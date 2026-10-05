@@ -1,0 +1,3408 @@
+[
+ {
+  "id": "arrieta",
+  "name": "Mateo Arrieta",
+  "number": 39,
+  "nationality": "ESP",
+  "kind": "current",
+  "age": 33,
+  "team": "ful-factory",
+  "helmet": [
+   "#ff2d2d",
+   "#111111",
+   "#ffd400"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Front-End Feel"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 96,
+   "acceleration": 97,
+   "braking": 96,
+   "cornerEntry": 98,
+   "midCorner": 96,
+   "cornerExit": 95,
+   "throttleControl": 94,
+   "racePace": 96,
+   "qualifying": 96,
+   "overtaking": 97,
+   "defending": 96,
+   "racecraft": 96,
+   "consistency": 87,
+   "wet": 92,
+   "tireManagement": 88,
+   "bikeControl": 98,
+   "aggression": 98,
+   "reaction": 92,
+   "mental": 98,
+   "clutch": 95
+  },
+  "hidden": {
+   "riskTaking": 99,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 95,
+   "pressureResistance": 97,
+   "startReaction": 91
+  },
+  "strengths": "Superhuman front-end saves, ruthless late-race attacks.",
+  "weaknesses": "Pushes beyond the limit; tyres can fade when he chases."
+ },
+ {
+  "id": "bellandi",
+  "name": "Nico Bellandi",
+  "number": 18,
+  "nationality": "ITA",
+  "kind": "current",
+  "age": 29,
+  "team": "ful-factory",
+  "helmet": [
+   "#ffffff",
+   "#c8102e",
+   "#1a1a1a"
+  ],
+  "styles": [
+   "Late Brake Master",
+   "Smooth Operator"
+  ],
+  "personality": "LATE BRAKER",
+  "attributes": {
+   "speed": 93,
+   "acceleration": 91,
+   "braking": 97,
+   "cornerEntry": 96,
+   "midCorner": 90,
+   "cornerExit": 94,
+   "throttleControl": 93,
+   "racePace": 93,
+   "qualifying": 96,
+   "overtaking": 90,
+   "defending": 93,
+   "racecraft": 93,
+   "consistency": 94,
+   "wet": 86,
+   "tireManagement": 92,
+   "bikeControl": 92,
+   "aggression": 93,
+   "reaction": 94,
+   "mental": 94,
+   "clutch": 89
+  },
+  "hidden": {
+   "riskTaking": 91,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 90,
+   "pressureResistance": 87,
+   "startReaction": 90
+  },
+  "strengths": "Ferocious braking stability and front-running pace.",
+  "weaknesses": "Can lose confidence when the front tyre talks back; average in the wet."
+ },
+ {
+  "id": "vitale",
+  "name": "Tommaso Vitale",
+  "number": 49,
+  "nationality": "ITA",
+  "kind": "current",
+  "age": 27,
+  "team": "ful-apex",
+  "helmet": [
+   "#ffd400",
+   "#6a1fb5",
+   "#ffffff"
+  ],
+  "styles": [
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 85,
+   "acceleration": 86,
+   "braking": 85,
+   "cornerEntry": 84,
+   "midCorner": 87,
+   "cornerExit": 84,
+   "throttleControl": 85,
+   "racePace": 85,
+   "qualifying": 83,
+   "overtaking": 86,
+   "defending": 86,
+   "racecraft": 84,
+   "consistency": 90,
+   "wet": 84,
+   "tireManagement": 90,
+   "bikeControl": 85,
+   "aggression": 84,
+   "reaction": 85,
+   "mental": 83,
+   "clutch": 87
+  },
+  "hidden": {
+   "riskTaking": 75,
+   "lateBrakingConfidence": 81,
+   "slipstreamUsage": 79,
+   "pressureResistance": 79,
+   "startReaction": 79
+  },
+  "strengths": "Tidy and consistent over race distance.",
+  "weaknesses": "Lacks a killer qualifying lap."
+ },
+ {
+  "id": "ferran",
+  "name": "Joaquín Ferrán",
+  "number": 33,
+  "nationality": "ARG",
+  "kind": "current",
+  "age": 25,
+  "team": "ful-apex",
+  "helmet": [
+   "#74acdf",
+   "#ffffff",
+   "#f6b40e"
+  ],
+  "styles": [
+   "Aggressive Attacker"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 81,
+   "acceleration": 82,
+   "braking": 79,
+   "cornerEntry": 83,
+   "midCorner": 79,
+   "cornerExit": 82,
+   "throttleControl": 81,
+   "racePace": 82,
+   "qualifying": 82,
+   "overtaking": 86,
+   "defending": 80,
+   "racecraft": 80,
+   "consistency": 78,
+   "wet": 81,
+   "tireManagement": 78,
+   "bikeControl": 80,
+   "aggression": 89,
+   "reaction": 79,
+   "mental": 80,
+   "clutch": 82
+  },
+  "hidden": {
+   "riskTaking": 92,
+   "lateBrakingConfidence": 79,
+   "slipstreamUsage": 76,
+   "pressureResistance": 75,
+   "startReaction": 73
+  },
+  "strengths": "Brave in close fights, great on lap one.",
+  "weaknesses": "Erratic consistency, wears the rear tyre."
+ },
+ {
+  "id": "ferrer",
+  "name": "Jordi Ferrer",
+  "number": 36,
+  "nationality": "ESP",
+  "kind": "current",
+  "age": 28,
+  "team": "kai-works",
+  "helmet": [
+   "#f4c300",
+   "#0b2a6f",
+   "#ffffff"
+  ],
+  "styles": [
+   "Tire Whisperer",
+   "Smooth Operator"
+  ],
+  "personality": "TIRE SAVER",
+  "attributes": {
+   "speed": 82,
+   "acceleration": 86,
+   "braking": 86,
+   "cornerEntry": 83,
+   "midCorner": 84,
+   "cornerExit": 83,
+   "throttleControl": 85,
+   "racePace": 85,
+   "qualifying": 80,
+   "overtaking": 86,
+   "defending": 86,
+   "racecraft": 83,
+   "consistency": 88,
+   "wet": 85,
+   "tireManagement": 90,
+   "bikeControl": 85,
+   "aggression": 83,
+   "reaction": 86,
+   "mental": 86,
+   "clutch": 84
+  },
+  "hidden": {
+   "riskTaking": 75,
+   "lateBrakingConfidence": 80,
+   "slipstreamUsage": 80,
+   "pressureResistance": 83,
+   "startReaction": 82
+  },
+  "strengths": "Brilliant tyre conservation, strong in the final laps.",
+  "weaknesses": "Weak qualifier, starts too far back."
+ },
+ {
+  "id": "brandao",
+  "name": "Lucas Brandão",
+  "number": 10,
+  "nationality": "BRA",
+  "kind": "current",
+  "age": 26,
+  "team": "kai-works",
+  "helmet": [
+   "#009c3b",
+   "#ffdf00",
+   "#002776"
+  ],
+  "styles": [
+   "Corner Speed Specialist"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 81,
+   "acceleration": 81,
+   "braking": 79,
+   "cornerEntry": 82,
+   "midCorner": 87,
+   "cornerExit": 82,
+   "throttleControl": 82,
+   "racePace": 83,
+   "qualifying": 84,
+   "overtaking": 80,
+   "defending": 81,
+   "racecraft": 84,
+   "consistency": 84,
+   "wet": 81,
+   "tireManagement": 82,
+   "bikeControl": 80,
+   "aggression": 84,
+   "reaction": 83,
+   "mental": 84,
+   "clutch": 83
+  },
+  "hidden": {
+   "riskTaking": 81,
+   "lateBrakingConfidence": 74,
+   "slipstreamUsage": 79,
+   "pressureResistance": 81,
+   "startReaction": 77
+  },
+  "strengths": "Fluid mid-corner speed in fast sweepers.",
+  "weaknesses": "Struggles in hard braking zones."
+ },
+ {
+  "id": "ishida",
+  "name": "Takeru Ishida",
+  "number": 32,
+  "nationality": "JPN",
+  "kind": "current",
+  "age": 25,
+  "team": "kai-tide",
+  "helmet": [
+   "#ffffff",
+   "#bc002d",
+   "#111111"
+  ],
+  "styles": [
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 78,
+   "acceleration": 79,
+   "braking": 80,
+   "cornerEntry": 80,
+   "midCorner": 77,
+   "cornerExit": 80,
+   "throttleControl": 80,
+   "racePace": 78,
+   "qualifying": 78,
+   "overtaking": 78,
+   "defending": 77,
+   "racecraft": 79,
+   "consistency": 81,
+   "wet": 78,
+   "tireManagement": 82,
+   "bikeControl": 78,
+   "aggression": 74,
+   "reaction": 80,
+   "mental": 80,
+   "clutch": 79
+  },
+  "hidden": {
+   "riskTaking": 65,
+   "lateBrakingConfidence": 78,
+   "slipstreamUsage": 76,
+   "pressureResistance": 75,
+   "startReaction": 76
+  },
+  "strengths": "Rarely makes mistakes.",
+  "weaknesses": "Too polite when overtaking."
+ },
+ {
+  "id": "hartigan",
+  "name": "Ollie Hartigan",
+  "number": 43,
+  "nationality": "AUS",
+  "kind": "current",
+  "age": 31,
+  "team": "kai-tide",
+  "helmet": [
+   "#00843d",
+   "#ffcd00",
+   "#012169"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Launch Specialist"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 80,
+   "acceleration": 79,
+   "braking": 81,
+   "cornerEntry": 81,
+   "midCorner": 80,
+   "cornerExit": 79,
+   "throttleControl": 79,
+   "racePace": 83,
+   "qualifying": 81,
+   "overtaking": 85,
+   "defending": 81,
+   "racecraft": 83,
+   "consistency": 78,
+   "wet": 82,
+   "tireManagement": 81,
+   "bikeControl": 81,
+   "aggression": 90,
+   "reaction": 86,
+   "mental": 83,
+   "clutch": 89
+  },
+  "hidden": {
+   "riskTaking": 94,
+   "lateBrakingConfidence": 75,
+   "slipstreamUsage": 78,
+   "pressureResistance": 80,
+   "startReaction": 92
+  },
+  "strengths": "Rocket starts and fearless dives.",
+  "weaknesses": "Crashes and fades in long runs."
+ },
+ {
+  "id": "rousselin",
+  "name": "Théo Rousselin",
+  "number": 27,
+  "nationality": "FRA",
+  "kind": "current",
+  "age": 27,
+  "team": "sor-factory",
+  "helmet": [
+   "#0055a4",
+   "#ffffff",
+   "#ef4135"
+  ],
+  "styles": [
+   "Corner Speed Specialist",
+   "Qualifying Ace"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 90,
+   "acceleration": 91,
+   "braking": 87,
+   "cornerEntry": 92,
+   "midCorner": 96,
+   "cornerExit": 93,
+   "throttleControl": 92,
+   "racePace": 91,
+   "qualifying": 94,
+   "overtaking": 87,
+   "defending": 86,
+   "racecraft": 90,
+   "consistency": 88,
+   "wet": 92,
+   "tireManagement": 92,
+   "bikeControl": 92,
+   "aggression": 88,
+   "reaction": 90,
+   "mental": 90,
+   "clutch": 89
+  },
+  "hidden": {
+   "riskTaking": 85,
+   "lateBrakingConfidence": 79,
+   "slipstreamUsage": 87,
+   "pressureResistance": 85,
+   "startReaction": 87
+  },
+  "strengths": "Sublime corner speed and qualifying laps.",
+  "weaknesses": "Finds it hard to overtake on slower straights."
+ },
+ {
+  "id": "reyna",
+  "name": "Álex Reyna",
+  "number": 42,
+  "nationality": "ESP",
+  "kind": "current",
+  "age": 30,
+  "team": "sor-factory",
+  "helmet": [
+   "#1546c7",
+   "#ffffff",
+   "#f2a900"
+  ],
+  "styles": [
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 84,
+   "acceleration": 83,
+   "braking": 85,
+   "cornerEntry": 83,
+   "midCorner": 85,
+   "cornerExit": 83,
+   "throttleControl": 84,
+   "racePace": 85,
+   "qualifying": 84,
+   "overtaking": 84,
+   "defending": 85,
+   "racecraft": 84,
+   "consistency": 81,
+   "wet": 86,
+   "tireManagement": 86,
+   "bikeControl": 85,
+   "aggression": 85,
+   "reaction": 84,
+   "mental": 84,
+   "clutch": 85
+  },
+  "hidden": {
+   "riskTaking": 82,
+   "lateBrakingConfidence": 81,
+   "slipstreamUsage": 80,
+   "pressureResistance": 81,
+   "startReaction": 81
+  },
+  "strengths": "Good feel in mixed conditions.",
+  "weaknesses": "Peaks and troughs in form."
+ },
+ {
+  "id": "fenzi",
+  "name": "Dario Fenzi",
+  "number": 21,
+  "nationality": "ITA",
+  "kind": "current",
+  "age": 31,
+  "team": "sor-horizon",
+  "helmet": [
+   "#00c389",
+   "#ffffff",
+   "#101820"
+  ],
+  "styles": [
+   "Smooth Operator"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 81,
+   "acceleration": 79,
+   "braking": 81,
+   "cornerEntry": 79,
+   "midCorner": 83,
+   "cornerExit": 80,
+   "throttleControl": 80,
+   "racePace": 81,
+   "qualifying": 81,
+   "overtaking": 80,
+   "defending": 81,
+   "racecraft": 79,
+   "consistency": 79,
+   "wet": 79,
+   "tireManagement": 81,
+   "bikeControl": 81,
+   "aggression": 79,
+   "reaction": 81,
+   "mental": 79,
+   "clutch": 81
+  },
+  "hidden": {
+   "riskTaking": 71,
+   "lateBrakingConfidence": 76,
+   "slipstreamUsage": 76,
+   "pressureResistance": 74,
+   "startReaction": 75
+  },
+  "strengths": "Silky on a Sorami.",
+  "weaknesses": "Lacks aggression in battles."
+ },
+ {
+  "id": "saldanha",
+  "name": "Rui Saldanha",
+  "number": 81,
+  "nationality": "POR",
+  "kind": "current",
+  "age": 30,
+  "team": "sor-horizon",
+  "helmet": [
+   "#006600",
+   "#ff0000",
+   "#ffcc00"
+  ],
+  "styles": [
+   "Defensive Master"
+  ],
+  "personality": "DEFENSIVE",
+  "attributes": {
+   "speed": 81,
+   "acceleration": 81,
+   "braking": 82,
+   "cornerEntry": 83,
+   "midCorner": 81,
+   "cornerExit": 82,
+   "throttleControl": 81,
+   "racePace": 82,
+   "qualifying": 79,
+   "overtaking": 83,
+   "defending": 87,
+   "racecraft": 84,
+   "consistency": 84,
+   "wet": 85,
+   "tireManagement": 83,
+   "bikeControl": 82,
+   "aggression": 81,
+   "reaction": 83,
+   "mental": 82,
+   "clutch": 83
+  },
+  "hidden": {
+   "riskTaking": 73,
+   "lateBrakingConfidence": 77,
+   "slipstreamUsage": 80,
+   "pressureResistance": 79,
+   "startReaction": 80
+  },
+  "strengths": "Very hard to pass.",
+  "weaknesses": "Qualifying pace is ordinary."
+ },
+ {
+  "id": "morimoto",
+  "name": "Kenta Morimoto",
+  "number": 26,
+  "nationality": "JPN",
+  "kind": "current",
+  "age": 29,
+  "team": "sei-arrow",
+  "helmet": [
+   "#14a6b8",
+   "#ffffff",
+   "#0d1b2a"
+  ],
+  "styles": [
+   "Tire Whisperer"
+  ],
+  "personality": "TIRE SAVER",
+  "attributes": {
+   "speed": 77,
+   "acceleration": 77,
+   "braking": 79,
+   "cornerEntry": 77,
+   "midCorner": 79,
+   "cornerExit": 78,
+   "throttleControl": 78,
+   "racePace": 79,
+   "qualifying": 75,
+   "overtaking": 77,
+   "defending": 78,
+   "racecraft": 79,
+   "consistency": 81,
+   "wet": 76,
+   "tireManagement": 83,
+   "bikeControl": 78,
+   "aggression": 79,
+   "reaction": 80,
+   "mental": 76,
+   "clutch": 79
+  },
+  "hidden": {
+   "riskTaking": 69,
+   "lateBrakingConfidence": 76,
+   "slipstreamUsage": 73,
+   "pressureResistance": 71,
+   "startReaction": 78
+  },
+  "strengths": "Looks after tyres.",
+  "weaknesses": "Slow over one lap."
+ },
+ {
+  "id": "srisuk",
+  "name": "Thanakorn Srisuk",
+  "number": 41,
+  "nationality": "THA",
+  "kind": "current",
+  "age": 22,
+  "potential": 90,
+  "team": "sei-arrow",
+  "helmet": [
+   "#2d2a4a",
+   "#ed1c24",
+   "#ffffff"
+  ],
+  "styles": [
+   "Wet Master",
+   "Aggressive Attacker"
+  ],
+  "personality": "RAIN MASTER",
+  "attributes": {
+   "speed": 77,
+   "acceleration": 79,
+   "braking": 79,
+   "cornerEntry": 77,
+   "midCorner": 78,
+   "cornerExit": 79,
+   "throttleControl": 80,
+   "racePace": 79,
+   "qualifying": 78,
+   "overtaking": 81,
+   "defending": 77,
+   "racecraft": 78,
+   "consistency": 75,
+   "wet": 89,
+   "tireManagement": 77,
+   "bikeControl": 80,
+   "aggression": 82,
+   "reaction": 77,
+   "mental": 77,
+   "clutch": 77
+  },
+  "hidden": {
+   "riskTaking": 81,
+   "lateBrakingConfidence": 75,
+   "slipstreamUsage": 73,
+   "pressureResistance": 73,
+   "startReaction": 71
+  },
+  "strengths": "Fearless and fast when it rains; improving every race.",
+  "weaknesses": "Raw consistency and race management."
+ },
+ {
+  "id": "almagro",
+  "name": "Pedro Almagro",
+  "number": 71,
+  "nationality": "ESP",
+  "kind": "current",
+  "age": 22,
+  "potential": 97,
+  "team": "bre-factory",
+  "helmet": [
+   "#ff7f11",
+   "#ffffff",
+   "#111111"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Late Brake Master"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 90,
+   "acceleration": 89,
+   "braking": 94,
+   "cornerEntry": 88,
+   "midCorner": 87,
+   "cornerExit": 88,
+   "throttleControl": 90,
+   "racePace": 91,
+   "qualifying": 89,
+   "overtaking": 95,
+   "defending": 87,
+   "racecraft": 88,
+   "consistency": 84,
+   "wet": 89,
+   "tireManagement": 86,
+   "bikeControl": 92,
+   "aggression": 98,
+   "reaction": 91,
+   "mental": 87,
+   "clutch": 89
+  },
+  "hidden": {
+   "riskTaking": 99,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 84,
+   "pressureResistance": 81,
+   "startReaction": 89
+  },
+  "strengths": "Generational talent, ferocious overtaker.",
+  "weaknesses": "Young: tyre management and patience still developing."
+ },
+ {
+  "id": "visagie",
+  "name": "Ruan Visagie",
+  "number": 13,
+  "nationality": "RSA",
+  "kind": "current",
+  "age": 30,
+  "team": "bre-factory",
+  "helmet": [
+   "#007a4d",
+   "#ffb612",
+   "#000000"
+  ],
+  "styles": [
+   "Late Brake Master",
+   "Defensive Master"
+  ],
+  "personality": "LATE BRAKER",
+  "attributes": {
+   "speed": 85,
+   "acceleration": 88,
+   "braking": 91,
+   "cornerEntry": 85,
+   "midCorner": 82,
+   "cornerExit": 88,
+   "throttleControl": 85,
+   "racePace": 85,
+   "qualifying": 85,
+   "overtaking": 88,
+   "defending": 90,
+   "racecraft": 85,
+   "consistency": 86,
+   "wet": 86,
+   "tireManagement": 85,
+   "bikeControl": 87,
+   "aggression": 86,
+   "reaction": 85,
+   "mental": 86,
+   "clutch": 88
+  },
+  "hidden": {
+   "riskTaking": 88,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 80,
+   "pressureResistance": 80,
+   "startReaction": 79
+  },
+  "strengths": "Outrageous late braking, tough racer.",
+  "weaknesses": "Mid-corner speed and qualifying."
+ },
+ {
+  "id": "valdrighi",
+  "name": "Enea Valdrighi",
+  "number": 23,
+  "nationality": "ITA",
+  "kind": "current",
+  "age": 28,
+  "team": "bre-titan",
+  "helmet": [
+   "#b0b7bf",
+   "#ff7f11",
+   "#1c1c1c"
+  ],
+  "styles": [
+   "Tire Whisperer"
+  ],
+  "personality": "TIRE SAVER",
+  "attributes": {
+   "speed": 82,
+   "acceleration": 84,
+   "braking": 86,
+   "cornerEntry": 86,
+   "midCorner": 83,
+   "cornerExit": 87,
+   "throttleControl": 86,
+   "racePace": 86,
+   "qualifying": 80,
+   "overtaking": 84,
+   "defending": 85,
+   "racecraft": 85,
+   "consistency": 82,
+   "wet": 85,
+   "tireManagement": 91,
+   "bikeControl": 85,
+   "aggression": 83,
+   "reaction": 85,
+   "mental": 82,
+   "clutch": 84
+  },
+  "hidden": {
+   "riskTaking": 80,
+   "lateBrakingConfidence": 80,
+   "slipstreamUsage": 81,
+   "pressureResistance": 77,
+   "startReaction": 81
+  },
+  "strengths": "Ferocious final laps on worn tyres.",
+  "weaknesses": "Starts slowly, weak qualifying."
+ },
+ {
+  "id": "salvat",
+  "name": "Iker Salvat",
+  "number": 12,
+  "nationality": "ESP",
+  "kind": "current",
+  "age": 31,
+  "team": "bre-titan",
+  "helmet": [
+   "#0a0a0a",
+   "#ff3c00",
+   "#ffffff"
+  ],
+  "styles": [
+   "Qualifying Ace",
+   "Corner Speed Specialist"
+  ],
+  "personality": "QUALIFYING SPECIALIST",
+  "attributes": {
+   "speed": 84,
+   "acceleration": 87,
+   "braking": 85,
+   "cornerEntry": 84,
+   "midCorner": 90,
+   "cornerExit": 83,
+   "throttleControl": 87,
+   "racePace": 87,
+   "qualifying": 91,
+   "overtaking": 84,
+   "defending": 83,
+   "racecraft": 86,
+   "consistency": 80,
+   "wet": 86,
+   "tireManagement": 85,
+   "bikeControl": 86,
+   "aggression": 86,
+   "reaction": 85,
+   "mental": 81,
+   "clutch": 81
+  },
+  "hidden": {
+   "riskTaking": 80,
+   "lateBrakingConfidence": 82,
+   "slipstreamUsage": 82,
+   "pressureResistance": 72,
+   "startReaction": 76
+  },
+  "strengths": "Stunning single-lap speed.",
+  "weaknesses": "Inconsistent starts and race-day form."
+ },
+ {
+  "id": "montero",
+  "name": "Raúl Montero",
+  "number": 78,
+  "nationality": "ESP",
+  "kind": "current",
+  "age": 28,
+  "team": "ven-squadra",
+  "helmet": [
+   "#9be000",
+   "#111111",
+   "#ffffff"
+  ],
+  "styles": [
+   "Qualifying Ace",
+   "Launch Specialist"
+  ],
+  "personality": "QUALIFYING SPECIALIST",
+  "attributes": {
+   "speed": 92,
+   "acceleration": 93,
+   "braking": 92,
+   "cornerEntry": 92,
+   "midCorner": 92,
+   "cornerExit": 93,
+   "throttleControl": 93,
+   "racePace": 92,
+   "qualifying": 98,
+   "overtaking": 94,
+   "defending": 92,
+   "racecraft": 91,
+   "consistency": 90,
+   "wet": 89,
+   "tireManagement": 87,
+   "bikeControl": 91,
+   "aggression": 96,
+   "reaction": 95,
+   "mental": 91,
+   "clutch": 98
+  },
+  "hidden": {
+   "riskTaking": 97,
+   "lateBrakingConfidence": 95,
+   "slipstreamUsage": 87,
+   "pressureResistance": 87,
+   "startReaction": 99
+  },
+  "strengths": "Explosive starts and one-lap speed.",
+  "weaknesses": "Tyre life in long races."
+ },
+ {
+  "id": "ravelli",
+  "name": "Gianluca Ravelli",
+  "number": 72,
+  "nationality": "ITA",
+  "kind": "current",
+  "age": 27,
+  "team": "ven-squadra",
+  "helmet": [
+   "#ffffff",
+   "#9be000",
+   "#000000"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Corner Speed Specialist"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 89,
+   "acceleration": 87,
+   "braking": 86,
+   "cornerEntry": 87,
+   "midCorner": 93,
+   "cornerExit": 89,
+   "throttleControl": 89,
+   "racePace": 89,
+   "qualifying": 86,
+   "overtaking": 86,
+   "defending": 86,
+   "racecraft": 87,
+   "consistency": 85,
+   "wet": 89,
+   "tireManagement": 89,
+   "bikeControl": 87,
+   "aggression": 87,
+   "reaction": 89,
+   "mental": 89,
+   "clutch": 88
+  },
+  "hidden": {
+   "riskTaking": 86,
+   "lateBrakingConfidence": 84,
+   "slipstreamUsage": 81,
+   "pressureResistance": 84,
+   "startReaction": 86
+  },
+  "strengths": "Fast and flowing, great in fast sweepers.",
+  "weaknesses": "Occasional off-days."
+ },
+ {
+  "id": "takahashi",
+  "name": "Sora Takahashi",
+  "number": 57,
+  "nationality": "JPN",
+  "kind": "current",
+  "age": 25,
+  "team": "ven-siam",
+  "helmet": [
+   "#ffffff",
+   "#d4af37",
+   "#b3001b"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Tire Whisperer"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 82,
+   "acceleration": 82,
+   "braking": 83,
+   "cornerEntry": 84,
+   "midCorner": 80,
+   "cornerExit": 82,
+   "throttleControl": 83,
+   "racePace": 81,
+   "qualifying": 81,
+   "overtaking": 82,
+   "defending": 80,
+   "racecraft": 86,
+   "consistency": 86,
+   "wet": 82,
+   "tireManagement": 87,
+   "bikeControl": 83,
+   "aggression": 77,
+   "reaction": 82,
+   "mental": 80,
+   "clutch": 82
+  },
+  "hidden": {
+   "riskTaking": 69,
+   "lateBrakingConfidence": 80,
+   "slipstreamUsage": 84,
+   "pressureResistance": 75,
+   "startReaction": 80
+  },
+  "strengths": "Mature, intelligent racer.",
+  "weaknesses": "Lacks single-lap aggression."
+ },
+ {
+  "id": "elorza",
+  "name": "Santi Elorza",
+  "number": 54,
+  "nationality": "ESP",
+  "kind": "current",
+  "age": 21,
+  "potential": 92,
+  "team": "ven-siam",
+  "helmet": [
+   "#d4af37",
+   "#b3001b",
+   "#ffffff"
+  ],
+  "styles": [
+   "Aggressive Attacker"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 86,
+   "acceleration": 86,
+   "braking": 85,
+   "cornerEntry": 86,
+   "midCorner": 83,
+   "cornerExit": 86,
+   "throttleControl": 86,
+   "racePace": 84,
+   "qualifying": 85,
+   "overtaking": 87,
+   "defending": 84,
+   "racecraft": 83,
+   "consistency": 79,
+   "wet": 86,
+   "tireManagement": 84,
+   "bikeControl": 84,
+   "aggression": 90,
+   "reaction": 86,
+   "mental": 84,
+   "clutch": 83
+  },
+  "hidden": {
+   "riskTaking": 94,
+   "lateBrakingConfidence": 91,
+   "slipstreamUsage": 79,
+   "pressureResistance": 78,
+   "startReaction": 83
+  },
+  "strengths": "Bold and quick to learn.",
+  "weaknesses": "Overcooks it under pressure."
+ },
+ {
+  "id": "kaewdee",
+  "name": "Nattapong Kaewdee",
+  "number": 94,
+  "nationality": "THA",
+  "kind": "rookie",
+  "age": 19,
+  "potential": 91,
+  "team": null,
+  "helmet": [
+   "#ffffff",
+   "#0033a0",
+   "#ed1c24"
+  ],
+  "styles": [
+   "Wet Master"
+  ],
+  "personality": "RAIN MASTER",
+  "attributes": {
+   "speed": 74,
+   "acceleration": 74,
+   "braking": 74,
+   "cornerEntry": 73,
+   "midCorner": 74,
+   "cornerExit": 73,
+   "throttleControl": 73,
+   "racePace": 75,
+   "qualifying": 72,
+   "overtaking": 71,
+   "defending": 75,
+   "racecraft": 72,
+   "consistency": 70,
+   "wet": 82,
+   "tireManagement": 74,
+   "bikeControl": 74,
+   "aggression": 78,
+   "reaction": 74,
+   "mental": 73,
+   "clutch": 75
+  },
+  "hidden": {
+   "riskTaking": 76,
+   "lateBrakingConfidence": 68,
+   "slipstreamUsage": 66,
+   "pressureResistance": 70,
+   "startReaction": 69
+  },
+  "strengths": "Natural feel in the rain, huge potential.",
+  "weaknesses": "Raw racecraft and consistency."
+ },
+ {
+  "id": "paredes",
+  "name": "Diego Paredes",
+  "number": 96,
+  "nationality": "ESP",
+  "kind": "rookie",
+  "age": 20,
+  "potential": 89,
+  "team": null,
+  "helmet": [
+   "#c60b1e",
+   "#ffc400",
+   "#000000"
+  ],
+  "styles": [
+   "Aggressive Attacker"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 74,
+   "acceleration": 75,
+   "braking": 76,
+   "cornerEntry": 76,
+   "midCorner": 78,
+   "cornerExit": 74,
+   "throttleControl": 78,
+   "racePace": 75,
+   "qualifying": 77,
+   "overtaking": 80,
+   "defending": 75,
+   "racecraft": 75,
+   "consistency": 73,
+   "wet": 77,
+   "tireManagement": 75,
+   "bikeControl": 76,
+   "aggression": 85,
+   "reaction": 75,
+   "mental": 78,
+   "clutch": 78
+  },
+  "hidden": {
+   "riskTaking": 88,
+   "lateBrakingConfidence": 74,
+   "slipstreamUsage": 70,
+   "pressureResistance": 75,
+   "startReaction": 70
+  },
+  "strengths": "Fearless rookie.",
+  "weaknesses": "Crash-prone."
+ },
+ {
+  "id": "tanabe",
+  "name": "Hiro Tanabe",
+  "number": 30,
+  "nationality": "JPN",
+  "kind": "rookie",
+  "age": 34,
+  "team": null,
+  "helmet": [
+   "#ffffff",
+   "#111111",
+   "#bc002d"
+  ],
+  "styles": [
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 76,
+   "acceleration": 79,
+   "braking": 77,
+   "cornerEntry": 76,
+   "midCorner": 78,
+   "cornerExit": 77,
+   "throttleControl": 77,
+   "racePace": 79,
+   "qualifying": 75,
+   "overtaking": 78,
+   "defending": 76,
+   "racecraft": 79,
+   "consistency": 84,
+   "wet": 80,
+   "tireManagement": 81,
+   "bikeControl": 76,
+   "aggression": 75,
+   "reaction": 78,
+   "mental": 79,
+   "clutch": 80
+  },
+  "hidden": {
+   "riskTaking": 66,
+   "lateBrakingConfidence": 72,
+   "slipstreamUsage": 75,
+   "pressureResistance": 73,
+   "startReaction": 74
+  },
+  "strengths": "Experienced test rider, precise feedback.",
+  "weaknesses": "Not a natural racer."
+ },
+ {
+  "id": "carrow",
+  "name": "Finn Carrow",
+  "number": 4,
+  "nationality": "GBR",
+  "kind": "rookie",
+  "age": 20,
+  "potential": 90,
+  "team": null,
+  "helmet": [
+   "#012169",
+   "#c8102e",
+   "#ffffff"
+  ],
+  "styles": [
+   "Late Brake Master"
+  ],
+  "personality": "LATE BRAKER",
+  "attributes": {
+   "speed": 75,
+   "acceleration": 76,
+   "braking": 78,
+   "cornerEntry": 76,
+   "midCorner": 74,
+   "cornerExit": 76,
+   "throttleControl": 74,
+   "racePace": 73,
+   "qualifying": 76,
+   "overtaking": 77,
+   "defending": 75,
+   "racecraft": 75,
+   "consistency": 71,
+   "wet": 78,
+   "tireManagement": 74,
+   "bikeControl": 75,
+   "aggression": 73,
+   "reaction": 75,
+   "mental": 74,
+   "clutch": 75
+  },
+  "hidden": {
+   "riskTaking": 70,
+   "lateBrakingConfidence": 81,
+   "slipstreamUsage": 72,
+   "pressureResistance": 70,
+   "startReaction": 70
+  },
+  "strengths": "Late on the brakes, good in the wet.",
+  "weaknesses": "Mid-corner speed."
+ },
+ {
+  "id": "hakala",
+  "name": "Sami Hakala",
+  "number": 8,
+  "nationality": "FIN",
+  "kind": "rookie",
+  "age": 19,
+  "potential": 88,
+  "team": null,
+  "helmet": [
+   "#ffffff",
+   "#003580",
+   "#99ccff"
+  ],
+  "styles": [
+   "Defensive Master"
+  ],
+  "personality": "DEFENSIVE",
+  "attributes": {
+   "speed": 74,
+   "acceleration": 72,
+   "braking": 74,
+   "cornerEntry": 73,
+   "midCorner": 72,
+   "cornerExit": 72,
+   "throttleControl": 74,
+   "racePace": 74,
+   "qualifying": 69,
+   "overtaking": 71,
+   "defending": 79,
+   "racecraft": 73,
+   "consistency": 73,
+   "wet": 76,
+   "tireManagement": 72,
+   "bikeControl": 72,
+   "aggression": 73,
+   "reaction": 73,
+   "mental": 74,
+   "clutch": 74
+  },
+  "hidden": {
+   "riskTaking": 68,
+   "lateBrakingConfidence": 70,
+   "slipstreamUsage": 67,
+   "pressureResistance": 70,
+   "startReaction": 71
+  },
+  "strengths": "Cool head, good defender.",
+  "weaknesses": "Lacks top-end pace."
+ },
+ {
+  "id": "valtieri-2002",
+  "name": "Enzo Valtieri",
+  "number": 64,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2002 Rising",
+  "primeYear": 2002,
+  "eraYears": "2000-2012",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffe500",
+   "#1a1a1a",
+   "#2fbf4a"
+  ],
+  "livery": [
+   "#ffcc00",
+   "#0a3d91",
+   "#ffffff"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 93,
+   "acceleration": 94,
+   "braking": 92,
+   "cornerEntry": 92,
+   "midCorner": 95,
+   "cornerExit": 92,
+   "throttleControl": 93,
+   "racePace": 93,
+   "qualifying": 83,
+   "overtaking": 98,
+   "defending": 92,
+   "racecraft": 98,
+   "consistency": 92,
+   "wet": 90,
+   "tireManagement": 93,
+   "bikeControl": 91,
+   "aggression": 97,
+   "reaction": 89,
+   "mental": 98,
+   "clutch": 89
+  },
+  "hidden": {
+   "riskTaking": 98,
+   "lateBrakingConfidence": 94,
+   "slipstreamUsage": 95,
+   "pressureResistance": 99,
+   "startReaction": 83
+  },
+  "strengths": "Supreme racecraft and mind games.",
+  "weaknesses": "Qualifying not yet his forte."
+ },
+ {
+  "id": "valtieri-2005",
+  "name": "Enzo Valtieri",
+  "number": 64,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2005 Prime",
+  "primeYear": 2005,
+  "eraYears": "2000-2012",
+  "team": null,
+  "bike": "sor-990",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#ffe500",
+   "#1a1a1a",
+   "#2fbf4a"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Aggressive Attacker",
+   "Tire Whisperer"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 92,
+   "acceleration": 96,
+   "braking": 98,
+   "cornerEntry": 96,
+   "midCorner": 96,
+   "cornerExit": 98,
+   "throttleControl": 97,
+   "racePace": 98,
+   "qualifying": 90,
+   "overtaking": 98,
+   "defending": 97,
+   "racecraft": 99,
+   "consistency": 97,
+   "wet": 95,
+   "tireManagement": 98,
+   "bikeControl": 97,
+   "aggression": 97,
+   "reaction": 92,
+   "mental": 98,
+   "clutch": 91
+  },
+  "hidden": {
+   "riskTaking": 95,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 95,
+   "pressureResistance": 99,
+   "startReaction": 87
+  },
+  "strengths": "Unmatched race intelligence and tyre feel; late-race killer.",
+  "weaknesses": "Qualifying was rarely his weapon."
+ },
+ {
+  "id": "valtieri-2009",
+  "name": "Enzo Valtieri",
+  "number": 64,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2009 Veteran",
+  "primeYear": 2009,
+  "eraYears": "2000-2012",
+  "team": null,
+  "bike": "sor-800",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#ffe500",
+   "#1a1a1a",
+   "#2fbf4a"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Defensive Master"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 85,
+   "acceleration": 87,
+   "braking": 93,
+   "cornerEntry": 91,
+   "midCorner": 93,
+   "cornerExit": 92,
+   "throttleControl": 93,
+   "racePace": 94,
+   "qualifying": 85,
+   "overtaking": 93,
+   "defending": 98,
+   "racecraft": 98,
+   "consistency": 91,
+   "wet": 91,
+   "tireManagement": 95,
+   "bikeControl": 91,
+   "aggression": 93,
+   "reaction": 86,
+   "mental": 96,
+   "clutch": 93
+  },
+  "hidden": {
+   "riskTaking": 88,
+   "lateBrakingConfidence": 92,
+   "slipstreamUsage": 93,
+   "pressureResistance": 99,
+   "startReaction": 81
+  },
+  "strengths": "Racecraft and experience peak.",
+  "weaknesses": "Raw speed starting to fade."
+ },
+ {
+  "id": "arrieta-2013",
+  "name": "Mateo Arrieta",
+  "number": 39,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2013 Rookie",
+  "primeYear": 2013,
+  "eraYears": "2013-2026",
+  "team": null,
+  "bike": "kai-1000",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ff2d2d",
+   "#111111",
+   "#ffd400"
+  ],
+  "livery": [
+   "#ff6a00",
+   "#0b2a6f",
+   "#f5f5f5"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Front-End Feel"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 91,
+   "acceleration": 90,
+   "braking": 97,
+   "cornerEntry": 93,
+   "midCorner": 89,
+   "cornerExit": 92,
+   "throttleControl": 89,
+   "racePace": 91,
+   "qualifying": 92,
+   "overtaking": 94,
+   "defending": 87,
+   "racecraft": 92,
+   "consistency": 83,
+   "wet": 91,
+   "tireManagement": 82,
+   "bikeControl": 97,
+   "aggression": 98,
+   "reaction": 89,
+   "mental": 88,
+   "clutch": 91
+  },
+  "hidden": {
+   "riskTaking": 99,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 88,
+   "pressureResistance": 86,
+   "startReaction": 86
+  },
+  "strengths": "Astonishing saves and audacious passes.",
+  "weaknesses": "Rookie impatience, tyre abuse."
+ },
+ {
+  "id": "arrieta-2014",
+  "name": "Mateo Arrieta",
+  "number": 39,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2014 Prime",
+  "primeYear": 2014,
+  "eraYears": "2013-2026",
+  "team": null,
+  "bike": "kai-1000",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ff2d2d",
+   "#111111",
+   "#ffd400"
+  ],
+  "livery": [
+   "#ff6a00",
+   "#0b2a6f",
+   "#f5f5f5"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Front-End Feel",
+   "Qualifying Ace"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 97,
+   "acceleration": 98,
+   "braking": 98,
+   "cornerEntry": 97,
+   "midCorner": 97,
+   "cornerExit": 95,
+   "throttleControl": 98,
+   "racePace": 97,
+   "qualifying": 98,
+   "overtaking": 98,
+   "defending": 91,
+   "racecraft": 95,
+   "consistency": 92,
+   "wet": 92,
+   "tireManagement": 89,
+   "bikeControl": 98,
+   "aggression": 98,
+   "reaction": 98,
+   "mental": 96,
+   "clutch": 96
+  },
+  "hidden": {
+   "riskTaking": 99,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 89,
+   "pressureResistance": 93,
+   "startReaction": 97
+  },
+  "strengths": "Relentless winning streak form; unreal front-end feel.",
+  "weaknesses": "Can push the tyres beyond their limit."
+ },
+ {
+  "id": "arrieta-2019",
+  "name": "Mateo Arrieta",
+  "number": 39,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2019 Prime",
+  "primeYear": 2019,
+  "eraYears": "2013-2026",
+  "team": null,
+  "bike": "kai-2019",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ff2d2d",
+   "#111111",
+   "#ffd400"
+  ],
+  "livery": [
+   "#ff6a00",
+   "#0b2a6f",
+   "#f5f5f5"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Front-End Feel"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 95,
+   "acceleration": 96,
+   "braking": 98,
+   "cornerEntry": 98,
+   "midCorner": 98,
+   "cornerExit": 95,
+   "throttleControl": 97,
+   "racePace": 97,
+   "qualifying": 98,
+   "overtaking": 98,
+   "defending": 95,
+   "racecraft": 98,
+   "consistency": 97,
+   "wet": 90,
+   "tireManagement": 89,
+   "bikeControl": 99,
+   "aggression": 98,
+   "reaction": 97,
+   "mental": 98,
+   "clutch": 98
+  },
+  "hidden": {
+   "riskTaking": 99,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 92,
+   "pressureResistance": 99,
+   "startReaction": 95
+  },
+  "strengths": "Complete package: speed, saves, and maturity.",
+  "weaknesses": "Tyre management only good, not great."
+ },
+ {
+  "id": "brennock-2006",
+  "name": "Callum Brennock",
+  "number": 17,
+  "nationality": "AUS",
+  "kind": "legend",
+  "version": "2006 Rookie",
+  "primeYear": 2006,
+  "eraYears": "2006-2012",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#c8102e",
+   "#0b2a6f"
+  ],
+  "livery": [
+   "#00a3e0",
+   "#ffffff",
+   "#e4002b"
+  ],
+  "styles": [
+   "Corner Speed Specialist",
+   "Front-End Feel"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 86,
+   "acceleration": 86,
+   "braking": 88,
+   "cornerEntry": 85,
+   "midCorner": 89,
+   "cornerExit": 88,
+   "throttleControl": 87,
+   "racePace": 86,
+   "qualifying": 85,
+   "overtaking": 85,
+   "defending": 85,
+   "racecraft": 82,
+   "consistency": 78,
+   "wet": 84,
+   "tireManagement": 85,
+   "bikeControl": 90,
+   "aggression": 86,
+   "reaction": 86,
+   "mental": 84,
+   "clutch": 86
+  },
+  "hidden": {
+   "riskTaking": 90,
+   "lateBrakingConfidence": 85,
+   "slipstreamUsage": 78,
+   "pressureResistance": 80,
+   "startReaction": 83
+  },
+  "strengths": "Breathtaking natural speed.",
+  "weaknesses": "Crashes a lot as a rookie."
+ },
+ {
+  "id": "brennock-2007",
+  "name": "Callum Brennock",
+  "number": 17,
+  "nationality": "AUS",
+  "kind": "legend",
+  "version": "2007 Prime",
+  "primeYear": 2007,
+  "eraYears": "2006-2012",
+  "team": null,
+  "bike": "ful-800",
+  "manufacturer": "fulminor",
+  "helmet": [
+   "#ffffff",
+   "#c8102e",
+   "#0b2a6f"
+  ],
+  "livery": [
+   "#cf0a0a",
+   "#ffffff",
+   "#222222"
+  ],
+  "styles": [
+   "Corner Speed Specialist",
+   "Front-End Feel"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 97,
+   "acceleration": 95,
+   "braking": 95,
+   "cornerEntry": 95,
+   "midCorner": 97,
+   "cornerExit": 98,
+   "throttleControl": 98,
+   "racePace": 97,
+   "qualifying": 96,
+   "overtaking": 94,
+   "defending": 87,
+   "racecraft": 88,
+   "consistency": 94,
+   "wet": 95,
+   "tireManagement": 90,
+   "bikeControl": 98,
+   "aggression": 95,
+   "reaction": 97,
+   "mental": 91,
+   "clutch": 94
+  },
+  "hidden": {
+   "riskTaking": 94,
+   "lateBrakingConfidence": 94,
+   "slipstreamUsage": 83,
+   "pressureResistance": 86,
+   "startReaction": 92
+  },
+  "strengths": "Tames any machine; inch-perfect throttle control.",
+  "weaknesses": "Prefers to lead from the front rather than scrap."
+ },
+ {
+  "id": "brennock-2011",
+  "name": "Callum Brennock",
+  "number": 17,
+  "nationality": "AUS",
+  "kind": "legend",
+  "version": "2011 Prime",
+  "primeYear": 2011,
+  "eraYears": "2006-2012",
+  "team": null,
+  "bike": "kai-800",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#c8102e",
+   "#0b2a6f"
+  ],
+  "livery": [
+   "#ff6a00",
+   "#0b2a6f",
+   "#f5f5f5"
+  ],
+  "styles": [
+   "Corner Speed Specialist",
+   "Front-End Feel",
+   "Qualifying Ace"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 95,
+   "acceleration": 95,
+   "braking": 97,
+   "cornerEntry": 94,
+   "midCorner": 95,
+   "cornerExit": 98,
+   "throttleControl": 98,
+   "racePace": 95,
+   "qualifying": 98,
+   "overtaking": 95,
+   "defending": 85,
+   "racecraft": 90,
+   "consistency": 97,
+   "wet": 95,
+   "tireManagement": 96,
+   "bikeControl": 98,
+   "aggression": 94,
+   "reaction": 93,
+   "mental": 91,
+   "clutch": 95
+  },
+  "hidden": {
+   "riskTaking": 92,
+   "lateBrakingConfidence": 93,
+   "slipstreamUsage": 87,
+   "pressureResistance": 86,
+   "startReaction": 89
+  },
+  "strengths": "Fastest man on the grid, devastating qualifying.",
+  "weaknesses": "Close-quarter battles are not his favourite."
+ },
+ {
+  "id": "ortell-2008",
+  "name": "Javi Ortell",
+  "number": 48,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2008 Rookie",
+  "primeYear": 2008,
+  "eraYears": "2008-2019",
+  "team": null,
+  "bike": "sor-800",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#e1e1e1",
+   "#ff0099",
+   "#111111"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Qualifying Ace"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 89,
+   "acceleration": 89,
+   "braking": 87,
+   "cornerEntry": 89,
+   "midCorner": 92,
+   "cornerExit": 90,
+   "throttleControl": 86,
+   "racePace": 87,
+   "qualifying": 93,
+   "overtaking": 84,
+   "defending": 90,
+   "racecraft": 88,
+   "consistency": 84,
+   "wet": 83,
+   "tireManagement": 88,
+   "bikeControl": 89,
+   "aggression": 85,
+   "reaction": 88,
+   "mental": 86,
+   "clutch": 88
+  },
+  "hidden": {
+   "riskTaking": 85,
+   "lateBrakingConfidence": 83,
+   "slipstreamUsage": 84,
+   "pressureResistance": 81,
+   "startReaction": 83
+  },
+  "strengths": "Precise lines and qualifying pace.",
+  "weaknesses": "Big crashes as a rookie, poor in the wet."
+ },
+ {
+  "id": "ortell-2010",
+  "name": "Javi Ortell",
+  "number": 48,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2010 Prime",
+  "primeYear": 2010,
+  "eraYears": "2008-2019",
+  "team": null,
+  "bike": "sor-800",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#e1e1e1",
+   "#ff0099",
+   "#111111"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Corner Speed Specialist"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 96,
+   "acceleration": 96,
+   "braking": 95,
+   "cornerEntry": 97,
+   "midCorner": 98,
+   "cornerExit": 96,
+   "throttleControl": 93,
+   "racePace": 96,
+   "qualifying": 97,
+   "overtaking": 86,
+   "defending": 91,
+   "racecraft": 97,
+   "consistency": 98,
+   "wet": 82,
+   "tireManagement": 94,
+   "bikeControl": 97,
+   "aggression": 82,
+   "reaction": 94,
+   "mental": 96,
+   "clutch": 93
+  },
+  "hidden": {
+   "riskTaking": 74,
+   "lateBrakingConfidence": 91,
+   "slipstreamUsage": 95,
+   "pressureResistance": 91,
+   "startReaction": 92
+  },
+  "strengths": "Metronomic consistency, perfect lines.",
+  "weaknesses": "Weak in rain and in tight brawls."
+ },
+ {
+  "id": "ortell-2015",
+  "name": "Javi Ortell",
+  "number": 48,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2015 Prime",
+  "primeYear": 2015,
+  "eraYears": "2008-2019",
+  "team": null,
+  "bike": "sor-1000",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#e1e1e1",
+   "#ff0099",
+   "#111111"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Corner Speed Specialist",
+   "Launch Specialist"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 98,
+   "acceleration": 96,
+   "braking": 98,
+   "cornerEntry": 98,
+   "midCorner": 98,
+   "cornerExit": 96,
+   "throttleControl": 95,
+   "racePace": 95,
+   "qualifying": 98,
+   "overtaking": 88,
+   "defending": 92,
+   "racecraft": 98,
+   "consistency": 98,
+   "wet": 86,
+   "tireManagement": 98,
+   "bikeControl": 96,
+   "aggression": 83,
+   "reaction": 98,
+   "mental": 96,
+   "clutch": 98
+  },
+  "hidden": {
+   "riskTaking": 75,
+   "lateBrakingConfidence": 95,
+   "slipstreamUsage": 92,
+   "pressureResistance": 92,
+   "startReaction": 99
+  },
+  "strengths": "Lights-to-flag precision; leads and disappears.",
+  "weaknesses": "Vulnerable in the wet and in aggressive dogfights."
+ },
+ {
+  "id": "pellicer-2007",
+  "name": "Dario Pellicer",
+  "number": 22,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2007 Prime",
+  "primeYear": 2007,
+  "eraYears": "2006-2018",
+  "team": null,
+  "bike": "kai-800",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#ff6a00",
+   "#111111"
+  ],
+  "livery": [
+   "#ff6a00",
+   "#0b2a6f",
+   "#f5f5f5"
+  ],
+  "styles": [
+   "Launch Specialist",
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 91,
+   "acceleration": 95,
+   "braking": 90,
+   "cornerEntry": 93,
+   "midCorner": 91,
+   "cornerExit": 94,
+   "throttleControl": 91,
+   "racePace": 92,
+   "qualifying": 93,
+   "overtaking": 84,
+   "defending": 84,
+   "racecraft": 92,
+   "consistency": 92,
+   "wet": 80,
+   "tireManagement": 90,
+   "bikeControl": 89,
+   "aggression": 81,
+   "reaction": 98,
+   "mental": 92,
+   "clutch": 98
+  },
+  "hidden": {
+   "riskTaking": 73,
+   "lateBrakingConfidence": 85,
+   "slipstreamUsage": 88,
+   "pressureResistance": 88,
+   "startReaction": 99
+  },
+  "strengths": "Explosive starts and corner exits.",
+  "weaknesses": "Light frame: struggles in wheel-to-wheel fights and rain."
+ },
+ {
+  "id": "pellicer-2012",
+  "name": "Dario Pellicer",
+  "number": 22,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2012 Prime",
+  "primeYear": 2012,
+  "eraYears": "2006-2018",
+  "team": null,
+  "bike": "kai-1000",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#ff6a00",
+   "#111111"
+  ],
+  "livery": [
+   "#ff6a00",
+   "#0b2a6f",
+   "#f5f5f5"
+  ],
+  "styles": [
+   "Launch Specialist",
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 93,
+   "acceleration": 97,
+   "braking": 92,
+   "cornerEntry": 92,
+   "midCorner": 91,
+   "cornerExit": 91,
+   "throttleControl": 95,
+   "racePace": 94,
+   "qualifying": 97,
+   "overtaking": 89,
+   "defending": 85,
+   "racecraft": 95,
+   "consistency": 94,
+   "wet": 83,
+   "tireManagement": 91,
+   "bikeControl": 94,
+   "aggression": 84,
+   "reaction": 98,
+   "mental": 93,
+   "clutch": 98
+  },
+  "hidden": {
+   "riskTaking": 76,
+   "lateBrakingConfidence": 86,
+   "slipstreamUsage": 93,
+   "pressureResistance": 91,
+   "startReaction": 99
+  },
+  "strengths": "Peak form: blistering pace and launches.",
+  "weaknesses": "Defending and rain remain weaknesses."
+ },
+ {
+  "id": "harlan-2003",
+  "name": "Wade Harlan",
+  "number": 96,
+  "nationality": "USA",
+  "kind": "legend",
+  "version": "2003 Rookie",
+  "primeYear": 2003,
+  "eraYears": "2003-2016",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#c8102e",
+   "#002868"
+  ],
+  "livery": [
+   "#ffcc00",
+   "#0a3d91",
+   "#ffffff"
+  ],
+  "styles": [
+   "Aggressive Attacker"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 85,
+   "acceleration": 81,
+   "braking": 82,
+   "cornerEntry": 82,
+   "midCorner": 81,
+   "cornerExit": 82,
+   "throttleControl": 83,
+   "racePace": 83,
+   "qualifying": 80,
+   "overtaking": 84,
+   "defending": 82,
+   "racecraft": 85,
+   "consistency": 81,
+   "wet": 84,
+   "tireManagement": 82,
+   "bikeControl": 81,
+   "aggression": 89,
+   "reaction": 84,
+   "mental": 81,
+   "clutch": 82
+  },
+  "hidden": {
+   "riskTaking": 90,
+   "lateBrakingConfidence": 76,
+   "slipstreamUsage": 81,
+   "pressureResistance": 76,
+   "startReaction": 80
+  },
+  "strengths": "Hard-charging dirt-track style.",
+  "weaknesses": "Rookie inconsistency."
+ },
+ {
+  "id": "harlan-2006",
+  "name": "Wade Harlan",
+  "number": 96,
+  "nationality": "USA",
+  "kind": "legend",
+  "version": "2006 Prime",
+  "primeYear": 2006,
+  "eraYears": "2003-2016",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#c8102e",
+   "#002868"
+  ],
+  "livery": [
+   "#ffcc00",
+   "#0a3d91",
+   "#ffffff"
+  ],
+  "styles": [
+   "Defensive Master",
+   "Smooth Operator"
+  ],
+  "personality": "DEFENSIVE",
+  "attributes": {
+   "speed": 85,
+   "acceleration": 92,
+   "braking": 89,
+   "cornerEntry": 90,
+   "midCorner": 91,
+   "cornerExit": 90,
+   "throttleControl": 90,
+   "racePace": 89,
+   "qualifying": 81,
+   "overtaking": 87,
+   "defending": 95,
+   "racecraft": 93,
+   "consistency": 96,
+   "wet": 89,
+   "tireManagement": 88,
+   "bikeControl": 89,
+   "aggression": 89,
+   "reaction": 91,
+   "mental": 93,
+   "clutch": 92
+  },
+  "hidden": {
+   "riskTaking": 83,
+   "lateBrakingConfidence": 83,
+   "slipstreamUsage": 90,
+   "pressureResistance": 99,
+   "startReaction": 88
+  },
+  "strengths": "Relentlessly consistent title-winning season.",
+  "weaknesses": "Lacks raw one-lap speed."
+ },
+ {
+  "id": "bertolli-2001",
+  "name": "Massimo Bertolli",
+  "number": 31,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2001 Prime",
+  "primeYear": 2001,
+  "eraYears": "2000-2005",
+  "team": null,
+  "bike": "sor-990",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#111111",
+   "#c0c0c0",
+   "#c8102e"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Corner Speed Specialist"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 89,
+   "acceleration": 89,
+   "braking": 90,
+   "cornerEntry": 92,
+   "midCorner": 95,
+   "cornerExit": 90,
+   "throttleControl": 92,
+   "racePace": 92,
+   "qualifying": 95,
+   "overtaking": 90,
+   "defending": 92,
+   "racecraft": 87,
+   "consistency": 95,
+   "wet": 81,
+   "tireManagement": 93,
+   "bikeControl": 90,
+   "aggression": 92,
+   "reaction": 90,
+   "mental": 87,
+   "clutch": 90
+  },
+  "hidden": {
+   "riskTaking": 87,
+   "lateBrakingConfidence": 88,
+   "slipstreamUsage": 84,
+   "pressureResistance": 77,
+   "startReaction": 85
+  },
+  "strengths": "Exceptionally smooth and precise.",
+  "weaknesses": "Wet weather and pressure moments."
+ },
+ {
+  "id": "serafini-2011",
+  "name": "Luca Serafini",
+  "number": 85,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2011 Prime",
+  "primeYear": 2011,
+  "eraYears": "2008-2011",
+  "team": null,
+  "bike": "kai-800",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ff7300",
+   "#111111",
+   "#ffffff"
+  ],
+  "livery": [
+   "#ff6a00",
+   "#ffffff",
+   "#111111"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Late Brake Master"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 87,
+   "acceleration": 89,
+   "braking": 93,
+   "cornerEntry": 89,
+   "midCorner": 87,
+   "cornerExit": 87,
+   "throttleControl": 88,
+   "racePace": 87,
+   "qualifying": 87,
+   "overtaking": 92,
+   "defending": 91,
+   "racecraft": 87,
+   "consistency": 81,
+   "wet": 87,
+   "tireManagement": 86,
+   "bikeControl": 86,
+   "aggression": 98,
+   "reaction": 89,
+   "mental": 88,
+   "clutch": 87
+  },
+  "hidden": {
+   "riskTaking": 99,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 84,
+   "pressureResistance": 86,
+   "startReaction": 84
+  },
+  "strengths": "Spectacular, fearless overtaker.",
+  "weaknesses": "Contact-prone and inconsistent."
+ },
+ {
+  "id": "ferrante-2017",
+  "name": "Paolo Ferrante",
+  "number": 14,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2017 Prime",
+  "primeYear": 2017,
+  "eraYears": "2008-2020",
+  "team": null,
+  "bike": "ful-1000",
+  "manufacturer": "fulminor",
+  "helmet": [
+   "#c8102e",
+   "#ffffff",
+   "#00a651"
+  ],
+  "livery": [
+   "#cf0a0a",
+   "#ffffff",
+   "#222222"
+  ],
+  "styles": [
+   "Late Brake Master",
+   "Tire Whisperer"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 89,
+   "acceleration": 89,
+   "braking": 96,
+   "cornerEntry": 90,
+   "midCorner": 84,
+   "cornerExit": 90,
+   "throttleControl": 88,
+   "racePace": 90,
+   "qualifying": 84,
+   "overtaking": 92,
+   "defending": 89,
+   "racecraft": 96,
+   "consistency": 91,
+   "wet": 92,
+   "tireManagement": 95,
+   "bikeControl": 89,
+   "aggression": 91,
+   "reaction": 91,
+   "mental": 92,
+   "clutch": 90
+  },
+  "hidden": {
+   "riskTaking": 85,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 92,
+   "pressureResistance": 87,
+   "startReaction": 89
+  },
+  "strengths": "Last-lap braking ambushes, clever strategist.",
+  "weaknesses": "Mid-corner speed and qualifying."
+ },
+ {
+  "id": "rousselin-2021",
+  "name": "Théo Rousselin",
+  "number": 27,
+  "nationality": "FRA",
+  "kind": "legend",
+  "version": "2021 Prime",
+  "primeYear": 2021,
+  "eraYears": "2019-2026",
+  "team": null,
+  "bike": "sor-2021",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#0055a4",
+   "#ffffff",
+   "#ef4135"
+  ],
+  "livery": [
+   "#1546c7",
+   "#0a0a0a",
+   "#e8e8e8"
+  ],
+  "styles": [
+   "Corner Speed Specialist",
+   "Qualifying Ace"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 94,
+   "acceleration": 93,
+   "braking": 88,
+   "cornerEntry": 95,
+   "midCorner": 98,
+   "cornerExit": 95,
+   "throttleControl": 92,
+   "racePace": 93,
+   "qualifying": 97,
+   "overtaking": 89,
+   "defending": 86,
+   "racecraft": 93,
+   "consistency": 94,
+   "wet": 91,
+   "tireManagement": 92,
+   "bikeControl": 92,
+   "aggression": 94,
+   "reaction": 94,
+   "mental": 94,
+   "clutch": 93
+  },
+  "hidden": {
+   "riskTaking": 90,
+   "lateBrakingConfidence": 83,
+   "slipstreamUsage": 90,
+   "pressureResistance": 90,
+   "startReaction": 92
+  },
+  "strengths": "Title-winning corner speed.",
+  "weaknesses": "Overtaking on straights."
+ },
+ {
+  "id": "bellandi-2023",
+  "name": "Nico Bellandi",
+  "number": 18,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2023 Prime",
+  "primeYear": 2023,
+  "eraYears": "2019-2026",
+  "team": null,
+  "bike": "ful-2023",
+  "manufacturer": "fulminor",
+  "helmet": [
+   "#ffffff",
+   "#c8102e",
+   "#1a1a1a"
+  ],
+  "livery": [
+   "#c8102e",
+   "#f2f2f2",
+   "#1a1a1a"
+  ],
+  "styles": [
+   "Late Brake Master",
+   "Smooth Operator"
+  ],
+  "personality": "LATE BRAKER",
+  "attributes": {
+   "speed": 94,
+   "acceleration": 97,
+   "braking": 98,
+   "cornerEntry": 98,
+   "midCorner": 95,
+   "cornerExit": 94,
+   "throttleControl": 93,
+   "racePace": 96,
+   "qualifying": 98,
+   "overtaking": 92,
+   "defending": 97,
+   "racecraft": 94,
+   "consistency": 98,
+   "wet": 88,
+   "tireManagement": 96,
+   "bikeControl": 94,
+   "aggression": 94,
+   "reaction": 95,
+   "mental": 96,
+   "clutch": 91
+  },
+  "hidden": {
+   "riskTaking": 89,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 89,
+   "pressureResistance": 92,
+   "startReaction": 89
+  },
+  "strengths": "Championship-level braking and pace.",
+  "weaknesses": "Occasional front-end crashes; average wet pace."
+ },
+ {
+  "id": "montero-2024",
+  "name": "Raúl Montero",
+  "number": 78,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2024 Prime",
+  "primeYear": 2024,
+  "eraYears": "2019-2026",
+  "team": null,
+  "bike": "ful-2023",
+  "manufacturer": "fulminor",
+  "helmet": [
+   "#9be000",
+   "#111111",
+   "#ffffff"
+  ],
+  "livery": [
+   "#6a1fb5",
+   "#ffd400",
+   "#111111"
+  ],
+  "styles": [
+   "Qualifying Ace",
+   "Launch Specialist"
+  ],
+  "personality": "QUALIFYING SPECIALIST",
+  "attributes": {
+   "speed": 95,
+   "acceleration": 93,
+   "braking": 97,
+   "cornerEntry": 92,
+   "midCorner": 95,
+   "cornerExit": 94,
+   "throttleControl": 96,
+   "racePace": 94,
+   "qualifying": 98,
+   "overtaking": 94,
+   "defending": 91,
+   "racecraft": 94,
+   "consistency": 94,
+   "wet": 89,
+   "tireManagement": 86,
+   "bikeControl": 95,
+   "aggression": 95,
+   "reaction": 97,
+   "mental": 93,
+   "clutch": 98
+  },
+  "hidden": {
+   "riskTaking": 93,
+   "lateBrakingConfidence": 97,
+   "slipstreamUsage": 92,
+   "pressureResistance": 87,
+   "startReaction": 99
+  },
+  "strengths": "Title-winning speed with new-found consistency.",
+  "weaknesses": "Tyre life over full distance."
+ },
+ {
+  "id": "campell-2004",
+  "name": "Sergi Campell",
+  "number": 15,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2004 Prime",
+  "primeYear": 2004,
+  "eraYears": "2000-2009",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#111111",
+   "#f2c300",
+   "#ffffff"
+  ],
+  "livery": [
+   "#00a3e0",
+   "#ffffff",
+   "#e4002b"
+  ],
+  "styles": [
+   "Late Brake Master",
+   "Qualifying Ace"
+  ],
+  "personality": "LATE BRAKER",
+  "attributes": {
+   "speed": 88,
+   "acceleration": 88,
+   "braking": 92,
+   "cornerEntry": 90,
+   "midCorner": 89,
+   "cornerExit": 89,
+   "throttleControl": 88,
+   "racePace": 88,
+   "qualifying": 93,
+   "overtaking": 89,
+   "defending": 87,
+   "racecraft": 90,
+   "consistency": 87,
+   "wet": 92,
+   "tireManagement": 89,
+   "bikeControl": 89,
+   "aggression": 89,
+   "reaction": 88,
+   "mental": 84,
+   "clutch": 90
+  },
+  "hidden": {
+   "riskTaking": 85,
+   "lateBrakingConfidence": 96,
+   "slipstreamUsage": 85,
+   "pressureResistance": 72,
+   "startReaction": 84
+  },
+  "strengths": "Brave on the brakes, good in the wet.",
+  "weaknesses": "Cracks under title pressure."
+ },
+ {
+  "id": "rainer-2008",
+  "name": "Colt Rainer",
+  "number": 5,
+  "nationality": "USA",
+  "kind": "legend",
+  "version": "2008 Prime",
+  "primeYear": 2008,
+  "eraYears": "2003-2014",
+  "team": null,
+  "bike": "sor-800",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#ffffff",
+   "#002868",
+   "#bf0a30"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator",
+   "Tire Whisperer"
+  ],
+  "personality": "TIRE SAVER",
+  "attributes": {
+   "speed": 83,
+   "acceleration": 85,
+   "braking": 86,
+   "cornerEntry": 83,
+   "midCorner": 86,
+   "cornerExit": 83,
+   "throttleControl": 87,
+   "racePace": 85,
+   "qualifying": 82,
+   "overtaking": 81,
+   "defending": 85,
+   "racecraft": 86,
+   "consistency": 87,
+   "wet": 90,
+   "tireManagement": 91,
+   "bikeControl": 86,
+   "aggression": 84,
+   "reaction": 84,
+   "mental": 83,
+   "clutch": 84
+  },
+  "hidden": {
+   "riskTaking": 75,
+   "lateBrakingConfidence": 83,
+   "slipstreamUsage": 83,
+   "pressureResistance": 81,
+   "startReaction": 81
+  },
+  "strengths": "Superb feedback, tyre saver.",
+  "weaknesses": "Rarely converts to wins."
+ },
+ {
+  "id": "morandi-2006",
+  "name": "Renzo Morandi",
+  "number": 65,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2006 Prime",
+  "primeYear": 2006,
+  "eraYears": "2000-2010",
+  "team": null,
+  "bike": "ful-800",
+  "manufacturer": "fulminor",
+  "helmet": [
+   "#ff0000",
+   "#111111",
+   "#ffffff"
+  ],
+  "livery": [
+   "#cf0a0a",
+   "#ffffff",
+   "#222222"
+  ],
+  "styles": [
+   "Late Brake Master",
+   "Launch Specialist"
+  ],
+  "personality": "LATE BRAKER",
+  "attributes": {
+   "speed": 90,
+   "acceleration": 89,
+   "braking": 94,
+   "cornerEntry": 88,
+   "midCorner": 84,
+   "cornerExit": 88,
+   "throttleControl": 88,
+   "racePace": 88,
+   "qualifying": 88,
+   "overtaking": 90,
+   "defending": 90,
+   "racecraft": 87,
+   "consistency": 86,
+   "wet": 90,
+   "tireManagement": 85,
+   "bikeControl": 88,
+   "aggression": 88,
+   "reaction": 89,
+   "mental": 89,
+   "clutch": 91
+  },
+  "hidden": {
+   "riskTaking": 83,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 84,
+   "pressureResistance": 86,
+   "startReaction": 89
+  },
+  "strengths": "Brave braking and rocket launches.",
+  "weaknesses": "Mid-corner speed, tyre wear."
+ },
+ {
+  "id": "rotella-2005",
+  "name": "Gianni Rotella",
+  "number": 33,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2005 Prime",
+  "primeYear": 2005,
+  "eraYears": "2002-2011",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#00a3e0",
+   "#ff6600"
+  ],
+  "livery": [
+   "#00a3e0",
+   "#ffffff",
+   "#e4002b"
+  ],
+  "styles": [
+   "Wet Master",
+   "Corner Speed Specialist"
+  ],
+  "personality": "RAIN MASTER",
+  "attributes": {
+   "speed": 87,
+   "acceleration": 87,
+   "braking": 89,
+   "cornerEntry": 86,
+   "midCorner": 89,
+   "cornerExit": 88,
+   "throttleControl": 86,
+   "racePace": 87,
+   "qualifying": 86,
+   "overtaking": 87,
+   "defending": 87,
+   "racecraft": 88,
+   "consistency": 85,
+   "wet": 96,
+   "tireManagement": 88,
+   "bikeControl": 88,
+   "aggression": 89,
+   "reaction": 87,
+   "mental": 85,
+   "clutch": 87
+  },
+  "hidden": {
+   "riskTaking": 86,
+   "lateBrakingConfidence": 86,
+   "slipstreamUsage": 83,
+   "pressureResistance": 80,
+   "startReaction": 83
+  },
+  "strengths": "Brilliant in changing conditions.",
+  "weaknesses": "Form can disappear on some bikes."
+ },
+ {
+  "id": "graves-2011",
+  "name": "Tyler Graves",
+  "number": 11,
+  "nationality": "USA",
+  "kind": "legend",
+  "version": "2011 Prime",
+  "primeYear": 2011,
+  "eraYears": "2010-2013",
+  "team": null,
+  "bike": "sor-800",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#ffffff",
+   "#0033a0",
+   "#ff0000"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Smooth Operator"
+  ],
+  "personality": "CALCULATED",
+  "attributes": {
+   "speed": 87,
+   "acceleration": 84,
+   "braking": 87,
+   "cornerEntry": 83,
+   "midCorner": 89,
+   "cornerExit": 83,
+   "throttleControl": 85,
+   "racePace": 84,
+   "qualifying": 85,
+   "overtaking": 84,
+   "defending": 85,
+   "racecraft": 84,
+   "consistency": 87,
+   "wet": 86,
+   "tireManagement": 86,
+   "bikeControl": 83,
+   "aggression": 85,
+   "reaction": 84,
+   "mental": 82,
+   "clutch": 86
+  },
+  "hidden": {
+   "riskTaking": 79,
+   "lateBrakingConfidence": 84,
+   "slipstreamUsage": 80,
+   "pressureResistance": 78,
+   "startReaction": 81
+  },
+  "strengths": "Smooth superbike-style lines.",
+  "weaknesses": "Tight overtakes."
+ },
+ {
+  "id": "whitcombe-2016",
+  "name": "Ross Whitcombe",
+  "number": 35,
+  "nationality": "GBR",
+  "kind": "legend",
+  "version": "2016 Prime",
+  "primeYear": 2016,
+  "eraYears": "2011-2020",
+  "team": null,
+  "bike": "kai-1000",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#012169",
+   "#ffffff",
+   "#c8102e"
+  ],
+  "livery": [
+   "#00a3e0",
+   "#ffffff",
+   "#e4002b"
+  ],
+  "styles": [
+   "Wet Master",
+   "Late Brake Master"
+  ],
+  "personality": "RAIN MASTER",
+  "attributes": {
+   "speed": 88,
+   "acceleration": 87,
+   "braking": 91,
+   "cornerEntry": 88,
+   "midCorner": 88,
+   "cornerExit": 85,
+   "throttleControl": 86,
+   "racePace": 85,
+   "qualifying": 84,
+   "overtaking": 85,
+   "defending": 86,
+   "racecraft": 85,
+   "consistency": 82,
+   "wet": 97,
+   "tireManagement": 86,
+   "bikeControl": 86,
+   "aggression": 92,
+   "reaction": 87,
+   "mental": 87,
+   "clutch": 87
+  },
+  "hidden": {
+   "riskTaking": 93,
+   "lateBrakingConfidence": 92,
+   "slipstreamUsage": 83,
+   "pressureResistance": 84,
+   "startReaction": 83
+  },
+  "strengths": "Rain specialist with brave braking.",
+  "weaknesses": "Crashes when pushing in the dry."
+ },
+ {
+  "id": "ferrer-2020",
+  "name": "Jordi Ferrer",
+  "number": 36,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2020 Prime",
+  "primeYear": 2020,
+  "eraYears": "2019-2026",
+  "team": null,
+  "bike": "sei-2020",
+  "manufacturer": "seiran",
+  "helmet": [
+   "#f4c300",
+   "#0b2a6f",
+   "#ffffff"
+  ],
+  "livery": [
+   "#14a6b8",
+   "#c0c6cc",
+   "#0d1b2a"
+  ],
+  "styles": [
+   "Tire Whisperer",
+   "Smooth Operator"
+  ],
+  "personality": "TIRE SAVER",
+  "attributes": {
+   "speed": 88,
+   "acceleration": 90,
+   "braking": 87,
+   "cornerEntry": 90,
+   "midCorner": 90,
+   "cornerExit": 89,
+   "throttleControl": 88,
+   "racePace": 90,
+   "qualifying": 83,
+   "overtaking": 90,
+   "defending": 88,
+   "racecraft": 91,
+   "consistency": 94,
+   "wet": 90,
+   "tireManagement": 95,
+   "bikeControl": 89,
+   "aggression": 86,
+   "reaction": 90,
+   "mental": 87,
+   "clutch": 88
+  },
+  "hidden": {
+   "riskTaking": 78,
+   "lateBrakingConfidence": 82,
+   "slipstreamUsage": 89,
+   "pressureResistance": 91,
+   "startReaction": 85
+  },
+  "strengths": "Title-winning tyre management and consistency.",
+  "weaknesses": "Qualifying puts him in traffic."
+ },
+ {
+  "id": "salvat-2017",
+  "name": "Iker Salvat",
+  "number": 12,
+  "nationality": "ESP",
+  "kind": "legend",
+  "version": "2017 Prime",
+  "primeYear": 2017,
+  "eraYears": "2015-2026",
+  "team": null,
+  "bike": "sor-1000",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#0a0a0a",
+   "#ff3c00",
+   "#ffffff"
+  ],
+  "livery": [
+   "#1d3fa8",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "styles": [
+   "Qualifying Ace",
+   "Corner Speed Specialist"
+  ],
+  "personality": "QUALIFYING SPECIALIST",
+  "attributes": {
+   "speed": 89,
+   "acceleration": 91,
+   "braking": 90,
+   "cornerEntry": 92,
+   "midCorner": 95,
+   "cornerExit": 90,
+   "throttleControl": 88,
+   "racePace": 88,
+   "qualifying": 97,
+   "overtaking": 89,
+   "defending": 91,
+   "racecraft": 91,
+   "consistency": 86,
+   "wet": 91,
+   "tireManagement": 89,
+   "bikeControl": 88,
+   "aggression": 90,
+   "reaction": 90,
+   "mental": 85,
+   "clutch": 87
+  },
+  "hidden": {
+   "riskTaking": 87,
+   "lateBrakingConfidence": 86,
+   "slipstreamUsage": 88,
+   "pressureResistance": 76,
+   "startReaction": 82
+  },
+  "strengths": "Electric pace on a corner-speed bike.",
+  "weaknesses": "Bad starts and form swings."
+ },
+ {
+  "id": "arakawa-2004",
+  "name": "Kenji Arakawa",
+  "number": 56,
+  "nationality": "JPN",
+  "kind": "legend",
+  "version": "2004 Prime",
+  "primeYear": 2004,
+  "eraYears": "2001-2009",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#111111",
+   "#22aa22"
+  ],
+  "livery": [
+   "#2a7d2e",
+   "#ffffff",
+   "#111111"
+  ],
+  "styles": [
+   "Smooth Operator"
+  ],
+  "personality": "SMOOTH",
+  "attributes": {
+   "speed": 82,
+   "acceleration": 81,
+   "braking": 84,
+   "cornerEntry": 82,
+   "midCorner": 86,
+   "cornerExit": 83,
+   "throttleControl": 82,
+   "racePace": 84,
+   "qualifying": 85,
+   "overtaking": 81,
+   "defending": 81,
+   "racecraft": 84,
+   "consistency": 87,
+   "wet": 82,
+   "tireManagement": 85,
+   "bikeControl": 85,
+   "aggression": 83,
+   "reaction": 84,
+   "mental": 82,
+   "clutch": 82
+  },
+  "hidden": {
+   "riskTaking": 78,
+   "lateBrakingConfidence": 80,
+   "slipstreamUsage": 79,
+   "pressureResistance": 77,
+   "startReaction": 80
+  },
+  "strengths": "Smooth and tidy.",
+  "weaknesses": "Lacks a racing edge."
+ },
+ {
+  "id": "saeki-2004",
+  "name": "Haruto Saeki",
+  "number": 6,
+  "nationality": "JPN",
+  "kind": "legend",
+  "version": "2004 Prime",
+  "primeYear": 2004,
+  "eraYears": "2002-2008",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#ffffff",
+   "#bc002d",
+   "#111111"
+  ],
+  "livery": [
+   "#ffffff",
+   "#00a0e9",
+   "#111111"
+  ],
+  "styles": [
+   "Late Brake Master"
+  ],
+  "personality": "LATE BRAKER",
+  "attributes": {
+   "speed": 83,
+   "acceleration": 85,
+   "braking": 94,
+   "cornerEntry": 86,
+   "midCorner": 86,
+   "cornerExit": 86,
+   "throttleControl": 85,
+   "racePace": 87,
+   "qualifying": 83,
+   "overtaking": 89,
+   "defending": 86,
+   "racecraft": 85,
+   "consistency": 79,
+   "wet": 84,
+   "tireManagement": 83,
+   "bikeControl": 84,
+   "aggression": 85,
+   "reaction": 83,
+   "mental": 87,
+   "clutch": 86
+  },
+  "hidden": {
+   "riskTaking": 87,
+   "lateBrakingConfidence": 99,
+   "slipstreamUsage": 82,
+   "pressureResistance": 81,
+   "startReaction": 80
+  },
+  "strengths": "Ferocious late braking.",
+  "weaknesses": "Inconsistent across a season."
+ },
+ {
+  "id": "ventura-2004",
+  "name": "Caio Ventura",
+  "number": 4,
+  "nationality": "BRA",
+  "kind": "legend",
+  "version": "2004 Prime",
+  "primeYear": 2004,
+  "eraYears": "2000-2007",
+  "team": null,
+  "bike": "kai-990",
+  "manufacturer": "kairyu",
+  "helmet": [
+   "#009c3b",
+   "#ffdf00",
+   "#002776"
+  ],
+  "livery": [
+   "#ffcc00",
+   "#0a3d91",
+   "#ffffff"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Late Brake Master"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 86,
+   "acceleration": 84,
+   "braking": 91,
+   "cornerEntry": 87,
+   "midCorner": 86,
+   "cornerExit": 85,
+   "throttleControl": 86,
+   "racePace": 84,
+   "qualifying": 86,
+   "overtaking": 90,
+   "defending": 87,
+   "racecraft": 88,
+   "consistency": 83,
+   "wet": 84,
+   "tireManagement": 84,
+   "bikeControl": 86,
+   "aggression": 92,
+   "reaction": 85,
+   "mental": 85,
+   "clutch": 86
+  },
+  "hidden": {
+   "riskTaking": 88,
+   "lateBrakingConfidence": 94,
+   "slipstreamUsage": 83,
+   "pressureResistance": 82,
+   "startReaction": 81
+  },
+  "strengths": "Brave, hard-braking veteran.",
+  "weaknesses": "Tyre wear late on."
+ },
+ {
+  "id": "lemaire-2017",
+  "name": "Hugo Lemaire",
+  "number": 5,
+  "nationality": "FRA",
+  "kind": "legend",
+  "version": "2017 Prime",
+  "primeYear": 2017,
+  "eraYears": "2017-2026",
+  "team": null,
+  "bike": "sor-1000",
+  "manufacturer": "sorami",
+  "helmet": [
+   "#0055a4",
+   "#ffffff",
+   "#ffd200"
+  ],
+  "livery": [
+   "#00c389",
+   "#101820",
+   "#ffffff"
+  ],
+  "styles": [
+   "Aggressive Attacker",
+   "Wet Master"
+  ],
+  "personality": "AGGRESSIVE",
+  "attributes": {
+   "speed": 85,
+   "acceleration": 85,
+   "braking": 85,
+   "cornerEntry": 87,
+   "midCorner": 86,
+   "cornerExit": 89,
+   "throttleControl": 85,
+   "racePace": 88,
+   "qualifying": 87,
+   "overtaking": 89,
+   "defending": 86,
+   "racecraft": 86,
+   "consistency": 84,
+   "wet": 93,
+   "tireManagement": 84,
+   "bikeControl": 87,
+   "aggression": 91,
+   "reaction": 86,
+   "mental": 87,
+   "clutch": 87
+  },
+  "hidden": {
+   "riskTaking": 92,
+   "lateBrakingConfidence": 79,
+   "slipstreamUsage": 81,
+   "pressureResistance": 83,
+   "startReaction": 83
+  },
+  "strengths": "Spectacular rookie season charge.",
+  "weaknesses": "Tyre management."
+ },
+ {
+  "id": "valdrighi-2022",
+  "name": "Enea Valdrighi",
+  "number": 23,
+  "nationality": "ITA",
+  "kind": "legend",
+  "version": "2022 Prime",
+  "primeYear": 2022,
+  "eraYears": "2020-2026",
+  "team": null,
+  "bike": "ful-1000",
+  "manufacturer": "fulminor",
+  "helmet": [
+   "#b0b7bf",
+   "#ff7f11",
+   "#1c1c1c"
+  ],
+  "livery": [
+   "#00a3e0",
+   "#ffffff",
+   "#c8102e"
+  ],
+  "styles": [
+   "Tire Whisperer"
+  ],
+  "personality": "TIRE SAVER",
+  "attributes": {
+   "speed": 87,
+   "acceleration": 86,
+   "braking": 89,
+   "cornerEntry": 89,
+   "midCorner": 90,
+   "cornerExit": 90,
+   "throttleControl": 87,
+   "racePace": 88,
+   "qualifying": 83,
+   "overtaking": 86,
+   "defending": 87,
+   "racecraft": 88,
+   "consistency": 88,
+   "wet": 89,
+   "tireManagement": 96,
+   "bikeControl": 86,
+   "aggression": 89,
+   "reaction": 90,
+   "mental": 89,
+   "clutch": 88
+  },
+  "hidden": {
+   "riskTaking": 86,
+   "lateBrakingConfidence": 84,
+   "slipstreamUsage": 86,
+   "pressureResistance": 86,
+   "startReaction": 86
+  },
+  "strengths": "Tyre whisperer with a late-race surge.",
+  "weaknesses": "Qualifying."
+ }
+]

@@ -1,0 +1,93 @@
+GP RACING LEGENDS — BALANCE REPORT
+Generated 2026-10-05T07:15:17.663Z by tools/simulate.mjs (same performance model as in-game AI)
+
+=== A) CURRENT GRID · REAL MACHINERY · ALL 14 TRACKS · MIXED WEATHER — 1400 races × 12 laps, AI difficulty PRO ===
+weather mix: CLOUDY 27%, LIGHT_RAIN 16%, SUNNY 48%, HEAVY_RAIN 9%
+RIDER                                OVR  BIKE                     WIN%   POD%  TOP5%  POLE%  AVG POS
+Nico Bellandi                         93  FULMINOR GP-26            27.6   66.4   86.4   23.3    3.25
+Mateo Arrieta                         95  FULMINOR GP-26            27.2   68.1   86.8   34.7    3.31
+Théo Rousselin                        91  SORAMI ZR-M26             27.4   63.6   85.0   18.1    3.36
+Raúl Montero                          92  VENTARA AV-26              6.1   32.4   63.8   15.1    5.14
+Pedro Almagro                         89  BRENNWERK RR-26            6.9   28.2   54.4    5.9    5.86
+Gianluca Ravelli                      88  VENTARA AV-26              3.2   21.6   47.4    1.4    6.34
+Ruan Visagie                          86  BRENNWERK RR-26            0.6    5.6   18.6    0.6    9.10
+Álex Reyna                            84  SORAMI ZR-M26              0.2    3.4   12.1    0.3   10.50
+Enea Valdrighi                        85  BRENNWERK RR-25 SAT        0.1    2.7    9.3    0.1   11.38
+Tommaso Vitale                        85  FULMINOR GP-25             0.1    1.8    6.9    0.0   11.52
+Santi Elorza                          84  VENTARA AV-25 SAT          0.4    2.1    7.2    0.1   11.95
+Jordi Ferrer                          85  KAIRYU RX-26               0.1    0.8    4.2    0.0   12.54
+Iker Salvat                           85  BRENNWERK RR-25 SAT        0.1    1.0    4.1    0.3   13.39
+Sora Takahashi                        83  VENTARA AV-25 SAT          0.0    0.6    2.7    0.1   13.76
+Rui Saldanha                          82  SORAMI ZR-M25 SAT          0.0    0.5    1.9    0.0   14.38
+Thanakorn Srisuk                      79  SEIRAN SX-26               0.0    0.6    3.1    0.1   15.04
+Joaquín Ferrán                        81  FULMINOR GP-25             0.1    0.4    2.2    0.1   15.28
+Dario Fenzi                           80  SORAMI ZR-M25 SAT          0.0    0.0    1.6    0.0   16.07
+Kenta Morimoto                        78  SEIRAN SX-26               0.0    0.1    1.4    0.0   16.64
+Ollie Hartigan                        81  KAIRYU RX-25 SAT           0.0    0.1    0.4    0.0   16.95
+Lucas Brandão                         82  KAIRYU RX-26               0.0    0.0    0.3    0.0   17.71
+Takeru Ishida                         79  KAIRYU RX-25 SAT           0.0    0.0    0.1    0.0   19.52
+Spearman(OVR rank vs avg finish rank) = 0.949 · top win rate 27.6% · 14/22 riders won at least once
+
+=== B) DREAM GRID · EQUAL MACHINERY · LEGEND PRIMES + CURRENT STARS — 700 races × 12 laps, AI difficulty PRO ===
+weather mix: CLOUDY 27%, SUNNY 49%, HEAVY_RAIN 9%, LIGHT_RAIN 15%
+RIDER                                OVR  BIKE                     WIN%   POD%  TOP5%  POLE%  AVG POS
+Enzo Valtieri - 2005 Prime            97  SPEC GP PROTOTYPE         32.4   65.3   79.4   11.3    3.50
+Javi Ortell - 2015 Prime              96  SPEC GP PROTOTYPE         17.3   44.9   63.9   13.3    5.20
+Callum Brennock - 2007 Prime          95  SPEC GP PROTOTYPE         13.7   38.0   54.3   15.7    5.99
+Nico Bellandi - 2023 Prime            95  SPEC GP PROTOTYPE          8.3   29.0   52.4    9.0    6.25
+Mateo Arrieta - 2019 Prime            97  SPEC GP PROTOTYPE          7.9   30.0   50.1   12.1    6.26
+Mateo Arrieta                         95  SPEC GP PROTOTYPE          6.3   23.1   41.9   14.6    7.49
+Raúl Montero - 2024 Prime             94  SPEC GP PROTOTYPE          1.6    9.0   20.0    4.9   10.01
+Dario Pellicer - 2012 Prime           93  SPEC GP PROTOTYPE          3.3   12.4   23.3    3.9   10.19
+Nico Bellandi                         93  SPEC GP PROTOTYPE          2.9   10.4   20.9    3.3   10.30
+Théo Rousselin - 2021 Prime           93  SPEC GP PROTOTYPE          1.9    7.4   17.4    2.7   10.33
+Théo Rousselin                        91  SPEC GP PROTOTYPE          1.0    6.7   15.7    2.4   11.41
+Raúl Montero                          92  SPEC GP PROTOTYPE          1.7    6.1   13.9    4.7   11.45
+Jordi Ferrer - 2020 Prime             90  SPEC GP PROTOTYPE          0.7    5.1   10.4    0.0   12.25
+Massimo Bertolli - 2001 Prime         91  SPEC GP PROTOTYPE          0.7    4.6   11.4    0.4   13.01
+Paolo Ferrante - 2017 Prime           91  SPEC GP PROTOTYPE          0.4    2.9    8.7    0.3   13.08
+Wade Harlan - 2006 Prime              90  SPEC GP PROTOTYPE          0.0    1.1    4.0    0.0   14.03
+Pedro Almagro                         89  SPEC GP PROTOTYPE          0.0    1.7    5.1    1.0   14.90
+Gianluca Ravelli                      88  SPEC GP PROTOTYPE          0.0    1.3    3.7    0.4   15.34
+Enea Valdrighi                        85  SPEC GP PROTOTYPE          0.0    0.7    1.4    0.0   17.67
+Jordi Ferrer                          85  SPEC GP PROTOTYPE          0.0    0.0    0.6    0.0   17.73
+Ruan Visagie                          86  SPEC GP PROTOTYPE          0.0    0.1    1.3    0.0   18.25
+Tommaso Vitale                        85  SPEC GP PROTOTYPE          0.0    0.0    0.1    0.0   18.35
+Spearman(OVR rank vs avg finish rank) = 0.985 · top win rate 32.4% · 15/22 riders won at least once
+
+=== C) CURRENT GRID · HEAVY RAIN ONLY (wet specialists should rise) — 350 races × 12 laps, AI difficulty PRO ===
+weather mix: HEAVY_RAIN 100%
+RIDER                                OVR  BIKE                     WIN%   POD%  TOP5%  POLE%  AVG POS
+Mateo Arrieta                         95  FULMINOR GP-26            40.0   81.1   92.6   42.6    2.47
+Théo Rousselin                        91  SORAMI ZR-M26             37.1   79.4   91.1   30.9    2.51
+Raúl Montero                          92  VENTARA AV-26              8.6   36.0   69.4   11.7    4.64
+Pedro Almagro                         89  BRENNWERK RR-26            5.7   34.9   61.4    7.7    5.07
+Nico Bellandi                         93  FULMINOR GP-26             4.0   26.6   60.9    4.0    5.16
+Gianluca Ravelli                      88  VENTARA AV-26              3.4   26.3   58.0    1.7    5.60
+Ruan Visagie                          86  BRENNWERK RR-26            0.6    4.0   13.7    0.0    9.57
+Álex Reyna                            84  SORAMI ZR-M26              0.3    2.9   11.1    0.3   10.03
+Thanakorn Srisuk                      79  SEIRAN SX-26               0.0    2.6   10.6    0.3   10.37
+Enea Valdrighi                        85  BRENNWERK RR-25 SAT        0.0    1.1    6.3    0.0   10.86
+Santi Elorza                          84  VENTARA AV-25 SAT          0.0    2.3    8.9    0.3   10.92
+Iker Salvat                           85  BRENNWERK RR-25 SAT        0.3    2.0    7.4    0.6   11.40
+Jordi Ferrer                          85  KAIRYU RX-26               0.0    0.3    3.1    0.0   11.93
+Tommaso Vitale                        85  FULMINOR GP-25             0.0    0.0    2.9    0.0   12.67
+Rui Saldanha                          82  SORAMI ZR-M25 SAT          0.0    0.3    2.0    0.0   13.16
+Sora Takahashi                        83  VENTARA AV-25 SAT          0.0    0.3    0.6    0.0   15.08
+Joaquín Ferrán                        81  FULMINOR GP-25             0.0    0.0    0.0    0.0   16.79
+Ollie Hartigan                        81  KAIRYU RX-25 SAT           0.0    0.0    0.0    0.0   17.26
+Lucas Brandão                         82  KAIRYU RX-26               0.0    0.0    0.0    0.0   18.13
+Dario Fenzi                           80  SORAMI ZR-M25 SAT          0.0    0.0    0.0    0.0   18.70
+Kenta Morimoto                        78  SEIRAN SX-26               0.0    0.0    0.0    0.0   20.19
+Takeru Ishida                         79  KAIRYU RX-25 SAT           0.0    0.0    0.0    0.0   20.48
+Spearman(OVR rank vs avg finish rank) = 0.886 · top win rate 40.0% · 9/22 riders won at least once
+
+=== SUMMARY ===
+Total simulated races: 2450 (5.6 s)
+A) rank correlation 0.949, top win rate 27.6%
+B) rank correlation 0.985, top win rate 32.4%
+Wet check: srisuk dry/mixed avg-rank P16 → heavy rain P9
+Wet check: reyna dry/mixed avg-rank P8 → heavy rain P8
+Wet check: hartigan dry/mixed avg-rank P20 → heavy rain P18
+Wet check: bellandi dry/mixed avg-rank P1 → heavy rain P5
+Targets: higher OVR should win more over the long run (correlation > 0.8) without dominating (top win rate < 45%).
