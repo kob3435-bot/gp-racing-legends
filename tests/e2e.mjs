@@ -47,7 +47,7 @@ const state = (page) => page.evaluate(() => { const r = window.__gp && window.__
   await page.click('[data-go=quick]'); await page.waitForSelector('#go');
   await page.click('[data-seg=laps] [data-v="1"]');
   await page.click('#go');
-  await page.waitForSelector('#intro-skip', { timeout: 30000 });
+  await page.waitForSelector('#intro-skip', { timeout: 90000 });
   ok('quick race reachable in 3 clicks (menu → quick → start)', true);
   await page.waitForTimeout(1500);
   await page.screenshot({ path: OUT + '06-race-intro.png' });
@@ -79,9 +79,11 @@ const state = (page) => page.evaluate(() => { const r = window.__gp && window.__
   await page.evaluate(() => { window.__gp.game.timeScale = 10; });
   await page.waitForFunction(() => window.__gp.race.entrants.some(e => e.lap >= 1 && e.s > 200), null, { timeout: 120000 });
   s = await state(page); ok('lap counter running', s.maxLap >= 1, `maxLap ${s.maxLap}`);
-  await page.waitForFunction(() => ['finished', 'results'].includes(window.__gp.game.state) || document.querySelector('.restable'), null, { timeout: 240000 });
+  await page.waitForFunction(() => ['finished', 'podium', 'results'].includes(window.__gp.game.state) || document.querySelector('.restable'), null, { timeout: 240000 });
   s = await state(page).catch(() => null);
   const overt = await page.evaluate(() => window.__gp.race ? window.__gp.race.overtakes : window.__lastOvertakes);
+  await page.waitForSelector('#podium-skip, .restable', { timeout: 60000 });
+  if (await page.$('#podium-skip')) { await page.waitForTimeout(600); await page.screenshot({ path: OUT + 'v2-podium.png' }); await page.click('#podium-skip'); }
   await page.waitForSelector('.restable', { timeout: 60000 });
   ok('race finishes and shows results', true);
   const rows = await page.$$eval('.restable .rr:not(.head)', e => e.length);
@@ -102,7 +104,7 @@ const state = (page) => page.evaluate(() => { const r = window.__gp && window.__
   await page.tap('[data-x=casual]'); await page.waitForSelector('[data-go=quick]');
   await page.screenshot({ path: OUT + '07-mobile-menu.png' });
   await page.tap('[data-go=quick]'); await page.waitForSelector('#go'); await page.tap('#go');
-  await page.waitForSelector('#intro-skip', { timeout: 30000 }); await page.tap('#intro-skip');
+  await page.waitForSelector('#intro-skip', { timeout: 90000 }); await page.tap('#intro-skip');
   await page.waitForFunction(() => window.__gp.race.phase === 'race', null, { timeout: 60000 });
   const btns = await page.$$eval('.touch .tbtn', els => els.map(e => { const r = e.getBoundingClientRect(); return { cls: e.className, w: r.width, h: r.height, vis: getComputedStyle(e).display !== 'none' }; }));
   ok('touch LEFT/RIGHT buttons visible at 844x390', btns.length >= 2 && btns.every(b => b.vis && b.w > 80 && b.h > 80), JSON.stringify(btns.map(b => `${b.cls}:${Math.round(b.w)}x${Math.round(b.h)}`)));

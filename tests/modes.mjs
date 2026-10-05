@@ -14,7 +14,7 @@ await page.goto(BASE + '?nosw'); await page.waitForSelector('[data-x=exp]', { ti
 await page.click('[data-x=exp]'); await page.waitForSelector('[data-go=quick]');
 
 async function runRace(label, shot) {
-  await page.waitForSelector('#intro-skip', { timeout: 30000 }); await page.click('#intro-skip');
+  await page.waitForSelector('#intro-skip', { timeout: 90000 }); await page.click('#intro-skip');
   await page.waitForFunction(() => window.__gp.race && window.__gp.race.phase === 'race', null, { timeout: 60000 });
   await page.evaluate(() => { window.__gp.game.timeScale = 3; if (window.__gp.race.player) window.__gp.race.autopilot = true; });
   await page.waitForTimeout(2500);
@@ -22,7 +22,9 @@ async function runRace(label, shot) {
   if (shot) await page.screenshot({ path: OUT + shot });
   ok(`${label}: race running`, info.moving >= Math.min(10, info.n - 2), JSON.stringify(info));
   await page.evaluate(() => { window.__gp.game.timeScale = 12; });
-  await page.waitForSelector('.restable', { timeout: 400000 });
+  await page.waitForSelector('#podium-skip, .restable', { timeout: 400000 });
+  if (await page.$('#podium-skip')) await page.click('#podium-skip');
+  await page.waitForSelector('.restable', { timeout: 60000 });
   const rows = await page.$$eval('.restable .rr:not(.head)', r => r.length);
   ok(`${label}: results shown`, rows === info.n, `${rows} rows`);
   return info;

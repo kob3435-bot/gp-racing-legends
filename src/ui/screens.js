@@ -51,8 +51,10 @@ export class UI {
   constructor(root, app) { this.root = root; this.app = app; this.qr = null; }
   get settings() { return this.app.settings; }
   show(html, cls = '') {
-    this.root.innerHTML = `<div class="screen ${cls}">${html}</div>`;
+    this.root.innerHTML = `<div class="screen ${cls} enter">${html}</div>`;
     this.root.style.display = 'block';
+    requestAnimationFrame(() => { const sc = this.root.firstElementChild; if (sc) requestAnimationFrame(() => sc.classList.remove('enter')); });
+    if (audio.ctx) audio.startMusic();
     this.root.scrollTop = 0;
     const back = this.root.querySelector('[data-back]');
     if (back) back.onclick = () => { audio.click(); this.main(); };
@@ -95,7 +97,10 @@ export class UI {
     const el = this.show(`<div class="mainmenu"><div class="mm-left">${this.logo()}
       <nav class="mm-nav">${items.map(([id, t, s], i) => `<button class="mm-item ${i === 0 ? 'primary' : ''}" data-go="${id}"><b>${t}</b><small>${s}</small></button>`).join('')}</nav>
       <p class="fine">All riders, teams, manufacturers, sponsors and circuits are fictional.</p></div></div>`, 'menu');
-    el.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { audio.ensure(); audio.click(); this[b.dataset.go](); });
+    el.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { audio.ensure(); audio.click(); audio.whoosh(); this[b.dataset.go](); });
+    // menu music starts on the first user gesture (autoplay policy)
+    const kick = () => { if (audio.ensure()) audio.startMusic(); window.removeEventListener('pointerdown', kick); window.removeEventListener('keydown', kick); };
+    if (!audio.music) { window.addEventListener('pointerdown', kick); window.addEventListener('keydown', kick); }
   }
 
   // ---------------- shared pickers ----------------
@@ -356,19 +361,20 @@ export class UI {
           <label>PRESET</label>${seg('graphics', ['LOW', 'MEDIUM', 'HIGH', 'ULTRA'], s.graphics)}
           <label>AUTO-DOWNGRADE ON LOW FPS</label>${seg('autoGfx', ['ON', 'OFF'], s.autoGfx ? 'ON' : 'OFF')}
           <label>SHOW FPS</label>${seg('showFps', ['OFF', 'ON'], s.showFps ? 'ON' : 'OFF')}
+          <label>DYNAMIC RESOLUTION (HOLD FPS)</label>${seg('dynRes', ['ON', 'OFF'], s.dynRes !== false ? 'ON' : 'OFF')}
           <h4>SOUND</h4>
-          ${['master', 'engine', 'sfx'].map(k => `<label>${{ master: 'MASTER VOLUME', engine: 'ENGINE', sfx: 'EFFECTS & AMBIENCE' }[k]}</label><input type="range" min="0" max="1" step="0.05" value="${s[k]}" data-vol="${k}"/>`).join('')}
+          ${['master', 'engine', 'sfx', 'music'].map(k => `<label>${{ master: 'MASTER VOLUME', engine: 'ENGINE', sfx: 'EFFECTS & AMBIENCE', music: 'MENU MUSIC' }[k]}</label><input type="range" min="0" max="1" step="0.05" value="${s[k] ?? 0.5}" data-vol="${k}"/>`).join('')}
           <h4>DATA</h4><button class="btn danger small" id="reset">RESET ALL SAVE DATA</button>
         </div>
       </div>`, 'setupscreen');
     bindSegs(el, s, (k, v) => {
-      if (['tilt', 'autoGfx', 'showFps'].includes(k)) s[k] = v === 'ON';
+      if (['tilt', 'autoGfx', 'showFps', 'dynRes'].includes(k)) s[k] = v === 'ON';
       if (k === 'control' && v === 'MANUAL' && s.line === 'FULL') { /* keep user's line choice */ }
       if (k === 'graphics') this.app.game.applyGraphics(v);
       if (k === 'tilt' && s.tilt && typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().catch(() => { });
       save.saveSettings(s); this.app.applySettings();
     });
-    el.querySelectorAll('[data-vol]').forEach(i => i.oninput = () => { s[i.dataset.vol] = +i.value; audio.setVolume({ [i.dataset.vol]: +i.value }); save.saveSettings(s); });
+    el.querySelectorAll('[data-vol]').forEach(i => i.oninput = () => { s[i.dataset.vol] = +i.value; audio.setVolume({ [i.dataset.vol]: +i.value }); if (i.dataset.vol === 'music') { if (+i.value > 0) { audio.ensure(); audio.startMusic(); } else audio.stopMusic(); } save.saveSettings(s); });
     el.querySelector('#reset').onclick = () => { if (confirm('Delete all settings, statistics and championship progress?')) { save.resetAll(); location.reload(); } };
   }
 

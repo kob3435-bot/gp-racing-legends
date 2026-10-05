@@ -7,7 +7,7 @@ const isMobile = () => (navigator.maxTouchPoints > 0 && Math.min(screen.width, s
 
 export const DEFAULT_SETTINGS = () => ({
   control: 'SEMI', line: 'FULL', gear: 'AUTO', graphics: isMobile() ? 'LOW' : 'HIGH', autoGfx: true,
-  camera: 'chase', master: 0.8, engine: 0.8, sfx: 0.7, tilt: false, showFps: false, units: 'kmh', difficulty: 'NORMAL',
+  camera: 'chase', master: 0.8, engine: 0.8, sfx: 0.7, music: 0.5, dynRes: true, tilt: false, showFps: false, units: 'kmh', difficulty: 'NORMAL',
 });
 export function loadSettings() { return { ...DEFAULT_SETTINGS(), ...read(K.settings, {}) }; }
 export function saveSettings(s) { write(K.settings, s); }

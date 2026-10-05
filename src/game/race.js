@@ -30,7 +30,10 @@ export class Race {
     this.apexes = findApexes(this.geo);
     this.ctl = CONTROL[cfg.control || 'SEMI'];
     this.wearScale = Math.max(1, Math.min(4, 22 / this.laps));
-    this.events = []; this.overtakes = 0; this.fastestLap = null;
+    this.events = []; this.overtakes = 0; this.fastestLap = null; this.bestSec = [Infinity, Infinity, Infinity];
+    this.lodS = null; // focus position: AI far from it is integrated at 30 Hz (simplified sim)
+    this._apObj = Array.from({ length: 48 }, () => ({ i: 0, sign: 0, k: 0, dist: 0 })); this._apK = 0; this._apArr = Array.from({ length: 8 }, () => []); this._apA = 0;
+    this._sortFn = (a, b) => { if (a.finished && b.finished) return a.finishTime - b.finishTime; if (a.finished) return -1; if (b.finished) return 1; return b.s - a.s; };
     const tireAuto = autoTire(this.weather, this.track);
     this.entrants = cfg.entrants.map((en, k) => {
       const tire = en.isPlayer && cfg.playerTire && cfg.playerTire !== 'AUTO' ? cfg.playerTire : tireAuto;
@@ -42,6 +45,7 @@ export class Race {
         tactical: 0, tacTimer: this.rand() * 0.3, mode: 'cruise', personalOff: (this.rand() - 0.5) * 1.2,
         mistake: null, nextApexChecked: -1, crashT: 0, offTrack: false, gear: 1, rpm: IDLE, shiftCut: 0,
         throttle: 0, brake: 0, draft: 0, pos: k + 1, offLineErr: 0, collideT: 0, lastPos: k + 1,
+        secCount: -1, secT: 0, bestSec: [Infinity, Infinity, Infinity], lodAcc: 0, lockup: 0, dive: false, passedBy: null, passedT: -9,
       };
       this.recompute(e);
       return e;
@@ -99,7 +103,14 @@ export class Race {
       if (e.finished && e.coast === undefined) e.coast = 0;
       if (!e.started) { if (raceT >= e.startDelay && (!e.isPlayer || this.ctl.auto || this.autopilot || (input && input.throttle > 0.2) || this.spectator)) e.started = true; else { e.rpm = e.isPlayer && input && input.throttle > 0.2 ? 11000 : 6000 + Math.sin(this.t * 9 + e.idx) * 900; continue; } }
       if (e.isPlayer && !this.autopilot) this.stepPlayer(e, dt, input || {}, raceT);
-      else this.stepAI(e, dt, raceT);
+      else {
+        if (this.lodS !== null && !e.isPlayer && raceT > 5) {
+          const L = this.geo.L; let dl = (e.s - this.lodS) % L; if (dl > L / 2) dl -= L; if (dl < -L / 2) dl += L;
+          if (Math.abs(dl) > 600) { e.lodAcc += dt; if (e.lodAcc < 1 / 30) { this.timing(e); continue; } this.stepAI(e, e.lodAcc, raceT); e.lodAcc = 0; this.timing(e); continue; }
+        }
+        if (e.lodAcc > 0) { this.stepAI(e, e.lodAcc, raceT); e.lodAcc = 0; }
+        this.stepAI(e, dt, raceT);
+      }
       this.timing(e);
     }
     this.collisions(dt);
@@ -117,14 +128,19 @@ export class Race {
     return best ? [best, bg] : null;
   }
   nextApexes(s, count = 2, maxDist = 420) {
-    const geo = this.geo, N = geo.N; const i0 = ((Math.floor(s / geo.ds) % N) + N) % N; const out = [];
+    const geo = this.geo, N = geo.N; const i0 = ((Math.floor(s / geo.ds) % N) + N) % N;
+    const out = this._apArr[this._apA = (this._apA + 1) % 8]; out.length = 0;
     const A = this.apexes; if (!A.length) return out;
     let lo = 0; while (lo < A.length && A[lo].i < i0) lo++;
     for (let k = 0; k < A.length && out.length < count; k++) {
       const a = A[(lo + k) % A.length]; let di = a.i - i0; if (di < 0) di += N;
-      const dist = di * geo.ds; if (dist > maxDist) break; out.push({ ...a, dist });
+      const dist = di * geo.ds; if (dist > maxDist) break; const o = this._apObj[this._apK = (this._apK + 1) % 48]; o.i = a.i; o.sign = a.sign; o.k = a.k; o.dist = dist; out.push(o);
     }
     return out;
+  }
+  alongside(e) {
+    for (const o of this.entrants) { if (o === e || o.crashT > 0 || o.finished) continue; const g = o.s - e.s; if (g > -1.8 && g < 2.2 && Math.abs(o.d - e.d) < 2.2) return o; }
+    return null;
   }
   draftFor(e) {
     const a = this.ahead(e, 34); if (!a) return 0;
@@ -169,19 +185,27 @@ export class Race {
         const perCorner = p.mistakeRate / Math.max(6, this.apexes.length);
         if (this.rand() < perCorner && raceT > 4) {
           const sev = rollMistake(this.rand());
-          e.mistake = { at: e.s + a.dist, off: -a.sign * (sev === 1 ? 2.5 : 6.5), pen: sev === 1 ? 1.25 : 1.55, sev };
+          e.mistake = { at: e.s + a.dist, off: -a.sign * (sev === 1 ? 2.5 : 6.5), pen: sev === 1 ? 1.25 : 1.55, sev, lock: sev >= 2 || this.rand() < 0.4 };
           if (sev === 3 && !this.spectatorSafe) { e.crashT = 0; e.mistake.crash = true; }
+          else this.events.push({ type: 'mistake', e, kind: e.mistake.lock ? 'LOCK-UP' : 'RUNS WIDE' });
+        } else if (e.dive && this.rand() < 0.07 + (e.rider.personality === 'LATE BRAKER' ? 0.05 : 0)) {
+          // over-committed late dive: runs wide past the apex (can open the door for a switchback)
+          e.mistake = { at: e.s + a.dist, off: -a.sign * 2.2, pen: 1.18, sev: 1, lock: this.rand() < 0.6 };
+          this.events.push({ type: 'mistake', e, kind: e.mistake.lock ? 'LOCK-UP' : 'RUNS WIDE' });
         }
       }
       const off = (e.mistake && Math.abs(e.mistake.at - (e.s + a.dist)) < 30) ? e.mistake : null;
       const predD = Math.max(-lim, Math.min(lim, geo.lineD[a.i] + e.tactical * 0.8));
       let pen = linePenalty(geo, Math.abs(predD - geo.lineD[a.i]));
       if (off) pen *= off.pen;
-      const vA = e.prof[a.i] * e.paceF / Math.sqrt(pen);
-      const vreq = Math.sqrt(vA * vA + 2 * p.decel * p.brakeAcc * Math.max(0, a.dist - 4));
+      // late-braking dive: brakes later but carries a compromised apex (net neutral pace, more passes)
+      const dive = e.dive && a === aps[0] && a.dist < 200;
+      const vA = e.prof[a.i] * e.paceF / Math.sqrt(pen * (dive ? 1.07 : 1));
+      const vreq = Math.sqrt(vA * vA + 2 * p.decel * p.brakeAcc * (dive ? 1.05 : 1) * Math.max(0, a.dist - 4));
       vt = Math.min(vt, vreq);
       if (off && off.crash && a.dist < 12) { e.crashT = 9 + this.rand() * 6; e.mistake = null; this.events.push({ type: 'crash', e }); return; }
     }
+    e.lockup = e.mistake && e.mistake.lock && e.accel < -4 && e.mistake.at - e.s < 90 && e.mistake.at > e.s ? 1 : Math.max(0, e.lockup - dt * 3);
     // traffic: can't drive through the bike ahead
     const ah = this.ahead(e, 9);
     if (ah && Math.abs(ah[0].d - e.d) < 1.0) { vt = Math.min(vt, ah[0].v + (ah[1] - 3.2) * 1.3); e.blocked = (e.blocked || 0) + dt; } else e.blocked = 0;
@@ -213,7 +237,24 @@ export class Race {
     const p = e.eff;
     const pers = e.rider.personality;
     const aggr = (p.aggression + (pers === 'AGGRESSIVE' ? 8 : 0) + (pers === 'LATE BRAKER' ? 5 : 0)) / 100;
-    let target = 0; e.mode = 'cruise';
+    let target = 0; e.mode = 'cruise'; e.dive = false;
+    // switchback: just got passed into a corner -> cross back under the passer on the exit
+    if (e.passedBy && this.t - e.passedT < 1.6 && ap && ap.dist < 120 && !e.finished) {
+      const o = e.passedBy; const gap = o.s - e.s;
+      if (gap > 0 && gap < 12 && this.rand() < 0.35 + aggr * 0.5) {
+        const i = ((Math.floor(e.s / geo.ds) % geo.N) + geo.N) % geo.N;
+        target = Math.max(-lim, Math.min(lim, o.d - Math.sign(o.d - e.d || ap.sign) * 1.9)) - geo.lineD[i];
+        e.mode = 'attack'; e.tactical += (target - e.tactical) * 0.5; return;
+      }
+    }
+    // side-by-side: hold a lane instead of tucking in when alongside
+    const al = this.alongside(e);
+    if (al && !e.finished) {
+      const i = ((Math.floor(e.s / geo.ds) % geo.N) + geo.N) % geo.N;
+      const side = Math.sign(e.d - al.d) || 1;
+      target = Math.max(-lim, Math.min(lim, al.d + side * 1.6)) - geo.lineD[i];
+      e.mode = 'side'; e.tactical += (target - e.tactical) * 0.4; return;
+    }
     if (ah) {
       const [o, gap] = ah;
       const closing = e.v - o.v;
@@ -227,8 +268,9 @@ export class Race {
           const want = Math.max(-lim, Math.min(lim, o.d + inside * (1.5 + skill)));
           target = want - geo.lineD[ap.i];
           if (this.rand() > 0.35 + skill * 0.5) target *= 0.5; // hesitates
-        } else if (gap < 9) {
-          // pull out of the slipstream to the side with more room
+          else if (gap < 12 && this.rand() < aggr * 0.9) e.dive = true; // commits to a late-braking dive
+        } else if (gap < 9 && !(e.draft > 0.3 && gap > 4.5 && (!ap || ap.dist > 260))) {
+          // pull out of the slipstream to the side with more room (after building the tow on a straight)
           const side = o.d > 0 ? -1 : 1;
           const i = ((Math.floor(e.s / geo.ds) % geo.N) + geo.N) % geo.N;
           target = Math.max(-lim, Math.min(lim, o.d + side * 1.9)) - geo.lineD[i];
@@ -378,6 +420,16 @@ export class Race {
 
   timing(e) {
     const L = this.geo.L;
+    const sc = Math.floor(e.s / (L / 3));
+    if (sc > e.secCount && !e.finished && this.goTime !== null) {
+      if (e.secCount >= 0) {
+        const k = e.secCount % 3, tm = this.t - e.secT;
+        const cls = tm < this.bestSec[k] ? 'purple' : tm < e.bestSec[k] ? 'green' : 'yellow';
+        if (tm < this.bestSec[k]) this.bestSec[k] = tm; if (tm < e.bestSec[k]) e.bestSec[k] = tm;
+        if (e.isPlayer || this.spectator) this.events.push({ type: 'sector', e, k, time: tm, cls });
+      }
+      e.secT = e.secCount < 0 ? this.goTime : this.t; e.secCount = sc;
+    }
     const c = Math.floor(e.s / 50) + 8;
     if (c >= 0 && c < e.cp.length && !e.cp[c]) e.cp[c] = this.t;
     const lapNow = Math.floor(e.s / L);
@@ -421,19 +473,17 @@ export class Race {
   }
 
   updatePositions() {
-    const arr = this.entrants.slice().sort((a, b) => {
-      if (a.finished && b.finished) return a.finishTime - b.finishTime;
-      if (a.finished) return -1; if (b.finished) return 1;
-      return b.s - a.s;
-    });
-    arr.forEach((e, k) => {
-      const np = k + 1;
+    const arr = this._ord || (this._ord = this.entrants.slice());
+    arr.sort(this._sortFn);
+    for (let k = 0; k < arr.length; k++) {
+      const e = arr[k], np = k + 1;
       if (np !== e.pos && this.phase === 'race' && this.t - this.goTime > 2) {
         if (np < e.pos && !e.isPlayer) this.overtakes++;
-        if (e.isPlayer) this.events.push({ type: 'position', from: e.pos, to: np });
+        if (np > e.pos && k > 0 && !arr[k - 1].finished) { e.passedBy = arr[k - 1]; e.passedT = this.t; }
+        if (e.isPlayer) this.events.push({ type: 'position', from: e.pos, to: np, other: np < e.pos ? arr[k + 1] : arr[k - 1] });
       }
       e.pos = np;
-    });
+    }
     this.order = arr;
   }
 

@@ -28,11 +28,13 @@ export class Hud {
           <div><label>LAP</label><b id="h-cur">--:--.---</b></div>
           <div class="nm"><label>LAST</label><b id="h-last">--:--.---</b></div>
           <div><label>BEST</label><b id="h-best">--:--.---</b></div>
+          <div class="sectors" id="h-sec"><i></i><i></i><i></i></div>
         </div>
         <div class="cond"><span>${WEATHER[race.weather].icon} ${WEATHER[race.weather].label}</span>${race.player ? `<span class="tyre" style="--tc:${tw.color}">${tw.label}</span><span id="h-wear"></span>` : ''}</div>
       </div>
       <div class="hud-bl"><canvas id="h-map" width="220" height="220"></canvas></div>
       ${race.player ? `<div class="hud-br">
+        <div class="draft" id="h-draft"><span>SLIPSTREAM</span><b><i id="h-draftbar"></i></b></div>
         <div class="speedo"><div class="spd"><b id="h-spd">0</b><small>KM/H</small></div><div class="gear" id="h-gear">N</div></div>
         <div class="rpm"><div id="h-rpm"></div></div>
         <div class="assist" id="h-assist"></div>
@@ -44,6 +46,7 @@ export class Hud {
       </div>` : ''}
       ${spectator ? `<div class="spec-ctl"><button class="hbtn" id="s-prev">◀ RIDER</button><button class="hbtn" id="s-next">RIDER ▶</button></div>` : ''}
       <div class="lowerthird" id="h-lower"></div>
+      <div class="pops" id="h-pops"></div>
     </div>`;
     const $ = (id) => this.root.querySelector('#' + id);
     this.$ = $;
@@ -80,6 +83,17 @@ export class Hud {
     setTimeout(() => d.classList.add('out'), dur * 1000); setTimeout(() => d.remove(), dur * 1000 + 500);
     while (b.children.length > 3) b.firstChild.remove();
   }
+  pop(text, cls = '', sub = '', dur = 1.6) {
+    const b = this.$ && this.$('h-pops'); if (!b) return;
+    const d = document.createElement('div'); d.className = 'pop ' + cls; d.innerHTML = text + (sub ? `<small>${sub}</small>` : ''); b.appendChild(d);
+    setTimeout(() => d.classList.add('out'), dur * 1000); setTimeout(() => d.remove(), dur * 1000 + 450);
+    while (b.children.length > 2) b.firstChild.remove();
+  }
+  sector(k, cls) {
+    const el = this.$ && this.$('h-sec'); if (!el) return;
+    const is = el.children; if (k === 0) for (const i of is) i.className = '';
+    is[k].className = cls;
+  }
   lower(e, extra = '') {
     const el = this.$('h-lower'); if (!el) return;
     if (!e) { el.classList.remove('show'); return; }
@@ -103,6 +117,7 @@ export class Hud {
       const rf = Math.max(0, Math.min(1, (p.rpm - 3500) / 14000));
       const rpmEl = $('h-rpm'); rpmEl.style.width = (rf * 100).toFixed(1) + '%'; rpmEl.className = rf > 0.93 ? 'redline' : rf > 0.78 ? 'high' : '';
       const w = $('h-wear'); if (w) w.textContent = Math.round((1 - p.wear) * 100) + '%';
+      const dr = $('h-draft'); if (dr) { const on = p.draft > 0.08 && p.v > 30; if (on !== this.draftOn) { dr.classList.toggle('on', on); this.draftOn = on; } if (on) $('h-draftbar').style.width = Math.round(Math.min(1, p.draft) * 100) + '%'; }
       const as = $('h-assist');
       if (as) as.innerHTML = p.brake > 0.05 ? `<i class="b" style="opacity:${0.4 + p.brake * 0.6}">BRAKE</i>` : p.throttle > 0.6 ? '<i class="g">THROTTLE</i>' : '<i class="y">LIFT</i>';
       if (p.offTrack) as.innerHTML = '<i class="b">OFF TRACK</i>';

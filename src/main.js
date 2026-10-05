@@ -20,10 +20,10 @@ class App {
   lastRider() { return (save.loadLastRace() || {}).riderId || null; }
   applySettings() {
     this.fpsEl.style.display = this.settings.showFps ? 'block' : 'none';
-    audio.setVolume({ master: this.settings.master, engine: this.settings.engine, sfx: this.settings.sfx });
+    audio.setVolume({ master: this.settings.master, engine: this.settings.engine, sfx: this.settings.sfx, music: this.settings.music ?? 0.5 });
   }
   race(cfg, back) {
-    this.ui.hide();
+    this.ui.hide(); audio.stopMusic();
     this.currentCfg = cfg;
     const start = () => this.game.startRace({ ...cfg, seed: (Math.random() * 1e9) | 0 }, {
       onResults: (sum) => this.onResults(sum, cfg, back, start),
