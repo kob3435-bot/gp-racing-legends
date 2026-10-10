@@ -83,6 +83,17 @@ export class Race {
   // ---------------- start sequence ----------------
   updateStart(dt) {
     if (this.phase === 'grid') { this.phase = 'lights'; this.lightT = 0; }
+    if (this.phase === 'lights' && this.netStart) {
+      // online: lights follow the shared (clock-synced) wall clock so both devices go green together
+      const ns = this.netStart; this.lightT = Math.max(0, (ns.clock() - ns.at) / 1000); this.t = this.lightT;
+      const on = Math.min(5, Math.floor(this.lightT / 0.9));
+      if (on !== this.lightsOn) { this.lightsOn = on; this.events.push({ type: 'light', n: on }); }
+      if (this.lightT >= ns.hold) {
+        this.t = ns.hold; this.phase = 'race'; this.lightsOn = 0; this.goTime = this.t; this.events.push({ type: 'go' });
+        for (const e of this.entrants) e.startDelay = e.eff.reaction * (0.8 + this.rand() * 0.5);
+      }
+      return;
+    }
     if (this.phase === 'lights') {
       this.lightT += dt;
       const on = Math.min(5, Math.floor(this.lightT / 0.9));
@@ -101,6 +112,8 @@ export class Race {
     if (this.phase !== 'race' && this.phase !== 'finished') { this.updateStart(dt); return; }
     const raceT = this.t - this.goTime;
     for (const e of this.entrants) {
+      // online: bikes owned by the other device (or the host's AI on the guest) are driven by the network buffer
+      if (e.remote) { this.remoteApply(e, dt); this.timing(e); continue; }
       if (e.finished && e.coast === undefined) e.coast = 0;
       if (!e.started) { if (raceT >= e.startDelay && (!e.isPlayer || this.ctl.auto || this.autopilot || (input && input.throttle > 0.2) || this.spectator)) e.started = true; else { e.rpm = e.isPlayer && input && input.throttle > 0.2 ? 11000 : 6000 + Math.sin(this.t * 9 + e.idx) * 900; continue; } }
       if (e.isPlayer && !this.autopilot) this.stepPlayer(e, dt, input || {}, raceT);
@@ -117,6 +130,8 @@ export class Race {
     this.collisions(dt);
     this.updatePositions();
   }
+
+  remoteApply() {}
 
   ahead(e, maxGap) {
     let best = null, bg = maxGap;
@@ -451,6 +466,7 @@ export class Race {
     const lapNow = Math.floor(e.s / L);
     if (e.s > 0 && lapNow > e.lap - 1 && !e.finished) {
       // crossed the line
+      if (e.remote && e.lap >= this.laps) return; // the owner reports the remote bike's finish
       if (e.lap === 0) { e.lap = 1; e.lapStart = this.goTime; return; }
       const crossT = this.t - (e.s - lapNow * L) / Math.max(1, e.v);
       const lt = crossT - e.lapStart;
@@ -481,7 +497,7 @@ export class Race {
       const [front, rear] = ds >= 0 ? [A, B] : [B, A];
       const rel = rear.v - front.v;
       if (rel > 0) {
-        if (rear.isPlayer && this.ctl.crash && rel > 7) { this.crashPlayer(rear, 'CONTACT'); continue; }
+        if (rear.isPlayer && this.ctl.crash && rel > 7 && !front.remote) { this.crashPlayer(rear, 'CONTACT'); continue; }
         rear.v = Math.max(0, front.v - 0.6); rear.v *= 0.985;
       }
       if ((A.isPlayer || B.isPlayer) && (A.collideT || 0) <= this.t) { A.collideT = this.t + 0.5; this.events.push({ type: 'contact' }); }

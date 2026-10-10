@@ -9,13 +9,17 @@
     "preview": "vite preview --host 0.0.0.0 --port 4173 --strictPort",
     "simulate": "node tools/simulate.mjs",
     "test:e2e": "node tests/e2e.mjs",
-    "test:modes": "node tests/modes.mjs"
+    "test:modes": "node tests/modes.mjs",
+    "test:online": "node tests/online.mjs"
   },
   "dependencies": {
+    "peerjs": "^1.5.5",
     "three": "^0.169.0"
   },
   "devDependencies": {
+    "peer": "^1.0.2",
     "playwright-core": "^1.63.0",
-    "vite": "^5.4.21"
+    "vite": "^5.4.21",
+    "ws": "^8.22.0"
   }
 }

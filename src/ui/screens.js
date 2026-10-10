@@ -11,7 +11,7 @@ import { fmtTime } from './hud.js';
 import * as save from '../save.js';
 import { audio } from '../game/audio.js';
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const FLAG = { ESP: '🇪🇸', ITA: '🇮🇹', FRA: '🇫🇷', JPN: '🇯🇵', AUS: '🇦🇺', USA: '🇺🇸', GBR: '🇬🇧', THA: '🇹🇭', BRA: '🇧🇷', ARG: '🇦🇷', POR: '🇵🇹', RSA: '🇿🇦', FIN: '🇫🇮', SWE: '🇸🇪', GER: '🇩🇪', NED: '🇳🇱', AUT: '🇦🇹', MAS: '🇲🇾', QAT: '🇶🇦' };
 export const flag = (c) => FLAG[c] || '';
 
@@ -25,7 +25,7 @@ export function trackSvg(def, size = 120, stroke = 5) {
   return `<svg viewBox="0 0 ${size} ${size}" class="tsvg"><path d="${d}" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="${stroke + 3}" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linejoin="round"/></svg>`;
 }
 
-function riderCard(r, sel = false, extra = '') {
+export function riderCard(r, sel = false, extra = '') {
   const lv = riderLivery(r);
   return `<button class="rcard ${sel ? 'sel' : ''}" data-rid="${r.id}" style="--c1:${r.helmet[0]};--c2:${lv[0]};--c3:${r.helmet[1]}">
     <div class="rc-band"><span class="rc-num">${r.number}</span><span class="rc-ovr"><b>${r.ovr}</b><small>OVR</small></span></div>
@@ -35,10 +35,10 @@ function riderCard(r, sel = false, extra = '') {
   </button>`;
 }
 
-function seg(name, options, value, labels = {}) {
+export function seg(name, options, value, labels = {}) {
   return `<div class="seg" data-seg="${name}">${options.map(o => `<button class="${o === value ? 'on' : ''}" data-v="${o}">${labels[o] || o}</button>`).join('')}</div>`;
 }
-function bindSegs(root, state, onChange) {
+export function bindSegs(root, state, onChange) {
   root.querySelectorAll('.seg').forEach(sg => sg.addEventListener('click', (ev) => {
     const b = ev.target.closest('button'); if (!b) return; audio.click();
     sg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
@@ -88,6 +88,7 @@ export class UI {
     const items = [
       ['quick', 'QUICK RACE', 'Pick a rider & track and go'],
       ['champ', 'CHAMPIONSHIP', champ ? `Round ${Math.min(champ.round + 1, champ.calendar.length)} of ${champ.calendar.length} · continue` : 'Full season with standings'],
+      ['online', 'ONLINE CHAMPIONSHIP', '2 players · share a room code'],
       ['dream', 'DREAM GRID', 'Legends of every era on one grid'],
       ['spectator', 'SPECTATOR', 'Watch the AI battle it out'],
       ['db', 'RIDER DATABASE', `${RIDERS.length} riders · ${LEGENDS.length} legend versions`],
@@ -236,6 +237,8 @@ export class UI {
       this.app.race(cfg, () => this.spectator());
     };
   }
+
+  online() { this.app.online.menu(); }
 
   // ---------------- CHAMPIONSHIP ----------------
   champ() {
@@ -400,7 +403,7 @@ export class UI {
     const el = this.show(`<header class="sh"><div><h2>RESULTS · ${t.name}</h2><p>${cfg.title} · ${summary.laps} laps · ${WEATHER[summary.weather].icon} ${WEATHER[summary.weather].label}${summary.fastestLap ? ` · Fastest lap: <b class="purple">${esc(summary.fastestLap.name)} ${fmtTime(summary.fastestLap.time)}</b>` : ''}</p></div></header>
       ${me ? `<div class="res-hero ${me.pos <= 3 ? 'podium' : ''}"><span class="rh-pos">P${me.pos}</span><div><b>${me.pos === 1 ? 'VICTORY!' : me.pos <= 3 ? 'PODIUM FINISH' : 'RACE COMPLETE'}</b><small>Started P${me.grid} · ${me.points} pts${me.fastest ? ' · FASTEST LAP' : ''}</small></div></div>` : ''}
       <div class="restable"><div class="rr head"><span>POS</span><span>RIDER</span><span class="hide-m">TEAM</span><span>TIME / GAP</span><span class="hide-m">BEST LAP</span><span>PTS</span></div>
-      ${summary.results.map(r => `<div class="rr ${r.isPlayer ? 'me' : ''} ${r.pos <= 3 ? 'p' + r.pos : ''}"><span>${r.pos}</span><span><i class="dot" style="background:${r.rider.helmet[0]}"></i>${esc(displayName(r.rider))}</span><span class="hide-m">${esc(r.team)}</span><span>${r.pos === 1 ? fmtTime(r.time) : '+' + r.gap.toFixed(3)}${r.projected ? '*' : ''}</span><span class="hide-m ${r.fastest ? 'purple' : ''}">${fmtTime(r.bestLap)}</span><span>${r.points || ''}</span></div>`).join('')}</div>
+      ${summary.results.map(r => `<div class="rr ${r.isPlayer ? 'me' : ''} ${r.rival ? 'rival' : ''} ${r.pos <= 3 ? 'p' + r.pos : ''}"><span>${r.pos}</span><span><i class="dot" style="background:${r.rider.helmet[0]}"></i>${esc(displayName(r.rider))}</span><span class="hide-m">${esc(r.team)}</span><span>${r.pos === 1 ? fmtTime(r.time) : '+' + r.gap.toFixed(3)}${r.projected ? '*' : ''}</span><span class="hide-m ${r.fastest ? 'purple' : ''}">${fmtTime(r.bestLap)}</span><span>${r.points || ''}</span></div>`).join('')}</div>
       <p class="fine pad">* projected from race pace after the leader finished.</p>
       <div class="startbar"><button class="btn" id="menu">MENU</button><button class="btn" id="retry">RETRY</button>${onNext ? `<button class="btn primary big" id="next">${nextLabel || 'NEXT RACE ▶'}</button>` : ''}</div>`, 'setupscreen results');
     el.querySelector('#menu').onclick = () => { audio.click(); this.main(); };
@@ -417,7 +420,8 @@ export function buildField(me, grid) {
   return [me, ...field];
 }
 export function standings(points) { return Object.entries(points).sort((a, b) => b[1] - a[1]); }
-function teamLabel(id) { if (TEAM_BY_ID[id]) return TEAM_BY_ID[id].name; if (id.startsWith('legend-')) return (MANUFACTURER_BY_ID[id.slice(7)]?.name || '') + ' Legends'; return 'Wildcard Entry'; }
-function standTable(rows, meId, nameFn, subFn) {
-  return `<div class="stand">${rows.map(([id, pts], i) => `<div class="sr ${id === meId ? 'me' : ''}"><span>${i + 1}</span><span>${nameFn(id)}${subFn ? `<small>${esc(subFn(id))}</small>` : ''}</span><b>${pts}</b></div>`).join('')}</div>`;
+export function teamLabel(id) { if (TEAM_BY_ID[id]) return TEAM_BY_ID[id].name; if (id.startsWith('legend-')) return (MANUFACTURER_BY_ID[id.slice(7)]?.name || '') + ' Legends'; return 'Wildcard Entry'; }
+export function standTable(rows, meId, nameFn, subFn) {
+  const me = meId && typeof meId === 'object' ? meId.me : meId, rv = meId && typeof meId === 'object' ? meId.rival : null;
+  return `<div class="stand">${rows.map(([id, pts], i) => `<div class="sr ${id === me ? 'me' : id === rv ? 'rival' : ''}"><span>${i + 1}</span><span>${nameFn(id)}${subFn ? `<small>${esc(subFn(id))}</small>` : ''}</span><b>${pts}</b></div>`).join('')}</div>`;
 }

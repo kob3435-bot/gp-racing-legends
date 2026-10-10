@@ -27,7 +27,7 @@ const state = (page) => page.evaluate(() => { const r = window.__gp && window.__
   ok('first launch asks CASUAL / EXPERIENCED', await page.$('[data-x=exp]'));
   await page.click('[data-x=casual]'); await page.waitForSelector('[data-go=quick]');
   const items = await page.$$eval('.mm-item b', els => els.map(e => e.textContent));
-  ok('main menu shows working modes', items.length === 7, items.join(', '));
+  ok('main menu shows working modes', items.length === 8 && items.includes('ONLINE CHAMPIONSHIP'), items.join(', '));
   await page.mouse.move(5, 760); await page.waitForTimeout(1200);
   await page.screenshot({ path: OUT + '01-main-menu.png' });
   // rider database

@@ -11,6 +11,7 @@ export class Hud {
     const tw = TIRES[race.player?.tire || 'MEDIUM'];
     this.root.innerHTML = `
     <div class="hud ${mobile ? 'mobile' : ''} ${spectator ? 'spectator' : ''}">
+      <div class="rival" id="h-rival" hidden></div>
       <div class="hud-tl">
         <div class="hud-pos"><span class="big" id="h-pos">P-</span><span class="small" id="h-of">/${race.entrants.length}</span></div>
         <div class="hud-lap">LAP <b id="h-lap">1</b>/${race.laps}</div>
@@ -76,6 +77,15 @@ export class Hud {
   lights(n, go) {
     this.lightEls.forEach((el, i) => { el.className = go ? 'go' : i < n ? 'on' : ''; });
     this.$('h-lights').style.display = (n > 0 || go) ? 'flex' : 'none';
+  }
+  // online: the other human's position and time gap
+  rival(r, me, race) {
+    const el = document.getElementById('h-rival'); if (!el) return;
+    el.hidden = false;
+    let gap = '';
+    if (r.finished && me.finished) gap = (r.finishTime - me.finishTime >= 0 ? '+' : '') + (r.finishTime - me.finishTime).toFixed(2) + 's';
+    else { const ds = r.s - me.s, v = Math.max(15, ds > 0 ? me.v : r.v); gap = (ds > 0 ? '−' : '+') + Math.abs(ds / v).toFixed(1) + 's'; }
+    el.innerHTML = `<span>RIVAL</span><b>${r.rider.name.split(' ').slice(-1)[0].toUpperCase()}</b><i>P${r.pos}</i><em class="${r.s > me.s ? 'ahead' : 'behind'}">${gap}</em>`;
   }
   note(text, cls = '', dur = 2.4) {
     const b = this.$('h-banner'); if (!b) return;

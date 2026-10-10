@@ -5,6 +5,8 @@ import { RIDER_BY_ID, riderTeamId } from './data/riders.js';
 import { TRACKS } from './data/tracks.js';
 import * as save from './save.js';
 import { audio } from './game/audio.js';
+import { commitRound } from './champ.js';
+import { Online } from './net/online.js';
 
 class App {
   constructor() {
@@ -12,9 +14,10 @@ class App {
     this.game = new Game(document.getElementById('gl'), document.getElementById('hud'), this.settings);
     this.game.onSettingsChanged = () => save.saveSettings(this.settings);
     this.ui = new UI(document.getElementById('ui'), this);
+    this.online = new Online(this);
     this.fpsEl = document.getElementById('fps'); this.game.fpsEl = this.fpsEl;
     this.applySettings();
-    if (!save.loadProfile()) this.ui.welcome(); else this.ui.main();
+    if (!save.loadProfile()) this.ui.welcome(); else if (new URLSearchParams(location.search).get('room')) this.online.menu(); else this.ui.main();
     document.getElementById('boot').remove();
   }
   lastRider() { return (save.loadLastRace() || {}).riderId || null; }
@@ -25,7 +28,7 @@ class App {
   race(cfg, back) {
     this.ui.hide(); audio.stopMusic();
     this.currentCfg = cfg;
-    const start = () => this.game.startRace({ ...cfg, seed: (Math.random() * 1e9) | 0 }, {
+    const start = () => this.game.startRace({ ...cfg, seed: cfg.seed ?? ((Math.random() * 1e9) | 0) }, {
       onResults: (sum) => this.onResults(sum, cfg, back, start),
       onQuit: () => back(),
       onRestart: () => start(),
@@ -42,18 +45,11 @@ class App {
       if (isFinite(me.bestLap) && !me.projected) { const pb = st.bestLaps[sum.trackId]; if (!pb || me.bestLap < pb.time) st.bestLaps[sum.trackId] = { time: me.bestLap, rider: me.riderId }; }
       save.saveStats(st);
     }
+    if (cfg.mode === 'online') return this.online.onResults(sum, cfg);
     let commit = null;
     if (cfg.mode === 'champ') {
       commit = () => {
-        const c = save.loadChampionship(); if (!c || c.committedFor === c.round + ':' + sum.trackId) return;
-        for (const r of sum.results) {
-          c.points[r.riderId] = (c.points[r.riderId] || 0) + r.points;
-          const tid = riderTeamId(r.rider);
-          c.teamPoints[tid] = (c.teamPoints[tid] || 0) + r.points;
-        }
-        c.committedFor = c.round + ':' + sum.trackId;
-        c.results[c.round] = { winner: sum.results[0].riderId, myPos: me ? me.pos : null };
-        c.round++;
+        const c = save.loadChampionship(); if (!commitRound(c, sum)) return;
         if (c.round >= c.calendar.length) {
           const top = Object.entries(c.points).sort((a, b) => b[1] - a[1])[0];
           if (top && top[0] === c.riderId) { const st = save.loadStats(); st.championships++; save.saveStats(st); }

@@ -62,6 +62,8 @@ function bikeBlob() {
   const m = new THREE.Mesh(_blobGeo, _blobMat); m.position.set(0, 0.03, 0.1); m.renderOrder = 1; m.userData.blob = true; return m;
 }
 
+const netNow = () => performance.timeOrigin + performance.now();
+
 export class Game {
   constructor(canvas, hudRoot, settings) {
     this.canvas = canvas; this.settings = settings;
@@ -227,7 +229,8 @@ export class Game {
     // race logic
     const race = new Race({ geo, track, laps: cfg.laps, weather, difficulty: cfg.difficulty, control: this.settings.control, gearMode: this.settings.gear, playerTire: cfg.playerTire, entrants: cfg.entrants, spectator: !!cfg.spectator, seed: cfg.seed });
     race.wallD = ts.wall;
-    const order = race.qualify();
+    let order = race.qualify();
+    if (cfg.gridIds) { const by = new Map(race.entrants.map(e => [e.rider.id, e])); const o = cfg.gridIds.map(id => by.get(id)).filter(Boolean); if (o.length === race.entrants.length) order = o; }
     race.placeOnGrid(order, gridSlots(geo, race.entrants.length));
     // bikes, a few per frame
     const detail = p.q >= 2 ? 2 : p.q === 1 ? 1 : 0;
@@ -280,6 +283,9 @@ export class Game {
     ld.done();
     this.showIntroCard();
     window.__gp = { game: this, race };
+    this.net = cfg.net ? cfg.net.attach(this, race, cfg) : null;
+    if (this.net) this.timeScale = 1; // online races always run in real time on both devices
+    if (this.net) { const sk = document.getElementById('intro-skip'); if (sk) { sk.disabled = true; sk.textContent = 'WAITING FOR RIVAL…'; } cfg.net.loaded(); }
   }
 
   showIntroCard() {
@@ -333,6 +339,7 @@ export class Game {
   }
   pause() {
     if (!this.race || this.state === 'results' || this.state === 'podium' || this.paused) return;
+    if (this.net) { this.hud.note('ONLINE RACE · NO PAUSE', 'white', 1.5); return; }
     this.paused = true;
     const div = document.createElement('div'); div.className = 'pause-menu'; div.id = 'pause';
     div.innerHTML = `<div class="panel"><h2>PAUSED</h2>
@@ -361,6 +368,7 @@ export class Game {
   quit() { this.disposeRace(); this.state = 'menu'; this.cb && this.cb.onQuit && this.cb.onQuit(); }
 
   disposeRace() {
+    this.net = null; this.waitNote = false;
     audio.stopAll();
     document.querySelectorAll('#loading').forEach(n => n.remove());
     if (this.scene) {
@@ -409,7 +417,10 @@ export class Game {
     if (this.cfg.spectator) { if (ui.steer !== 0 && !this.specSteerLatch) { const i = race.order.indexOf(this.focus); this.focus = race.order[(i + (ui.steer > 0 ? 1 : race.order.length - 1)) % race.order.length]; this.hud.lower(this.focus, ` · P${this.focus.pos}`); this.lowerT = 4; this.camInit = false; } this.specSteerLatch = ui.steer !== 0; }
     if (this.state === 'intro') {
       this.introT += dt;
-      if (ui.steer !== 0 || ui.throttle > 0 || this.introT > 7.5) this.endIntro();
+      if (this.net) { // online: lights are scheduled on the synced clock
+        const L = this.net.lights, sk = document.getElementById('intro-skip');
+        if (L) { const left = (L.at - netNow()) / 1000; if (sk) sk.textContent = left > 0 ? `LIGHTS IN ${left.toFixed(1)} s` : 'GO!'; if (left <= 0.02) { race.netStart = { at: L.at, hold: L.hold, clock: netNow }; this.endIntro(); } }
+      } else if (ui.steer !== 0 || ui.throttle > 0 || this.introT > 7.5) this.endIntro();
     }
     if (this.state === 'start' || this.state === 'race' || this.state === 'finished') {
       // fixed-timestep simulation; rendering interpolates between the last two steps
@@ -424,9 +435,16 @@ export class Game {
       }
       this.alpha = n ? Math.min(1, this.acc / step) : this.alpha;
       if (race.phase === 'race' && this.state === 'start') this.state = 'race';
+      if (this.net) this.net.frame(dt);
       this.handleEvents();
       if (this.state === 'race') this.checkFinish(dt);
-      if (this.state === 'finished') { this.finishT += dt; if (this.finishT > (this.cfg.spectator ? 3 : 3.2)) this.startPodium(); }
+      if (this.net && this.net.role === 'guest' && this.net.finalRx && !this.net.offline && (this.state === 'race' || this.state === 'finished')) { this.net.applyFinal(this.net.finalRx); this.startPodium(); }
+      else if (this.state === 'finished') {
+        this.finishT += dt;
+        if (this.net && !this.net.canPodium() && this.net.role === 'host' && race.entrants.every(e => e.finished || e === this.net.rival)) { this.closeT = (this.closeT || 0) + dt * this.timeScale; if (this.closeT > 30) { race.projectFinish(); this.hud.note('RACE CLOSED', 'white', 3); } }
+        if (this.finishT > (this.cfg.spectator ? 3 : 3.2) && (!this.net || this.net.canPodium())) this.startPodium();
+        else if (this.net && this.finishT > 3.2 && !this.waitNote) { this.waitNote = true; this.hud.note(this.net.role === 'host' ? 'WAITING FOR RIVAL TO FINISH' : 'WAITING FOR OFFICIAL RESULT', 'white', 3); }
+      }
     }
     if (!this.race || !this.scene || this.state === 'podium' || this.state === 'results') return;
     this.updateVisuals(dt);
@@ -472,7 +490,7 @@ export class Game {
     for (const ev of race.events) {
       switch (ev.type) {
         case 'light': hud.lights(ev.n, false); audio.blip(440, 0.18, 'sine', 0.2); break;
-        case 'go': hud.lights(0, true); audio.blip(880, 0.4, 'sine', 0.25); setTimeout(() => this.hud && hud.lights(0, false), 1200); for (const l of this.ts.lights) l.color.set('#2a0000'); audio.cheer(1.2); break;
+        case 'go': window.__goWall = netNow(); hud.lights(0, true); audio.blip(880, 0.4, 'sine', 0.25); setTimeout(() => this.hud && hud.lights(0, false), 1200); for (const l of this.ts.lights) l.color.set('#2a0000'); audio.cheer(1.2); break;
         case 'shift': if (ev.e.isPlayer) audio.shift(this.playerVoice, ev.up); break;
         case 'fastest':
           if (race.t - race.goTime > 10) { hud.note(`FASTEST LAP · ${ev.e.rider.name.toUpperCase()} ${fmtTime(ev.time)}`, 'purple', 3); if (ev.e === focus) hud.pop('BEST LAP', 'purple', fmtTime(ev.time), 2.2); }
@@ -540,6 +558,7 @@ export class Game {
   startPodium() {
     if (this.state === 'podium' || this.state === 'results') return;
     const race = this.race, geo = this.geo; race.projectFinish();
+    if (this.net && this.net.role === 'host' && !this.net.offline && !this.net.finalSent) { this.net.finalSent = true; this.net.session.link.send(this.net.makeFinal()); }
     this.state = 'podium'; this.podT = 0;
     const N = geo.N; let ksum = 0; for (let i = 0; i < N; i++) ksum += geo.kappa[i];
     const side = ksum > 0 ? 1 : -1;
@@ -614,7 +633,7 @@ export class Game {
     const leader = race.order[0];
     const fl = race.fastestLap;
     const results = race.order.map((e, k) => ({
-      pos: k + 1, riderId: e.rider.id, rider: e.rider, isPlayer: e.isPlayer, team: riderTeamName(e.rider), bike: e.bike.name,
+      pos: k + 1, riderId: e.rider.id, rider: e.rider, isPlayer: e.isPlayer, rival: !!(e.human && !e.isPlayer), team: riderTeamName(e.rider), bike: e.bike.name,
       time: e.finishTime, gap: e.finishTime - leader.finishTime, bestLap: e.bestLap, points: POINTS[k] || 0, grid: e.gridPos, projected: !!e.projected,
       fastest: fl && fl.e === e,
     }));
