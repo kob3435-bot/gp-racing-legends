@@ -11,6 +11,15 @@ import { fmtTime } from './hud.js';
 import * as save from '../save.js';
 import { audio } from '../game/audio.js';
 
+export const CONTROL_MODES = ['SEMI', 'PRO', 'FULL', 'MANUAL'];
+export const CONTROL_LABEL = { SEMI: 'SEMI AUTO', PRO: 'PRO ASSIST', FULL: 'FULL ASSIST', MANUAL: 'MANUAL' };
+export const CONTROL_DESC = {
+  SEMI: 'Semi Auto: auto throttle, brake & gears; light steering help (the bike follows part of each corner, soft edge push-back). No crashes.',
+  PRO: 'Pro Assist: auto throttle, brake & gears — steering is 100% yours, zero steering help (no line pull, edge nudge or smoothing; let go and you run wide). No crashes; grass & gravel slow you down.',
+  FULL: 'Full Assist: auto throttle, brake & gears plus extra steering help towards the racing line. No crashes.',
+  MANUAL: 'Manual: W/S throttle & brake, Shift/Ctrl gears (or auto gears). You can crash.',
+};
+export function controlPicker(value) { return `${seg('control', CONTROL_MODES, value, CONTROL_LABEL)}<p class="fine" id="ctlDesc">${CONTROL_DESC[value] || ''}</p>`; }
 export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const FLAG = { ESP: '🇪🇸', ITA: '🇮🇹', FRA: '🇫🇷', JPN: '🇯🇵', AUS: '🇦🇺', USA: '🇺🇸', GBR: '🇬🇧', THA: '🇹🇭', BRA: '🇧🇷', ARG: '🇦🇷', POR: '🇵🇹', RSA: '🇿🇦', FIN: '🇫🇮', SWE: '🇸🇪', GER: '🇩🇪', NED: '🇳🇱', AUT: '🇦🇹', MAS: '🇲🇾', QAT: '🇶🇦' };
 export const flag = (c) => FLAG[c] || '';
@@ -368,8 +377,7 @@ export class UI {
     const el = this.show(`${this.header('SETTINGS')}
       <div class="settings">
         <div class="sg"><h4>RIDING</h4>
-          <label>CONTROL MODE</label>${seg('control', ['SEMI', 'FULL', 'MANUAL'], s.control, { SEMI: 'SEMI AUTO', FULL: 'FULL ASSIST', MANUAL: 'MANUAL' })}
-          <p class="fine">Semi Auto: you steer & choose the line, auto throttle/brake/gears, no crashes. Full Assist: extra steering help. Manual: W/S throttle & brake, Shift/Ctrl gears — you can crash.</p>
+          <label>CONTROL MODE</label>${controlPicker(s.control)}
           <label>GEARS (MANUAL MODE)</label>${seg('gear', ['AUTO', 'MANUAL'], s.gear)}
           <label>RACING LINE</label>${seg('line', ['OFF', 'BRAKING', 'FULL'], s.line, { BRAKING: 'BRAKING ONLY' })}
           <label>DEFAULT CAMERA</label>${seg('camera', ['chase', 'far', 'helmet', 'tv'], s.camera, { chase: 'CHASE', far: 'FAR CHASE', helmet: 'HELMET', tv: 'TV' })}
@@ -387,7 +395,7 @@ export class UI {
       </div>`, 'setupscreen');
     bindSegs(el, s, (k, v) => {
       if (['tilt', 'autoGfx', 'showFps', 'dynRes'].includes(k)) s[k] = v === 'ON';
-      if (k === 'control' && v === 'MANUAL' && s.line === 'FULL') { /* keep user's line choice */ }
+      if (k === 'control') el.querySelector('#ctlDesc').textContent = CONTROL_DESC[v];
       if (k === 'graphics') this.app.game.applyGraphics(v);
       if (k === 'tilt' && s.tilt && typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().catch(() => { });
       save.saveSettings(s); this.app.applySettings();

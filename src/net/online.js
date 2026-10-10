@@ -6,7 +6,7 @@ import { DIFFICULTY, pickWeather, WEATHER } from '../game/perf.js';
 import { Race } from '../game/race.js';
 import { getGeo } from '../game/game.js';
 import { commitRound } from '../champ.js';
-import { esc, seg, bindSegs, standTable, standings, teamLabel, flag } from '../ui/screens.js';
+import { controlPicker, CONTROL_DESC, esc, seg, bindSegs, standTable, standings, teamLabel, flag } from '../ui/screens.js';
 import { audio } from '../game/audio.js';
 
 // ONLINE CHAMPIONSHIP (2 players): lobby, season sync, race orchestration. Host-authoritative.
@@ -106,12 +106,14 @@ export class Online {
         <div id="net-err"></div>
         <div class="room-code"><span class="fine">ROOM</span><b id="room-code">${esc(this.code)}</b>${H ? `<input id="share" readonly value="${esc(this.shareLink())}"><button class="btn small" id="copy">COPY LINK</button>` : ''}</div>
         <div class="players" id="players"></div>
-        <div class="setup"><section class="col"><h4>YOUR RIDER</h4><div id="rp"></div></section>
+        <div class="setup"><section class="col"><h4>YOUR CONTROLS (each player picks their own)</h4><div class="opts" id="myctl">${controlPicker(this.app.settings.control)}</div><h4>YOUR RIDER</h4><div id="rp"></div></section>
         <section class="col"><h4>SEASON ${H ? '' : '(HOST)'}</h4><div id="settings"></div>
           <div class="row"><button class="btn big" id="ready">READY</button>${H ? '<button class="btn primary big" id="startS" disabled>START SEASON ▶</button>' : ''}</div>
           <p class="fine" id="lobby-hint"></p></section></div>
       </div>`, 'setupscreen');
     el.querySelector('[data-back]').onclick = () => { this.leave(); this.view = null; this.ui.main(); };
+    const myc = el.querySelector('#myctl');
+    bindSegs(myc, this.app.settings, (k, v) => { myc.querySelector('#ctlDesc').textContent = CONTROL_DESC[v]; this.app.game.onSettingsChanged && this.app.game.onSettingsChanged(); });
     if (H) {
       el.querySelector('#copy').onclick = () => { const i = el.querySelector('#share'); i.select(); navigator.clipboard?.writeText(i.value).catch(() => document.execCommand('copy')); el.querySelector('#copy').textContent = 'COPIED ✓'; };
       const sEl = el.querySelector('#settings');

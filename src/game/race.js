@@ -6,6 +6,9 @@ const CONTROL = {
   // follow: share of the road curvature the bike tracks on its own (the rest needs rider input); resp: heading response (1/s)
   SEMI: { assistMu: 0.985, assistDecel: 0.97, follow: 0.6, resp: 9, auto: true, crash: false, pull: 0 },
   FULL: { assistMu: 0.975, assistDecel: 0.96, follow: 0.82, resp: 9, auto: true, crash: false, pull: 0.5 },
+  // PRO ASSIST: auto throttle/brake/gears, ZERO steering help: world yaw comes only from the rider's input (no curvature
+  // following, no self-aligning, no line pull, no edge push, no input smoothing); no crashes, grass/gravel slows naturally
+  PRO: { assistMu: 0.985, assistDecel: 0.97, follow: 0, resp: 9, auto: true, crash: false, pull: 0, pure: true },
   MANUAL: { assistMu: 1, assistDecel: 1, follow: 0.45, resp: 8, auto: false, crash: true, pull: 0 },
 };
 const GEAR_SPLIT = [0.38, 0.53, 0.66, 0.78, 0.89, 1.0];
@@ -322,10 +325,11 @@ export class Race {
     const surf = off ? 0.55 : onKerb ? 0.93 : 1;
     const latMax = p.mu * G * surf;
     // assisted modes keep a stability margin so the rider can still tighten the line at the limit
-    const steerLat = latMax * (ctl.auto ? 1.12 : 1.0);
+    const steerLat = latMax * (ctl.auto && !ctl.pure ? 1.12 : 1.0);
     // ---- steering v3: short linear ramp (~0.1 s to full lock), fast return to centre, no heavy smoothing ----
     const target = Math.max(-1, Math.min(1, input.steer || 0));
-    if (input.analog) e.steer += (target - e.steer) * Math.min(1, 20 * dt);
+    if (ctl.pure) e.steer = target; // raw input, no ramp/smoothing
+    else if (input.analog) e.steer += (target - e.steer) * Math.min(1, 20 * dt);
     else {
       const dl = target - e.steer, building = target !== 0 && Math.sign(target) === Math.sign(e.steer || target) && Math.abs(target) >= Math.abs(e.steer);
       e.steer += Math.sign(dl) * Math.min(Math.abs(dl), (building ? 10 : 14) * dt);
@@ -338,13 +342,15 @@ export class Race {
     if (ctl.pull && Math.abs(e.steer) < 0.15) { const la = (i + Math.round(Math.max(12, e.v * 0.6) / geo.ds)) % N; psiT += Math.max(-0.035, Math.min(0.035, ctl.pull * 0.02 * (geo.lineD[la] - e.d))); }
     // soft push-back beyond the kerb in assisted modes (no snapping)
     const softEdge = geo.halfW + 1.3;
-    if (ctl.auto && absd > softEdge) psiT -= Math.sign(e.d) * Math.min(0.12, (absd - softEdge) * 0.035);
+    if (ctl.auto && !ctl.pure && absd > softEdge) psiT -= Math.sign(e.d) * Math.min(0.12, (absd - softEdge) * 0.035);
     // heading relative to the road follows the target quickly; the un-followed share of curvature drifts the bike wide
     let dpsiDes = ctl.resp * (psiT - e.psi) - (1 - ctl.follow) * kp * e.v * Math.cos(e.psi);
     const roadYaw = kp * e.v * Math.cos(e.psi);
     let yaw = dpsiDes + roadYaw, over = 1;
     const demand = Math.abs(yaw * e.v);
     if (demand > steerLat && e.v > 1) { over = demand / steerLat; yaw = Math.sign(yaw) * steerLat / e.v; }
+    // PRO: yaw rate in the world frame = input x grip-limited max; no input -> the bike holds its world heading (runs wide)
+    if (ctl.pure) { yaw = e.steer * Math.min(1.2, steerLat / vv); over = 1; }
     // auto speed scrubs only when the rider is asking to turn INTO a corner beyond the grip (so holding the key makes it)
     const intoCorner = Math.abs(kp) > 1 / 700 && Math.sign(e.steer) === Math.sign(kp) && Math.abs(e.steer) > 0.4;
     const overAuto = intoCorner ? Math.max(1, Math.abs(kp) * e.v * e.v / (steerLat * 0.95)) : 1;
@@ -365,7 +371,7 @@ export class Race {
     }
     const dpsi = yaw - roadYaw;
     e.psi += dpsi * dt;
-    e.psi = Math.max(-0.9, Math.min(0.9, e.psi));
+    e.psi = ctl.pure ? Math.max(-1.5, Math.min(1.5, e.psi)) : Math.max(-0.9, Math.min(0.9, e.psi));
     e.yaw = yaw;
     // longitudinal
     e.draft = this.draftFor(e);
@@ -399,7 +405,8 @@ export class Race {
     if (Math.abs(e.d) > this.wallD - 0.6) {
       e.d = Math.sign(e.d) * (this.wallD - 0.6);
       if (ctl.crash && e.v > 22) return this.crashPlayer(e, 'BARRIER');
-      if (ctl.auto) { e.psi = -Math.sign(e.d) * 0.04; e.v *= 0.85; } else { e.psi *= -0.25; e.v *= 0.62; }
+      if (ctl.pure) { e.psi *= -0.25; e.v *= 0.75; } // physical bounce only, no redirect
+      else if (ctl.auto) { e.psi = -Math.sign(e.d) * 0.04; e.v *= 0.85; } else { e.psi *= -0.25; e.v *= 0.62; }
       this.events.push({ type: 'bump', e });
     }
     const leanT = Math.atan(e.yaw * e.v / G);

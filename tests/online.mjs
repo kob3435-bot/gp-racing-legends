@@ -24,7 +24,9 @@ const startLocal = () => { server = PeerServer({ port: 9010, path: '/' }); retur
 let peerQ = LOCAL ? startLocal() : '';
 const simQ = LAG ? '&netlag=150&netjit=50&netloss=0.05' : '';
 
-const browser = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
+const browser = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required',
+  // test harness only: lets the live https page reach this test's own ws://localhost relay (Local Network Access)
+  ...(/localhost|127\.0\.0\.1/.test(BASE) ? [] : ['--disable-features=LocalNetworkAccessChecks,BlockInsecurePrivateNetworkRequests,PrivateNetworkAccessRespectPreflightResults'])] });
 const init = () => {
   localStorage.setItem('gprl.profile.v1', JSON.stringify({ type: 'experienced' }));
   if (!localStorage.getItem('gprl.settings.v1')) localStorage.setItem('gprl.settings.v1', JSON.stringify({ graphics: 'LOW', autoGfx: false, control: 'SEMI', camera: 'chase', dynRes: false, music: 0, master: 0, line: 'OFF' }));
@@ -93,6 +95,7 @@ await hp.click('[data-seg=rounds] [data-v="2"]'); await hp.click('[data-seg=laps
 await sleep(600);
 const hint = await gp.textContent('#lobby-hint');
 ok('guest sees host season settings', /2 rounds · 1 lap/.test(hint), hint);
+await gp.click('#myctl [data-seg=control] [data-v=PRO]');
 await hp.click('#ready'); await gp.click('#ready');
 await hp.waitForFunction(() => !document.querySelector('#startS').disabled, null, { timeout: 10000 });
 ok('host can start once both are ready', true);
@@ -134,6 +137,7 @@ async function raceRound(r, { disconnect = false } = {}) {
   await hp.click('#go');
   await Promise.all([hp, gp].map(p => p.waitForFunction(() => window.__gp && window.__gp.race && window.__net && document.getElementById('intro-skip'), null, { timeout: 120000 })));
   const grids = await Promise.all([hp, gp].map(p => p.evaluate(() => window.__gp.race.order.map(e => e.rider.id))));
+  if (r === 0) { const modes = await Promise.all([hp, gp].map(p => p.evaluate(() => ({ pure: !!window.__gp.race.ctl.pure, auto: window.__gp.race.ctl.auto })))); ok('each player rides their own control mode (host SEMI, guest PRO ASSIST)', !modes[0].pure && modes[1].pure && modes[1].auto, JSON.stringify(modes)); }
   ok(`R${r + 1}: both devices see the same 22-rider grid`, grids[0].join() === grids[1].join() && grids[0].length === 22, `pole ${grids[0][0]}`);
   await Promise.all([hp, gp].map(p => p.evaluate(samplerSrc)));
   await Promise.all([hp, gp].map(p => p.waitForFunction(() => window.__gp.race.phase === 'race', null, { timeout: 60000 })));

@@ -69,7 +69,7 @@ function runTrack(track) {
   const aiBest = Math.min(...race.entrants.filter(e => !e.isPlayer && isFinite(e.bestLap)).map(e => e.bestLap));
   const aiMedian = race.entrants.filter(e => !e.isPlayer && isFinite(e.bestLap)).map(e => e.bestLap).sort((a, b) => a - b)[10];
   const r = { track: track.id, finished: p.finished, best: +p.bestLap.toFixed(2), ref: +refLap.toFixed(2), refPct: +((p.bestLap / refLap - 1) * 100).toFixed(1), aiBest: +aiBest.toFixed(2), aiMedian: +(aiMedian || 0).toFixed(2), gapPct: +((p.bestLap / aiMedian - 1) * 100).toFixed(1), offTrackS: +offT.toFixed(1), bumps, maxStuck: +maxStuck.toFixed(1), presses, pos: p.pos };
-  r.pass = r.finished && r.maxStuck < 3 && r.bumps <= 1 && r.refPct < 8 && r.gapPct < 6 && r.offTrackS < r.best * LAPS * 0.04;
+  r.pass = r.finished && r.maxStuck < 3 && r.bumps <= 1 && r.refPct < (CONTROL === "PRO" ? 12 : 8) && r.gapPct < (CONTROL === "PRO" ? 9 : 6) && r.offTrackS < r.best * LAPS * 0.04;
   if (!r.pass) allPass = false;
   results.push(r);
   console.log(`${r.pass ? 'PASS' : 'FAIL'}  ${track.id.padEnd(9)} lap ${r.best}s  same-bike autopilot ${r.ref}s (${r.refPct > 0 ? '+' : ''}${r.refPct}%)  AI best ${r.aiBest}s / median ${r.aiMedian}s (${r.gapPct > 0 ? '+' : ''}${r.gapPct}%)  off-track ${r.offTrackS}s  wall hits ${r.bumps}  stuck ${r.maxStuck}s  key presses ${r.presses}  finish P${r.pos}`);
