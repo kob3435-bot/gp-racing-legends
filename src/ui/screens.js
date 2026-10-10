@@ -1,5 +1,5 @@
 import { RIDERS, RIDER_BY_ID, CURRENT_GRID, LEGENDS, ROOKIES, displayName, riderTeamName, riderBike, riderTeamId, riderLivery } from '../data/riders.js';
-import { TRACKS, TRACK_BY_ID } from '../data/tracks.js';
+import { TRACKS, TRACK_BY_ID, CALENDAR, MONTH_OF, realLaps, seasonLaps, lapsLabel } from '../data/tracks.js';
 import { ATTRS, ATTR_LABEL, ovrTier } from '../data/attributes.js';
 import { equalBike, balancedBike, BIKE_STATS } from '../data/bikes.js';
 import { MANUFACTURER_BY_ID } from '../data/manufacturers.js';
@@ -247,11 +247,11 @@ export class UI {
     this.app.game.showroom(me);
     const rs = standings(c.points), ts = standings(c.teamPoints);
     const myPos = rs.findIndex(x => x[0] === c.riderId) + 1;
-    const el = this.show(`${this.header('CHAMPIONSHIP', `${esc(displayName(me))} · ${DIFFICULTY[c.difficulty].label} · ${c.laps} laps per race`)}
+    const el = this.show(`${this.header('CHAMPIONSHIP', `${esc(displayName(me))} · ${DIFFICULTY[c.difficulty].label} · ${lapsLabel(c)}`)}
       <div class="setup champ">
         <section class="col"><h4>NEXT · ROUND ${c.round + 1} / ${c.calendar.length}</h4>
-          <div class="nextround">${trackSvg(next, 120, 5)}<div><b>${next.name}</b><small>${flag(next.flag)} ${next.country} · ${(next.length / 1000).toFixed(2)} km</small><small>${next.character.join(' · ')}</small></div></div>
-          <div class="cal">${c.calendar.map((id, i) => { const t = TRACK_BY_ID[id]; const res = c.results[i]; return `<div class="calr ${i === c.round ? 'cur' : ''} ${i < c.round ? 'done' : ''}"><span>R${i + 1}</span><span>${t.name}</span><span>${res ? (res.myPos ? 'P' + res.myPos : '') + ' · ' + esc(RIDER_BY_ID[res.winner]?.name || '') : ''}</span></div>`; }).join('')}</div>
+          <div class="nextround">${trackSvg(next, 120, 5)}<div><b>${next.name}</b><small>${flag(next.flag)} ${next.country} · ${(next.length / 1000).toFixed(2)} km</small><small>${next.character.join(' · ')}</small><small>${MONTH_OF[next.id] || ''} · ${seasonLaps(c, next.id)} laps</small></div></div>
+          <div class="cal">${c.calendar.map((id, i) => { const t = TRACK_BY_ID[id]; const res = c.results[i]; return `<div class="calr ${i === c.round ? 'cur' : ''} ${i < c.round ? 'done' : ''}"><span>R${i + 1}</span><span class="mon">${MONTH_OF[id] || ''}</span><span>${flag(t.flag)} ${t.name}</span><span class="lp">${seasonLaps(c, id)}L</span><span>${res ? (res.myPos ? 'P' + res.myPos : '') + ' · ' + esc(RIDER_BY_ID[res.winner]?.name || '') : ''}</span></div>`; }).join('')}</div>
           <div class="row"><button class="btn primary big" id="go">RACE ROUND ${c.round + 1} ▶</button></div>
           <button class="btn danger small" id="abandon">ABANDON SEASON</button>
         </section>
@@ -262,25 +262,38 @@ export class UI {
     el.querySelector('#go').onclick = () => {
       audio.ensure(); audio.click();
       const field = c.field.map(id => RIDER_BY_ID[id]);
-      const cfg = { mode: 'champ', title: `CHAMPIONSHIP · ROUND ${c.round + 1}/${c.calendar.length}`, trackId: next.id, laps: c.laps, weather: pickWeather(next), difficulty: c.difficulty, playerTire: 'AUTO', entrants: field.map(r => ({ rider: r, bike: riderBike(r, 'modern'), isPlayer: r.id === c.riderId })) };
+      const cfg = { mode: 'champ', title: `CHAMPIONSHIP · ROUND ${c.round + 1}/${c.calendar.length}`, trackId: next.id, laps: seasonLaps(c, next.id), weather: pickWeather(next), difficulty: c.difficulty, playerTire: 'AUTO', entrants: field.map(r => ({ rider: r, bike: riderBike(r, 'modern'), isPlayer: r.id === c.riderId })) };
       this.app.race(cfg, () => this.champ());
     };
   }
   champNew() {
-    const st = { riderId: this.app.lastRider() || 'srisuk', rounds: 6, laps: 3, difficulty: this.settings.difficulty || 'NORMAL' };
-    const el = this.show(`${this.header('NEW CHAMPIONSHIP', 'Choose your rider and season length. Points: 25-20-16-13-11-10-9-8-7-6-5-4-3-2-1.')}
+    const ALL = CALENDAR.length;
+    const st = { riderId: this.app.lastRider() || 'srisuk', rounds: 'FULL', laps: 3, difficulty: this.settings.difficulty || 'NORMAL', custom: 15 };
+    const el = this.show(`${this.header('NEW CHAMPIONSHIP', `Full season: all ${ALL} circuits, March to November. Points: 25-20-16-13-11-10-9-8-7-6-5-4-3-2-1.`)}
       <div class="setup"><section class="col"><h4>RIDER</h4><div id="rp"></div></section>
-      <section class="col"><h4>SEASON</h4><div class="opts"><label>ROUNDS</label>${seg('rounds', [4, 6, 10, 14], st.rounds)}<label>LAPS PER RACE</label>${seg('laps', [2, 3, 5, 8, 12], st.laps)}<label>AI DIFFICULTY</label>${seg('difficulty', Object.keys(DIFFICULTY), st.difficulty)}</div>
+      <section class="col"><h4>SEASON</h4><div class="opts"><label>ROUNDS</label>${seg('rounds', ['FULL', 4, 6, 10], st.rounds, { FULL: `FULL SEASON · ${ALL}` })}
+      <label>LAPS PER RACE</label>${seg('laps', [1, 3, 5, 10, 'REAL', 'CUSTOM'], st.laps, { REAL: 'REALISTIC', CUSTOM: 'CUSTOM' })}
+      <div class="custom-laps" id="customRow" hidden><input type="number" id="customLaps" min="1" max="99" value="${st.custom}"> <span>laps every round</span></div>
+      <p class="fine" id="lapsInfo"></p>
+      <label>AI DIFFICULTY</label>${seg('difficulty', Object.keys(DIFFICULTY), st.difficulty)}</div>
+      <div class="cal mini" id="calPrev"></div>
       <p class="fine">Legends and rookies enter as a wildcard on a factory-spec machine, replacing the slowest regular rider.</p></section></div>
       <div class="startbar"><div></div><button class="btn primary big" id="go">START SEASON ▶</button></div>`, 'setupscreen');
-    this.riderPicker(el.querySelector('#rp'), st, 'riderId'); bindSegs(el, st);
+    const pickCal = () => { const order = CALENDAR.map(c => c.id); if (st.rounds === 'FULL' || st.rounds >= order.length) return order; const n = st.rounds; return Array.from({ length: n }, (_, k) => order[Math.round(k * (order.length - 1) / (n - 1))]); };
+    const season = () => ({ lapsMode: st.laps === 'REAL' ? 'REAL' : 'FIXED', laps: st.laps === 'CUSTOM' ? Math.max(1, Math.min(99, Math.round(+el.querySelector('#customLaps').value || 1))) : st.laps === 'REAL' ? null : st.laps });
+    const refresh = () => {
+      el.querySelector('#customRow').hidden = st.laps !== 'CUSTOM';
+      const cal = pickCal(), s = season();
+      el.querySelector('#lapsInfo').textContent = s.lapsMode === 'REAL' ? `Realistic ~118 km race distance: ${Math.min(...cal.map(id => realLaps(TRACK_BY_ID[id])))}-${Math.max(...cal.map(id => realLaps(TRACK_BY_ID[id])))} laps depending on circuit.` : `${s.laps} lap${s.laps === 1 ? '' : 's'} at every round.`;
+      el.querySelector('#calPrev').innerHTML = cal.map((id, i) => `<div class="calr"><span>R${i + 1}</span><span class="mon">${MONTH_OF[id]}</span><span>${flag(TRACK_BY_ID[id].flag)} ${TRACK_BY_ID[id].name}</span><span class="lp">${seasonLaps(s, id)}L</span></div>`).join('');
+    };
+    this.riderPicker(el.querySelector('#rp'), st, 'riderId'); bindSegs(el, st, refresh);
+    el.querySelector('#customLaps').oninput = refresh; refresh();
     el.querySelector('#go').onclick = () => {
       audio.click();
       const me = RIDER_BY_ID[st.riderId];
-      const order = ['desert', 'siam', 'lonestar', 'valle', 'tuscan', 'polder', 'saxon', 'albion', 'alpine', 'valles', 'kanto', 'southern', 'selangor', 'levante'];
-      const pick = st.rounds >= 14 ? order : order.filter((_, i) => i % Math.ceil(14 / st.rounds) === 0).concat(order).filter((v, i, a) => a.indexOf(v) === i).slice(0, st.rounds);
       const field = buildField(me, CURRENT_GRID).map(r => r.id);
-      const c = { version: 1, riderId: me.id, difficulty: st.difficulty, laps: st.laps, calendar: pick, round: 0, field, points: Object.fromEntries(field.map(id => [id, 0])), teamPoints: {}, results: [], created: Date.now() };
+      const c = { version: 2, riderId: me.id, difficulty: st.difficulty, ...season(), calendar: pickCal(), round: 0, field, points: Object.fromEntries(field.map(id => [id, 0])), teamPoints: {}, results: [], created: Date.now() };
       for (const id of field) c.teamPoints[riderTeamId(RIDER_BY_ID[id])] = 0;
       save.saveChampionship(c); this.champ();
     };
@@ -289,7 +302,9 @@ export class UI {
     const rs = standings(c.points); const champ = RIDER_BY_ID[rs[0][0]]; const myPos = rs.findIndex(x => x[0] === c.riderId) + 1;
     const el = this.show(`${this.header('SEASON COMPLETE')}
       <div class="center-col"><div class="trophy">🏆</div><h2>${esc(champ.name)} is World Champion</h2><p>You finished the season <b>P${myPos}</b> with ${c.points[c.riderId]} points.</p>
-      ${standTable(rs, c.riderId, (id) => esc(RIDER_BY_ID[id]?.name || id), (id) => riderTeamName(RIDER_BY_ID[id]))}
+      <p class="fine">${c.calendar.length} rounds · ${lapsLabel(c)} · Teams' champion: <b>${esc(teamLabel(standings(c.teamPoints)[0][0]))}</b></p>
+      <div class="champ-tables"><div>${standTable(rs, c.riderId, (id) => esc(RIDER_BY_ID[id]?.name || id), (id) => riderTeamName(RIDER_BY_ID[id]))}</div>
+      <div><h4>TEAMS</h4>${standTable(standings(c.teamPoints), riderTeamId(RIDER_BY_ID[c.riderId]), (id) => esc(teamLabel(id)))}</div></div>
       <div class="row"><button class="btn primary" id="new">NEW SEASON</button><button class="btn" data-back>MENU</button></div></div>`, 'setupscreen');
     el.querySelector('#new').onclick = () => { save.saveChampionship(null); this.champNew(); };
     el.querySelector('[data-back]').onclick = () => this.main();

@@ -43,9 +43,9 @@ await page.click('[data-seg=laps] [data-v="1"]'); await page.click('#go');
 const sp = await runRace('spectator', '09-spectator.png'); ok('spectator: no player bike', !sp.player);
 await page.click('#menu'); await page.waitForSelector('[data-go=quick]');
 
-// ---- Championship: 4 rounds x 2 laps, race round 1, check standings persist
+// ---- Championship: 4 rounds x 1 lap, race round 1, check standings persist
 await page.click('[data-go=champ]'); await page.waitForSelector('#go');
-await page.click('[data-seg=rounds] [data-v="4"]'); await page.click('[data-seg=laps] [data-v="2"]'); await page.click('#go');
+await page.click('[data-seg=rounds] [data-v="4"]'); await page.click('[data-seg=laps] [data-v="1"]'); await page.click('#go');
 await page.waitForSelector('.calr'); ok('championship: hub with calendar', (await page.$$('.calr')).length === 4);
 await page.click('#go'); await runRace('championship R1');
 await page.click('#next'); await page.waitForSelector('.calr', { timeout: 30000 });

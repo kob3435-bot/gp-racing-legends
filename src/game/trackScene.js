@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { toonify, addOutlines } from './toon.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { mulberry } from './trackgeom.js';
 import { THEMES } from './themes.js';
@@ -202,7 +203,7 @@ function treeGeometries() {
 
 // crowd people: instanced boxes with a shader that makes some of them jump / flash (one draw call per grandstand set)
 function crowdMaterial(timeU) {
-  const m = new THREE.MeshLambertMaterial({ color: '#ffffff' });
+  const m = new THREE.MeshLambertMaterial({ color: '#ffffff' }); m.userData.noToon = true;
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uTime = timeU;
     sh.vertexShader = 'uniform float uTime;\n' + sh.vertexShader
@@ -229,7 +230,7 @@ export function* trackSceneStages(geo, opts) {
   const hw = geo.halfW, N = geo.N;
   const wet = weather === 'LIGHT_RAIN' || weather === 'HEAVY_RAIN';
   const KERB = 1.3, RUNOFF = 16, WALL = hw + 21, PAVED = 5;
-  const PBR = q >= 1;
+  const PBR = false; // v3 toon: no PBR maps on any preset (and no noise normal-map generation at load)
   const timeU = { value: 0 };
 
   const absK = new Float32Array(N);
@@ -335,7 +336,7 @@ export function* trackSceneStages(geo, opts) {
   }
   gantry.position.set(geo.x[0], geo.y[0], geo.z[0]);
   gantry.rotation.y = Math.atan2(-geo.tx[0], -geo.tz[0]);
-  gantry.traverse(o => { if (o.isMesh) o.castShadow = q >= 2; });
+  gantry.traverse(o => { if (o.isMesh) { o.castShadow = q >= 2; o.userData.ink = true; } });
   group.add(gantry);
   yield { p: 0.3, label: 'Shaping the landscape' };
 
@@ -345,7 +346,7 @@ export function* trackSceneStages(geo, opts) {
   const yavg = ysum / N;
   const cx = (mnx + mxx) / 2, cz = (mnz + mxz) / 2;
   const M = 900; mnx -= M; mxx += M; mnz -= M; mxz += M;
-  const cell = q >= 2 ? 12 : q === 1 ? 16 : 20;
+  const cell = [34, 28, 22, 18][q]; // v3: flat toon terrain needs far fewer triangles
   const nx = Math.ceil((mxx - mnx) / cell) + 1, nz = Math.ceil((mxz - mnz) / cell) + 1;
   const H = 60, hash = new Map();
   for (let i = 0; i < N; i += 2) { const key = Math.floor(geo.x[i] / H) + ',' + Math.floor(geo.z[i] / H); if (!hash.has(key)) hash.set(key, []); hash.get(key).push(i); }
@@ -414,7 +415,7 @@ export function* trackSceneStages(geo, opts) {
   const TG = treeGeometries();
   const kinds = Object.entries(theme.trees);
   const wsum = kinds.reduce((a, [, w]) => a + w, 0);
-  const treeTotal = Math.round([260, 750, 1500, 2600][q] * theme.density);
+  const treeTotal = Math.round([200, 520, 950, 1400][q] * theme.density);
   const treeMat = new THREE.MeshLambertMaterial({ vertexColors: true });
   const dummy = new THREE.Object3D(); const tc = new THREE.Color();
   for (const [kind, w] of kinds) {
@@ -433,7 +434,7 @@ export function* trackSceneStages(geo, opts) {
       tc.setHSL(0.0, 0, 0.8 + rnd() * 0.4); tc.r *= 0.92 + rnd() * 0.16; im.setColorAt(placed, tc);
       placed++;
     }
-    im.count = placed; im.computeBoundingSphere(); group.add(im);
+    im.count = placed; im.computeBoundingSphere(); im.userData.ink = false; group.add(im); // trees: flat toon silhouettes, no ink (cost)
   }
   yield { p: 0.7, label: 'Filling the grandstands' };
 
@@ -461,6 +462,7 @@ export function* trackSceneStages(geo, opts) {
     const d = side * (WALL + 3);
     st.position.set(geo.x[i] + geo.rx[i] * d, geo.y[i] - 0.3, geo.z[i] + geo.rz[i] * d);
     st.rotation.y = Math.atan2(geo.rx[i] * side, geo.rz[i] * side);
+    st.traverse(o => { if (o.isMesh) o.userData.ink = true; });
     group.add(st); st.updateMatrixWorld(true);
     stands.push({ s: i * geo.ds, x: st.position.x, z: st.position.z });
     if (crowd) {
@@ -527,10 +529,37 @@ export function* trackSceneStages(geo, opts) {
     group.add(poles, heads);
   }
   yield { p: 0.85, label: 'Final checks' };
+  // ---- v3 anime pass: toon materials, merge static meshes per material (draw calls), ink outlines on key props ----
+  toonify(group);
+  staticMerge(group, new Set([ocean].filter(Boolean)));
+  if (q >= 1) addOutlines(group, { width: q >= 2 ? 1.8 : 1.5, minSize: 0.5, filter: (o) => o.userData.ink });
   return {
     group, lights, slots, stands, yBase: yavg, bounds: { mnx, mxx, mnz, mxz }, wall: WALL, kerb: KERB, runoff: RUNOFF, isCorner, absK,
     update(t) { timeU.value = t; if (ocean && ocean.material.normalMap) ocean.material.normalMap.offset.set(t * 0.004, t * 0.002); },
   };
+}
+
+// Bake world transforms and merge static meshes that share material + attribute layout into one draw.
+function staticMerge(group, skip) {
+  group.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(group.matrixWorld).invert(), mtx = new THREE.Matrix4();
+  const buckets = new Map();
+  group.traverse((o) => {
+    if (!o.isMesh || o.isInstancedMesh || skip.has(o) || o.userData.outline || Array.isArray(o.material) || o.material.transparent) return;
+    const g = o.geometry; const attrs = Object.keys(g.attributes).sort().join(',');
+    const key = [o.material.uuid, attrs, g.index ? 'i' : 'n', o.castShadow, o.receiveShadow, o.userData.ink ? 1 : 0, o.renderOrder, o.frustumCulled].join('|');
+    let b = buckets.get(key); if (!b) buckets.set(key, (b = [])); b.push(o);
+  });
+  for (const list of buckets.values()) {
+    if (list.length < 2) continue;
+    const geos = list.map(o => { mtx.multiplyMatrices(inv, o.matrixWorld); const g = o.geometry.clone(); g.applyMatrix4(mtx); return g; });
+    const merged = mergeGeometries(geos); if (!merged) continue;
+    merged.computeBoundingSphere();
+    const o0 = list[0], m = new THREE.Mesh(merged, o0.material);
+    m.castShadow = o0.castShadow; m.receiveShadow = o0.receiveShadow; m.renderOrder = o0.renderOrder; m.frustumCulled = o0.frustumCulled; m.userData.ink = o0.userData.ink;
+    for (const o of list) o.parent.remove(o);
+    group.add(m);
+  }
 }
 
 // Grid: rows of three, pole position on the inside of turn 1.

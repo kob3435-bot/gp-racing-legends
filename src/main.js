@@ -1,7 +1,7 @@
 import './style.css';
 import { Game } from './game/game.js';
 import { UI } from './ui/screens.js';
-import { RIDER_BY_ID } from './data/riders.js';
+import { RIDER_BY_ID, riderTeamId } from './data/riders.js';
 import { TRACKS } from './data/tracks.js';
 import * as save from './save.js';
 import { audio } from './game/audio.js';
@@ -48,9 +48,10 @@ class App {
         const c = save.loadChampionship(); if (!c || c.committedFor === c.round + ':' + sum.trackId) return;
         for (const r of sum.results) {
           c.points[r.riderId] = (c.points[r.riderId] || 0) + r.points;
-          const tid = (r.rider.team) || (r.rider.kind === 'legend' ? 'legend-' + r.rider.manufacturer : 'wildcard');
+          const tid = riderTeamId(r.rider);
           c.teamPoints[tid] = (c.teamPoints[tid] || 0) + r.points;
         }
+        c.committedFor = c.round + ':' + sum.trackId;
         c.results[c.round] = { winner: sum.results[0].riderId, myPos: me ? me.pos : null };
         c.round++;
         if (c.round >= c.calendar.length) {
@@ -71,6 +72,9 @@ class App {
     }
   }
 }
+
+// read-only data hooks for automated QA
+window.__gpData = { teamOf: (id) => riderTeamId(RIDER_BY_ID[id]), riderName: (id) => RIDER_BY_ID[id]?.name, trackCount: TRACKS.length };
 
 window.addEventListener('DOMContentLoaded', () => {
   try { window.app = new App(); }

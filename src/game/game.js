@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { TRACK_BY_ID } from '../data/tracks.js';
 import { riderLivery, riderTeamName, displayName, shortName } from '../data/riders.js';
 import { TEAM_BY_ID } from '../data/teams.js';
@@ -13,16 +12,18 @@ import { Input } from './input.js';
 import { audio } from './audio.js';
 import { Hud, fmtTime } from '../ui/hud.js';
 import { buildEnvironment } from './env.js';
+import { toonMat, toonify, addOutlines, blobTexture, setOutlineResolution } from './toon.js';
 import { Post, DynRes } from './post.js';
 import { FX, Confetti } from './fx.js';
 import { themeOf } from './themes.js';
 
 // lodNear: distance (m) within which bikes use the full model; fx: max particle-emitter distance
 export const PRESETS = {
-  LOW: { q: 0, pr: 0.75, shadow: 0, draw: 800, rain: 400, lines: 40, lodNear: 40, fx: 45 },
-  MEDIUM: { q: 1, pr: 1, shadow: 1024, draw: 1300, rain: 1000, lines: 60, lodNear: 70, fx: 80 },
-  HIGH: { q: 2, pr: 1.25, shadow: 2048, draw: 1900, rain: 1800, lines: 90, lodNear: 100, fx: 120 },
-  ULTRA: { q: 3, pr: 1.75, shadow: 4096, draw: 2600, rain: 2800, lines: 120, lodNear: 150, fx: 160 },
+  // v3 toon presets: hi = max full-detail bikes, ink = max bikes with ink outlines (nearest first), loInk = outlines on far LOD bikes
+  LOW: { q: 0, pr: 0.75, shadow: 0, draw: 800, rain: 300, lines: 40, lodNear: 22, hi: 3, ink: 1, loInk: false, fx: 40 },
+  MEDIUM: { q: 1, pr: 1, shadow: 0, draw: 1300, rain: 700, lines: 60, lodNear: 35, hi: 6, ink: 3, loInk: true, fx: 70 },
+  HIGH: { q: 2, pr: 1.25, shadow: 1024, draw: 1900, rain: 1200, lines: 90, lodNear: 55, hi: 9, ink: 6, loInk: true, fx: 110 },
+  ULTRA: { q: 3, pr: 1.5, shadow: 2048, draw: 2600, rain: 2000, lines: 120, lodNear: 80, hi: 12, ink: 10, loInk: true, fx: 150 },
 };
 const PRESET_ORDER = ['LOW', 'MEDIUM', 'HIGH', 'ULTRA'];
 const CAMS = ['chase', 'far', 'helmet', 'tv'];
@@ -54,14 +55,23 @@ function outlineSvg(def) {
   return `<svg viewBox="0 0 ${S} ${S}"><path d="${d}" fill="none" stroke="rgba(225,6,0,.35)" stroke-width="12" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>`;
 }
 
+// cheap contact shadow under each bike when the shadow map is off
+let _blobGeo = null, _blobMat = null;
+function bikeBlob() {
+  if (!_blobGeo) { _blobGeo = new THREE.PlaneGeometry(0.95, 2.3).rotateX(-Math.PI / 2); _blobMat = new THREE.MeshBasicMaterial({ map: blobTexture(), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }); _blobGeo.userData.cached = true; _blobMat.userData.cached = true; }
+  const m = new THREE.Mesh(_blobGeo, _blobMat); m.position.set(0, 0.03, 0.1); m.renderOrder = 1; m.userData.blob = true; return m;
+}
+
 export class Game {
   constructor(canvas, hudRoot, settings) {
     this.canvas = canvas; this.settings = settings;
     // AA comes from the post chain (MSAA render target / FXAA); LOW renders straight to the canvas without AA
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, stencil: false, powerPreference: 'high-performance' });
+    // v3 toon renderer: no post chain; context MSAA (cheap on real GPUs) gives clean ink lines; LOW drops to 0.75 px ratio
+    const lowEnd = (settings.graphics || 'HIGH') === 'LOW';
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !lowEnd, stencil: false, powerPreference: 'high-performance' });
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.0;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.NoToneMapping; // flat anime colours, no filmic curve
+    this.renderer.shadowMap.type = THREE.PCFShadowMap; // single hard-ish shadow map, HIGH+ only
     this.renderer.info.autoReset = false; // post passes would otherwise reset the per-frame counters
     this.camera = new THREE.PerspectiveCamera(62, 1, 0.1, 3000);
     this.input = new Input();
@@ -104,6 +114,7 @@ export class Game {
   resize() {
     const w = window.innerWidth, h = window.innerHeight;
     this.renderer.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
+    setOutlineResolution(w, h);
     this.post.resize();
     this.mobile = (navigator.maxTouchPoints > 0 && Math.min(w, h) < 820);
   }
@@ -115,52 +126,48 @@ export class Game {
     else this.renderer.render(scene, this.camera);
   }
 
-  // ---------------- menu showroom (studio with reflective floor + light strips) ----------------
+  // ---------------- menu showroom (anime stage: sunburst backdrop, toon floor, ink-outlined bike) ----------------
   buildShowroom() {
     const s = new THREE.Scene();
-    s.background = new THREE.Color('#090a0d');
-    s.fog = new THREE.Fog('#090a0d', 9, 26);
-    const pm = new THREE.PMREMGenerator(this.renderer);
-    this.studioEnv = pm.fromScene(new RoomEnvironment(), 0.04).texture; pm.dispose();
-    s.environment = this.studioEnv; s.environmentIntensity = 0.45;
-    s.add(new THREE.HemisphereLight('#ffffff', '#202024', 0.6));
-    const key = new THREE.DirectionalLight('#ffffff', 2.4); key.position.set(4, 7, 3); key.castShadow = true; key.shadow.mapSize.set(1024, 1024);
-    const sc = key.shadow.camera; sc.left = -3; sc.right = 3; sc.top = 3; sc.bottom = -3; sc.near = 1; sc.far = 20; key.shadow.bias = -0.0005; key.shadow.normalBias = 0.02;
-    s.add(key);
-    const rim = new THREE.DirectionalLight('#ff3020', 3.0); rim.position.set(-5, 2.5, -4); s.add(rim);
-    const rim2 = new THREE.DirectionalLight('#6aa8ff', 1.4); rim2.position.set(5, 1.5, -5); s.add(rim2);
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(14, 64), new THREE.MeshStandardMaterial({ color: '#101115', roughness: 0.22, metalness: 0.65 }));
-    floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; s.add(floor);
-    const table = new THREE.Mesh(new THREE.CylinderGeometry(2.25, 2.3, 0.06, 64), new THREE.MeshStandardMaterial({ color: '#17181d', roughness: 0.3, metalness: 0.8 }));
-    table.position.y = 0.03; table.receiveShadow = true; s.add(table);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(2.27, 0.018, 8, 96), new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 0.12, 0.05) }));
-    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.065; s.add(ring);
-    // overhead light strips (bloom + paint reflections)
-    for (let k = -1; k <= 1; k++) { const st = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.04, 0.12), new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 3, 3.2) })); st.position.set(0, 4.2, k * 1.1); s.add(st); }
-    const wall = new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 8, 64, 1, true), new THREE.MeshStandardMaterial({ color: '#0d0e12', roughness: 0.9, side: THREE.BackSide }));
-    wall.position.y = 4; s.add(wall);
-    for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; const b = new THREE.Mesh(new THREE.BoxGeometry(0.06, 5, 0.06), new THREE.MeshBasicMaterial({ color: new THREE.Color(k % 3 ? 1.2 : 3.5, k % 3 ? 1.2 : 0.15, k % 3 ? 1.3 : 0.08) })); b.position.set(Math.cos(a) * 10.8, 2.6, Math.sin(a) * 10.8); s.add(b); }
-    this.show = { scene: s, bike: null, rot: 0, t: 0, key };
+    s.background = new THREE.Color('#ffd25a');
+    // sunburst backdrop
+    const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
+    const gr = x.createRadialGradient(256, 256, 0, 256, 256, 360); gr.addColorStop(0, '#fff3c4'); gr.addColorStop(0.45, '#ffb340'); gr.addColorStop(1, '#ff4d5e');
+    x.fillStyle = gr; x.fillRect(0, 0, 512, 512);
+    x.fillStyle = 'rgba(255,255,255,0.22)';
+    for (let k = 0; k < 24; k++) { const a0 = k / 24 * Math.PI * 2; x.beginPath(); x.moveTo(256, 256); x.arc(256, 256, 400, a0, a0 + Math.PI / 24); x.fill(); }
+    const burstTex = new THREE.CanvasTexture(c); burstTex.colorSpace = THREE.SRGBColorSpace;
+    const burst = new THREE.Mesh(new THREE.CircleGeometry(16, 48), new THREE.MeshBasicMaterial({ map: burstTex, fog: false }));
+    burst.position.set(-1.2, 2.2, -9); s.add(burst);
+    s.add(new THREE.HemisphereLight('#fff6e8', '#b07aa0', 1.5));
+    const key = new THREE.DirectionalLight('#ffffff', 2.6); key.position.set(4, 7, 3); s.add(key);
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(30, 48), toonMat({ color: '#ffe3a3' }));
+    floor.rotation.x = -Math.PI / 2; s.add(floor);
+    const table = new THREE.Mesh(new THREE.CylinderGeometry(2.25, 2.3, 0.08, 48), toonMat({ color: '#2a2348' }));
+    table.position.y = 0.04; s.add(table); addOutlines(table, { width: 2.5 });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(2.27, 0.03, 6, 72), new THREE.MeshBasicMaterial({ color: '#ff3b5c' }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.085; s.add(ring);
+    const blob = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.3), new THREE.MeshBasicMaterial({ map: blobTexture(), transparent: true, depthWrite: false }));
+    blob.rotation.x = -Math.PI / 2; blob.position.y = 0.09; s.add(blob);
+    this.show = { scene: s, bike: null, rot: 0, t: 0, key, blob };
   }
   showroom(rider) {
     this.state = 'menu';
     const sh = this.show;
     if (this.post.scene !== sh.scene) this.post.setScene(sh.scene, this.camera);
-    this.renderer.toneMappingExposure = 1.0;
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = false;
     if (sh.riderId === rider?.id) return;
     if (sh.bike) sh.scene.remove(sh.bike.root);
     if (!rider) return;
     const team = TEAM_BY_ID[rider.team];
     sh.bike = createBike({ livery: riderLivery(rider), helmet: rider.helmet, number: rider.number, sponsor: team?.sponsor, detail: this.preset.q >= 1 ? 2 : 1 });
-    sh.bike.root.position.y = 0.06;
-    sh.bike.root.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    sh.bike.root.position.y = 0.08;
     sh.scene.add(sh.bike.root); sh.riderId = rider.id;
   }
   renderShowroom(dt) {
     const sh = this.show; sh.rot += dt * 0.32; sh.t += dt;
     if (sh.bike) {
-      sh.bike.root.rotation.y = sh.rot;
+      sh.bike.root.rotation.y = sh.rot; sh.blob.rotation.z = sh.rot;
       const lean = Math.sin(sh.t * 0.9) * 0.42;
       animateBike(sh.bike, { lean, accel: 0, v: 4, dt, near: true });
     }
@@ -171,7 +178,7 @@ export class Game {
     this.camera.fov = 40; this.camera.updateProjectionMatrix();
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(narrow ? 0 : -1.15, 0.62, 0);
-    if (this.post.enabled) this.post.setLook({ bloom: 0.28, vignette: 0.4, saturation: 1.05, contrast: 1.05 });
+    if (this.post.enabled) this.post.setLook({ lines: 0, flash: 0 });
     this.render(dt);
   }
 
@@ -228,7 +235,7 @@ export class Game {
     for (let k = 0; k < race.entrants.length; k++) {
       const e = race.entrants[k], team = TEAM_BY_ID[e.rider.team];
       const m = createBike({ livery: riderLivery(e.rider), helmet: e.rider.helmet, number: e.rider.number, sponsor: team?.sponsor, detail, tyre: e.tire });
-      if (p.shadow === 0) m.root.traverse(o => { if (o.isMesh) o.castShadow = false; });
+      if (p.shadow === 0) { m.root.traverse(o => { if (o.isMesh) o.castShadow = false; }); m.root.add(bikeBlob()); }
       scene.add(m.root); bikes.push(m);
       if (k % 4 === 3) { ld.set(0.68 + 0.2 * k / race.entrants.length, 'Rolling out the bikes'); await nextFrame(); if (!alive()) { env.dispose(); return; } }
     }
@@ -359,13 +366,13 @@ export class Game {
     if (this.scene) {
       const seen = new Set();
       this.scene.traverse((o) => {
-        if (o.geometry) o.geometry.dispose();
+        if (o.geometry && !o.geometry.userData.cached) o.geometry.dispose();
         if (o.material) {
           const ms = Array.isArray(o.material) ? o.material : [o.material];
           for (const m of ms) {
             if (seen.has(m)) continue; seen.add(m);
             for (const k of ['map', 'normalMap', 'roughnessMap', 'emissiveMap']) { const t = m[k]; if (t && !t.userData.cached) t.dispose(); }
-            m.dispose();
+            if (!m.userData.cached) m.dispose();
           }
         }
       });
@@ -480,6 +487,7 @@ export class Game {
           const o = ev.other, nm = o ? shortName(o.rider) : '';
           if (ev.to < ev.from) {
             const clean = race.t - this.lastContactT > 2.5, close = o && Math.abs(race.player.d - o.d) < 1.35;
+            this.flash = Math.max(this.flash, 0.32);
             hud.pop(`OVERTAKE · P${ev.to}`, 'green', o ? `${close && clean ? 'CLOSE PASS' : clean ? 'CLEAN PASS' : 'PASSED'} ON ${nm}` : '', 1.8);
             if (this.crowdNear > 0.3) audio.cheer(0.8);
           } else hud.note(`P${ev.to}  ▼${ev.to - ev.from}${nm ? ' · ' + nm : ''}`, 'red', 1.6);
@@ -500,11 +508,11 @@ export class Game {
           break;
         }
         case 'crash':
-          if (ev.e.isPlayer) { hud.note(ev.kind === 'HIGHSIDE' ? 'HIGHSIDE!' : 'CRASH! (R to reset)', 'red', 2.5); audio.thud(0.6); this.shake = 1; }
+          if (ev.e.isPlayer) { hud.note(ev.kind === 'HIGHSIDE' ? 'HIGHSIDE!' : 'CRASH! (R to reset)', 'red', 2.5); audio.thud(0.6); this.shake = 1; this.flash = 0.8; }
           else if (Math.abs(ev.e.s - focus.s) < 400 || ev.e.pos <= 5) hud.note(`${ev.e.rider.name.toUpperCase()} IS DOWN!`, 'red', 2.5);
           { const m = this.bikes[ev.e.idx]; if (m && this.fx && m.root.visible) this.fx.burst(m.root.position, this.theme.sand ? [0.75, 0.62, 0.45] : [0.55, 0.5, 0.42], 26); }
           break;
-        case 'bump': case 'contact': audio.thud(0.25); this.shake = 0.5; this.lastContactT = race.t; break;
+        case 'bump': case 'contact': audio.thud(0.25); this.shake = 0.5; this.lastContactT = race.t; if (ev.e && ev.e.isPlayer || ev.a?.isPlayer || ev.b?.isPlayer) this.flash = Math.max(this.flash, 0.45); break;
       }
     }
     if (race.phase === 'lights') this.ts.lights.forEach((l, i) => { if (i < race.lightsOn) l.color.setRGB(7, 0.25, 0.12); else l.color.set('#2a0000'); });
@@ -546,8 +554,9 @@ export class Game {
       const b = new THREE.Mesh(new THREE.BoxGeometry(2.4, H[k], 2.2), stepMat); b.position.set(X[k], H[k] / 2, 0); b.castShadow = b.receiveShadow = true; g.add(b);
       const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.7), new THREE.MeshBasicMaterial({ map: numTex(String(k + 1)) })); pl.position.set(X[k], H[k] / 2, 1.111); g.add(pl);
     }
-    const back = new THREE.Mesh(new THREE.BoxGeometry(9.5, 4.2, 0.2), new THREE.MeshStandardMaterial({ map: (() => { const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 448; const x = cv.getContext('2d'); x.fillStyle = '#0b0d12'; x.fillRect(0, 0, 1024, 448); for (let i = 0; i < 4; i++) for (let j = 0; j < 8; j++) { x.fillStyle = (i + j) % 2 ? '#e10600' : '#ffd400'; x.font = 'italic 900 30px Arial'; x.fillText(['NOVARA ENERGY', 'GP LEGENDS', 'TIDECORE OIL', 'KITE WATCHES'][(i + j) % 4], j * 128 - (i % 2) * 64, 70 + i * 110); } const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; })(), roughness: 0.6 }));
+    const back = new THREE.Mesh(new THREE.BoxGeometry(9.5, 4.2, 0.2), new THREE.MeshStandardMaterial({ map: (() => { const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 448; const x = cv.getContext('2d'); x.fillStyle = '#0b0d12'; x.fillRect(0, 0, 1024, 448); for (let i = 0; i < 4; i++) for (let j = 0; j < 6; j++) { x.fillStyle = (i + j) % 2 ? '#ff3d7f' : '#ffd23f'; x.font = 'italic 900 30px Arial'; x.fillText(['NOVARA ENERGY', 'GP LEGENDS', 'TIDECORE OIL', 'KITE WATCHES'][(i + j) % 4], j * 240 - (i % 2) * 120, 70 + i * 110); } const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; })(), roughness: 0.6 }));
     back.position.set(0, 2.1, -1.6); g.add(back);
+    toonify(g); addOutlines(g, { width: 2.4, minSize: 0.6 });
     this.scene.add(g); g.updateMatrixWorld(true);
     const top = race.order.slice(0, 3);
     this.bikes.forEach(m => { m.root.visible = false; });
@@ -620,6 +629,11 @@ export class Game {
     const camP = this.camera.position, p = this.preset;
     const drawSq = (p.draw * 0.55) ** 2, lodSq = p.lodNear * p.lodNear, fxSq = p.fx * p.fx;
     const E = race.entrants;
+    // rank bikes by camera distance: only the nearest few get the full model / ink outlines
+    const dq = this._dq || (this._dq = new Float64Array(E.length)), dqs = this._dqs || (this._dqs = new Float64Array(E.length));
+    for (let k = 0; k < E.length; k++) { toWorld(geo, E[k].s, E[k].d, tmp); dq[k] = (tmp.x - camP.x) ** 2 + (tmp.z - camP.z) ** 2; dqs[k] = dq[k]; }
+    dqs.sort();
+    const hiCut = Math.min(lodSq, dqs[Math.min(E.length, p.hi) - 1] ?? 0), inkCut = p.ink ? dqs[Math.min(E.length, p.ink) - 1] : -1;
     for (let k = 0; k < E.length; k++) {
       const e = E[k], m = this.bikes[k];
       let s = e.s, d = e.d, psi = e.psi, lean = e.lean;
@@ -632,8 +646,9 @@ export class Game {
       const visible = dsq < drawSq;
       m.root.visible = visible;
       if (!visible) { m.lastGear = e.gear; continue; }
-      const near = dsq < lodSq || e === this.focus;
+      const near = dq[k] <= hiCut || e === this.focus;
       m.setLOD(near ? 0 : 1);
+      m.setInk(dq[k] <= inkCut || e === this.focus, p.loInk);
       const brk = e.brake || (e.accel < -4 ? Math.min(1, -e.accel / 12) : 0);
       animateBike(m, { lean: e.crashT > 0 ? 0 : lean, accel: e.accel, v: e.v, dt, crashed: e.crashT > 0, brake: brk, near });
       if (dsq < fxSq) this.bikeFx(e, m, dt, k, lean, dsq);
@@ -759,8 +774,8 @@ export class Game {
     crit(cs, 'fov', fovT, mode === 'tv' ? 6 : 3, dt);
     cam.fov = cs.fov; cam.updateProjectionMatrix();
     // speed lines
-    const op = mode === 'tv' ? 0 : Math.max(0, Math.min(0.32, (v - 55) / 80));
-    this.speedLines.material.opacity = op;
+    const op = 0; this.speedLines.material.opacity = 0; // 3D lines replaced by the anime screen overlay
+    this._lines = mode === 'tv' ? 0 : Math.max(0, Math.min(0.85, (v - 58) / 32));
     if (op > 0) {
       const pa = this.speedLines.geometry.attributes.position, sd = this.slData;
       for (let i = 0; i < sd.length; i++) { const s = sd[i]; s.z += v * dt * 0.9; if (s.z > -1) s.z = -30; pa.setXYZ(i * 2, s.x, s.y, s.z); pa.setXYZ(i * 2 + 1, s.x, s.y, s.z - s.len * (v / 60)); }
@@ -774,7 +789,7 @@ export class Game {
     o.speed = blur; o.time = this.time; o.haze = sunny && (this.theme.sand || this.theme.sky.turbidity > 6) ? 1 : sunny ? 0.5 : 0;
     o.vignette = 0.28 + sp * 0.16; o.saturation = this.wet ? 0.9 : this.night ? 1.04 : 1.1; o.contrast = this.wet ? 1.02 : 1.07;
     if (this.night) o.tint.set(0.96, 0.98, 1.05); else if (this.wet) o.tint.set(0.96, 0.99, 1.03); else if (sunny) o.tint.set(1.03, 1.0, 0.95); else o.tint.set(1, 1, 1);
-    o.bloom = this.night ? 0.55 : sunny ? 0.18 : 0.26; o.flash = this.flash || 0;
+    o.bloom = 0; o.flash = this.flash || 0; o.lines = this._lines || 0;
     return o;
   }
 

@@ -90,3 +90,22 @@ export const TRACKS = [
   },
 ];
 export const TRACK_BY_ID = Object.fromEntries(TRACKS.map(t => [t.id, t]));
+
+// Season calendar: every circuit in the database, in a realistic order through the year
+// (night opener in the desert, Asian/American flyaways in spring, the European summer, autumn overseas swing, Spanish finale).
+export const CALENDAR = [
+  { id: 'desert', month: 'MAR' }, { id: 'siam', month: 'MAR' }, { id: 'lonestar', month: 'APR' }, { id: 'valle', month: 'APR' },
+  { id: 'tuscan', month: 'MAY' }, { id: 'valles', month: 'MAY' }, { id: 'polder', month: 'JUN' }, { id: 'saxon', month: 'JUL' },
+  { id: 'albion', month: 'AUG' }, { id: 'alpine', month: 'AUG' }, { id: 'kanto', month: 'SEP' }, { id: 'southern', month: 'OCT' },
+  { id: 'selangor', month: 'OCT' }, { id: 'levante', month: 'NOV' },
+];
+// any track added later without a calendar slot still gets raced (appended before the finale)
+for (const t of TRACKS) if (!CALENDAR.some(c => c.id === t.id)) CALENDAR.splice(CALENDAR.length - 1, 0, { id: t.id, month: 'OCT' });
+export const MONTH_OF = Object.fromEntries(CALENDAR.map(c => [c.id, c.month]));
+// realistic Grand Prix race distance (~110-120 km)
+export function realLaps(t) { return Math.max(18, Math.min(30, Math.round(118000 / t.length))); }
+export function seasonLaps(season, trackId) {
+  if (season.lapsMode === 'REAL') return trackId ? realLaps(TRACK_BY_ID[trackId]) : 0;
+  return Math.max(1, Math.min(99, Math.round(+season.laps || 3)));
+}
+export function lapsLabel(season) { return season.lapsMode === 'REAL' ? 'realistic race distance' : `${seasonLaps(season)} lap${seasonLaps(season) === 1 ? '' : 's'} per race`; }

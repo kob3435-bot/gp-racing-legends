@@ -3,9 +3,10 @@ import { effective, speedProfile, lapTimeOf, accelAt, linePenalty, G, TIRES, aut
 import { lerpArr, mulberry } from './trackgeom.js';
 
 const CONTROL = {
-  SEMI: { assistMu: 0.985, assistDecel: 0.97, follow: 0.78, align: 2.4, auto: true, crash: false, pull: 0 },
-  FULL: { assistMu: 0.975, assistDecel: 0.96, follow: 0.94, align: 3.2, auto: true, crash: false, pull: 0.55 },
-  MANUAL: { assistMu: 1, assistDecel: 1, follow: 0.72, align: 1.6, auto: false, crash: true, pull: 0 },
+  // follow: share of the road curvature the bike tracks on its own (the rest needs rider input); resp: heading response (1/s)
+  SEMI: { assistMu: 0.985, assistDecel: 0.97, follow: 0.6, resp: 9, auto: true, crash: false, pull: 0 },
+  FULL: { assistMu: 0.975, assistDecel: 0.96, follow: 0.82, resp: 9, auto: true, crash: false, pull: 0.5 },
+  MANUAL: { assistMu: 1, assistDecel: 1, follow: 0.45, resp: 8, auto: false, crash: true, pull: 0 },
 };
 const GEAR_SPLIT = [0.38, 0.53, 0.66, 0.78, 0.89, 1.0];
 const IDLE = 3500, REDLINE = 17500;
@@ -307,17 +308,31 @@ export class Race {
     const latMax = p.mu * G * surf;
     // assisted modes keep a stability margin so the rider can still tighten the line at the limit
     const steerLat = latMax * (ctl.auto ? 1.12 : 1.0);
-    // steering
+    // ---- steering v3: short linear ramp (~0.1 s to full lock), fast return to centre, no heavy smoothing ----
     const target = Math.max(-1, Math.min(1, input.steer || 0));
-    const rate = input.analog ? 14 : (Math.abs(target) > Math.abs(e.steer) ? 4.2 : 7);
-    e.steer += (target - e.steer) * Math.min(1, rate * dt);
-    const vv = Math.max(6, e.v);
-    const steerK = e.steer * Math.min(latMax * 0.95 / (vv * vv), 0.085);
-    let yawDes = e.v * (ctl.follow * kp + steerK);
-    if (ctl.pull) { const la = (i + Math.round(Math.max(12, e.v * 0.6) / geo.ds)) % N; yawDes += e.v * ctl.pull * 0.012 * (geo.lineD[la] - e.d) * (1 - Math.abs(e.steer)); }
-    let yaw = yawDes, over = 1;
-    const demand = Math.abs(yawDes * e.v);
-    if (demand > steerLat && e.v > 1) { over = demand / steerLat; yaw = Math.sign(yawDes) * steerLat / e.v; }
+    if (input.analog) e.steer += (target - e.steer) * Math.min(1, 20 * dt);
+    else {
+      const dl = target - e.steer, building = target !== 0 && Math.sign(target) === Math.sign(e.steer || target) && Math.abs(target) >= Math.abs(e.steer);
+      e.steer += Math.sign(dl) * Math.min(Math.abs(dl), (building ? 10 : 14) * dt);
+    }
+    const vv = Math.max(4, e.v);
+    // full lock = relative heading worth ~6.5 m/s of lateral speed (capped at low speed)
+    const psiMax = Math.min(0.45, 6.5 / vv);
+    let psiT = e.steer * psiMax;
+    // FULL assist: gentle nudge towards the line only while the rider is not steering (never overrides input)
+    if (ctl.pull && Math.abs(e.steer) < 0.15) { const la = (i + Math.round(Math.max(12, e.v * 0.6) / geo.ds)) % N; psiT += Math.max(-0.035, Math.min(0.035, ctl.pull * 0.02 * (geo.lineD[la] - e.d))); }
+    // soft push-back beyond the kerb in assisted modes (no snapping)
+    const softEdge = geo.halfW + 1.3;
+    if (ctl.auto && absd > softEdge) psiT -= Math.sign(e.d) * Math.min(0.12, (absd - softEdge) * 0.035);
+    // heading relative to the road follows the target quickly; the un-followed share of curvature drifts the bike wide
+    let dpsiDes = ctl.resp * (psiT - e.psi) - (1 - ctl.follow) * kp * e.v * Math.cos(e.psi);
+    const roadYaw = kp * e.v * Math.cos(e.psi);
+    let yaw = dpsiDes + roadYaw, over = 1;
+    const demand = Math.abs(yaw * e.v);
+    if (demand > steerLat && e.v > 1) { over = demand / steerLat; yaw = Math.sign(yaw) * steerLat / e.v; }
+    // auto speed scrubs only when the rider is asking to turn INTO a corner beyond the grip (so holding the key makes it)
+    const intoCorner = Math.abs(kp) > 1 / 700 && Math.sign(e.steer) === Math.sign(kp) && Math.abs(e.steer) > 0.4;
+    const overAuto = intoCorner ? Math.max(1, Math.abs(kp) * e.v * e.v / (steerLat * 0.95)) : 1;
     // manual: overcooked -> lowside
     if (ctl.crash) {
       // overcooked: crash only when clearly faster (>12%) than the safe speed for this point of the corner given the
@@ -333,10 +348,10 @@ export class Race {
       if (e.brake > 0.85 && latUseNow > 0.85 && leanDeg > 38 && e.v > 20) { e.frontT = (e.frontT || 0) + dt; if (e.frontT > 0.35) return this.crashPlayer(e, 'LOWSIDE', 'front'); } else e.frontT = Math.max(0, (e.frontT || 0) - dt);
       if (e.throttle > 0.95 && leanDeg > 47 && e.gear <= 3 && e.v > 15 && e.v < 45) { e.hsT = (e.hsT || 0) + dt; if (e.hsT > 0.35) return this.crashPlayer(e, 'HIGHSIDE'); } else e.hsT = 0;
     }
-    const dpsi = yaw - kp * e.v * Math.cos(e.psi) - ctl.align * e.psi * Math.min(1, e.v / 12);
+    const dpsi = yaw - roadYaw;
     e.psi += dpsi * dt;
     e.psi = Math.max(-0.9, Math.min(0.9, e.psi));
-    e.yaw = dpsi + kp * e.v;
+    e.yaw = yaw;
     // longitudinal
     e.draft = this.draftFor(e);
     const vTopEff = p.vTop * (1 + 0.032 * e.draft);
@@ -345,9 +360,9 @@ export class Race {
     let a = 0;
     const launch = raceT < 3 ? p.launch : 1;
     if (ctl.auto) {
-      const vt = this.autoTarget(e, i, over, off);
+      const vt = this.autoTarget(e, i, overAuto, off);
       e.autoTarget = vt;
-      if (e.v > vt + 0.2) { e.brake = Math.min(1, (e.v - vt) / 4); e.throttle = 0; a = -p.decel * Math.max(0.35, e.brake) * Math.min(1, 0.45 + circle); }
+      if (e.v > vt + 0.2) { e.brake = Math.min(1, (e.v - vt) / 4); e.throttle = 0; a = -p.decel * Math.max(0.35, e.brake) * Math.min(1, 0.72 + circle); }
       else { e.brake = 0; e.throttle = Math.min(1, (vt - e.v) / 2 + 0.2); a = accelAt({ a0: p.a0, vTop: vTopEff }, e.v) * circle * launch * (e.shiftCut > 0 ? 0.3 : 1); a = Math.min(a, (vt - e.v) / dt); }
     } else {
       e.throttle = input.throttle || 0; e.brake = input.brake || 0;
@@ -369,7 +384,8 @@ export class Race {
     if (Math.abs(e.d) > this.wallD - 0.6) {
       e.d = Math.sign(e.d) * (this.wallD - 0.6);
       if (ctl.crash && e.v > 22) return this.crashPlayer(e, 'BARRIER');
-      e.psi *= -0.25; e.v *= 0.62; this.events.push({ type: 'bump', e });
+      if (ctl.auto) { e.psi = -Math.sign(e.d) * 0.04; e.v *= 0.85; } else { e.psi *= -0.25; e.v *= 0.62; }
+      this.events.push({ type: 'bump', e });
     }
     const leanT = Math.atan(e.yaw * e.v / G);
     e.lean = Math.max(-1.08, Math.min(1.08, leanT));

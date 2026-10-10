@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { toonify, addOutlines, toonMat } from './toon.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 // Procedural GP bike + rider (v2). Local frame: forward = -Z, up = +Y, right = +X; ground contact at y = 0.
@@ -133,11 +134,18 @@ function tyreGeometry(halfW, seg, detail) {
 function limbGeo(r0, r1, len, seg) { const g = new THREE.CylinderGeometry(r1, r0, len, seg, 1); const cap = new THREE.SphereGeometry(r0, seg, Math.max(3, seg / 2)); cap.translate(0, -len / 2, 0); const cap2 = new THREE.SphereGeometry(r1, seg, Math.max(3, seg / 2)); cap2.translate(0, len / 2, 0); return mergeGeometries([g.toNonIndexed(), cap.toNonIndexed(), cap2.toNonIndexed()]); }
 const T = (g, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, s = null) => { g.applyMatrix4(new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), s || new THREE.Vector3(1, 1, 1))); return g; };
 function clean(g) { let n = g.index ? g.toNonIndexed() : g; for (const k of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(k)) n.deleteAttribute(k); if (!n.attributes.uv) n.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(n.attributes.position.count * 2), 2)); if (!n.attributes.normal) n.computeVertexNormals(); return n; }
+// v3: untextured opaque parts are baked into ONE vertex-coloured toon mesh (1 draw instead of 1 per colour);
+// textured / transparent parts keep their own material
+function bakeColor(g, color) { const c = new THREE.Color(color), n = g.attributes.position.count, a = new Float32Array(n * 3); for (let i = 0; i < n; i++) { a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; } g.setAttribute('color', new THREE.BufferAttribute(a, 3)); return g; }
 function mergeByMaterial(parts, shadow = true) {
-  const groups = new Map();
-  for (const p of parts) { if (!groups.has(p.mat)) groups.set(p.mat, []); groups.get(p.mat).push(clean(p.geo)); }
+  const groups = new Map(), baked = [];
+  for (const p of parts) {
+    if (!p.mat.map && !p.mat.transparent) { baked.push(bakeColor(clean(p.geo), p.mat.color)); continue; }
+    if (!groups.has(p.mat)) groups.set(p.mat, []); groups.get(p.mat).push(clean(p.geo));
+  }
   const out = [];
-  for (const [m, gs] of groups) { const mesh = new THREE.Mesh(mergeGeometries(gs, false), m); mesh.castShadow = shadow; out.push(mesh); }
+  if (baked.length) { const mesh = new THREE.Mesh(mergeGeometries(baked, false), toonMat({ vertexColors: true, rim: 0.55 })); mesh.castShadow = shadow; mesh.userData.ink = true; out.push(mesh); }
+  for (const [m, gs] of groups) { const mesh = new THREE.Mesh(mergeGeometries(gs, false), m); mesh.castShadow = shadow; mesh.userData.ink = true; out.push(mesh); }
   return out;
 }
 function tube(points, r, seg, radial) { const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p))); return new THREE.TubeGeometry(curve, seg, r, radial, false); }
@@ -154,7 +162,7 @@ const SCREEN = [[-0.95, 0.865, 0.1, 0.045, 0.01], [-0.8, 0.905, 0.15, 0.07, 0.01
 
 export function createBike({ livery, helmet, number, sponsor, detail = 1, tyre = 'MEDIUM' }) {
   const D = detail;
-  const seg = D >= 2 ? 28 : D === 1 ? 18 : 10;
+  const seg = D >= 2 ? 20 : D === 1 ? 14 : 8; // v3: toon ramps hide facets, fewer segments
   const root = new THREE.Group();
   const lean = new THREE.Group(); root.add(lean);
   const wheelie = new THREE.Group(); wheelie.position.z = REAR_Z; lean.add(wheelie);
@@ -215,8 +223,9 @@ export function createBike({ livery, helmet, number, sponsor, detail = 1, tyre =
   const scr = new THREE.Mesh(loft(SCREEN, D >= 1 ? 20 : 10, { from: 0.28, to: 0.72 }), cScreen); scr.renderOrder = 3; hi.add(scr);
   // number plates
   const numMat = D === 0 ? new THREE.MeshLambertMaterial({ map: numberTexture(number), transparent: true }) : new THREE.MeshStandardMaterial({ map: numberTexture(number), transparent: true, roughness: 0.4 });
-  const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 0.15), numMat); plate.position.set(0, 0.85, -0.985); plate.rotation.set(-0.5, Math.PI, 0); hi.add(plate);
-  for (const sx of [-1, 1]) { const tp = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.13), numMat); tp.position.set(sx * 0.118, 0.955, 0.66); tp.rotation.y = sx * Math.PI / 2; tp.rotation.z = sx * 0.12; hi.add(tp); }
+  { const pg = [T(new THREE.PlaneGeometry(0.18, 0.15), 0, 0.85, -0.985, -0.5, Math.PI, 0)];
+    for (const sx of [-1, 1]) { const g = new THREE.PlaneGeometry(0.16, 0.13); g.rotateZ(sx * 0.12); g.rotateY(sx * Math.PI / 2); g.translate(sx * 0.118, 0.955, 0.66); pg.push(g); }
+    hi.add(new THREE.Mesh(mergeGeometries(pg.map(clean)), numMat)); }
 
   // wheels
   const mkWheel = (front) => {
@@ -239,7 +248,7 @@ export function createBike({ livery, helmet, number, sponsor, detail = 1, tyre =
   const calipers = [];
   for (const dx of [-0.065, 0.065]) calipers.push({ geo: T(new THREE.BoxGeometry(0.03, 0.09, 0.05), dx * 1.25, R + 0.12, FRONT_Z + 0.06, -0.5), mat: cGold });
   calipers.push({ geo: T(new THREE.BoxGeometry(0.03, 0.06, 0.04), -0.09, R + 0.08, REAR_Z - 0.05), mat: cGold });
-  for (const m of mergeByMaterial(calipers, false)) hi.add(m);
+  for (const m of mergeByMaterial(calipers, false)) { m.userData.ink = false; hi.add(m); }
 
   // ---------------- rider ----------------
   const suitMat = D === 0 ? new THREE.MeshLambertMaterial({ map: suitTexture(livery, number) }) : new THREE.MeshStandardMaterial({ map: suitTexture(livery, number), roughness: 0.62, metalness: 0.05 });
@@ -255,11 +264,11 @@ export function createBike({ livery, helmet, number, sponsor, detail = 1, tyre =
   }
   const head = new THREE.Group(); hi.add(head);
   { const hm = new THREE.Mesh(new THREE.SphereGeometry(0.145, D >= 2 ? 26 : 16, D >= 2 ? 18 : 10), D === 0 ? new THREE.MeshLambertMaterial({ map: helmetTexture(helmet, number) }) : new THREE.MeshPhysicalMaterial({ map: helmetTexture(helmet, number), roughness: 0.25, clearcoat: D >= 2 ? 1 : 0, clearcoatRoughness: 0.08 }));
-    hm.scale.set(1, 0.98, 1.12); hm.rotation.y = Math.PI / 2; hm.castShadow = true; head.add(hm);
-    const chin = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8), hm.material); chin.scale.set(1.05, 0.7, 1.0); chin.position.set(0, -0.07, -0.07); head.add(chin);
-    const visor = new THREE.Mesh(new THREE.SphereGeometry(0.149, 18, 8, Math.PI * 1.18, Math.PI * 0.64, Math.PI * 0.34, Math.PI * 0.26), D === 0 ? new THREE.MeshLambertMaterial({ color: '#0d0f16' }) : new THREE.MeshStandardMaterial({ color: '#202a3a', roughness: 0.03, metalness: 1, envMapIntensity: 1.4 }));
-    visor.scale.set(1, 0.98, 1.12); head.add(visor);
-    const spoiler = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.025, 0.08), mat('paint', helmet[1], D)); spoiler.position.set(0, 0.11, 0.14); spoiler.rotation.x = 0.35; head.add(spoiler);
+    { const sg = hm.geometry; sg.rotateY(Math.PI / 2); sg.scale(1, 0.98, 1.12); const cg = new THREE.SphereGeometry(0.11, 10, 6); cg.scale(1.05, 0.7, 1.0); cg.translate(0, -0.07, -0.07); hm.geometry = mergeGeometries([clean(sg), clean(cg)]); }
+    hm.castShadow = true; head.add(hm);
+    const vg = new THREE.SphereGeometry(0.149, 16, 6, Math.PI * 1.18, Math.PI * 0.64, Math.PI * 0.34, Math.PI * 0.26); vg.scale(1, 0.98, 1.12);
+    const spg = new THREE.BoxGeometry(0.13, 0.025, 0.08); spg.rotateX(0.35); spg.translate(0, 0.11, 0.14);
+    const vis = new THREE.Mesh(mergeGeometries([bakeColor(clean(vg), '#141a2e'), bakeColor(clean(spg), helmet[1])]), toonMat({ vertexColors: true, rim: 0.8 })); vis.userData.ink = false; head.add(vis);
   }
   // limbs: [upperArmL, foreArmL, upperArmR, foreArmR, thighL, shinL, thighR, shinR]
   const L = { ua: 0.29, fa: 0.3, th: 0.43, sh: 0.44 };
@@ -269,9 +278,12 @@ export function createBike({ livery, helmet, number, sponsor, detail = 1, tyre =
   for (let s = 0; s < 2; s++) { mkLimb(L.th, 0.078, 0.06, limbMat); mkLimb(L.sh, 0.056, 0.045, limbMat); }
   // gloves, boots, knee sliders (follow the limb ends)
   const extras = [];
-  for (let s = 0; s < 2; s++) { const g = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.05, 0.1), bootMat); hi.add(g); extras.push(g); }
-  for (let s = 0; s < 2; s++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.09, 0.22), bootMat); b.castShadow = D >= 1; hi.add(b); extras.push(b); }
-  for (let s = 0; s < 2; s++) { const k = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.1), mat('plastic', '#e9e9e9', D)); hi.add(k); extras.push(k); }
+  // (gloves, boots, knee sliders: separate animated parts, only at the top detail level to save draws)
+  if (D >= 2) {
+    for (let s = 0; s < 2; s++) { const g = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.05, 0.1), bootMat); hi.add(g); extras.push(g); }
+    for (let s = 0; s < 2; s++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.09, 0.22), bootMat); b.castShadow = true; hi.add(b); extras.push(b); }
+    for (let s = 0; s < 2; s++) { const k = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.1), mat('plastic', '#e9e9e9', D)); hi.add(k); extras.push(k); }
+  }
 
   // ---------------- far LOD (single draw) ----------------
   const lo = new THREE.Group(); body.add(lo); lo.visible = false;
@@ -287,12 +299,22 @@ export function createBike({ livery, helmet, number, sponsor, detail = 1, tyre =
     lo.add(m);
   }
 
+  // ---------------- anime look: toon ramps, rim light on bike+rider, ink outlines ----------------
+  toonify(hi, { rim: 0.55 }); toonify(lo, { rim: 0.4 });
+  // ink only on the big silhouettes: baked bodywork, livery, wheels, torso, helmet, limbs
+  limbs.forEach(l => { l.userData.ink = true; }); torso.traverse(o => { if (o.isMesh) o.userData.ink = true; }); head.children[0].userData.ink = true;
+  addOutlines(hi, { width: D >= 2 ? 2.2 : 1.9, minSize: 0.05, filter: o => o.userData.ink });
+  addOutlines(lo, { width: 1.6 });
+  hi.traverse(o => { if (o.isMesh) o.receiveShadow = false; });
   const bike = {
     root, lean, wheelie, body, hi, lo, front, rear, head, torso, limbs, extras, exhaust, detail: D,
     anim: { lean: 0, leanV: 0, pitch: 0, pitchV: 0, hang: 0, hangV: 0, tuck: 0.8, tuckV: 0, spin: 0, look: 0, lookV: 0, lod: 0 },
     knee: [new THREE.Vector3(), new THREE.Vector3()], // world-space knee slider positions (for sparks)
     setLOD(level) { if (this.anim.lod === level) return; this.anim.lod = level; hi.visible = level === 0; lo.visible = level === 1; },
+    hulls: [], loHulls: [], ink: true, loInk: true,
+    setInk(on, loOn = on) { if (on !== this.ink) { this.ink = on; for (const h of this.hulls) h.visible = on; } if (loOn !== this.loInk) { this.loInk = loOn; for (const h of this.loHulls) h.visible = loOn; } },
   };
+  hi.traverse(o => { if (o.userData.outline) bike.hulls.push(o); }); lo.traverse(o => { if (o.userData.outline) bike.loHulls.push(o); });
   poseRider(bike, 0, 0.8, 0, 0); // initial pose
   return bike;
 }
@@ -358,7 +380,7 @@ function poseRider(m, hang, tuck, look, brake, celebrate = 0) {
     P.pole.set(sx * (0.8 + inside * 0.8), -0.6 - inside * 0.4 + celebrate * 0.5, 0.2);
     ik(P.sh[s], P.hand[s], 0.29, 0.3, P.pole, P.elbow);
     setLimb(m.limbs[s * 2], P.sh[s], P.elbow); setLimb(m.limbs[s * 2 + 1], P.elbow, P.hand[s]);
-    m.extras[s].position.copy(P.hand[s]); m.extras[s].quaternion.copy(m.limbs[s * 2 + 1].quaternion);
+    if (m.extras.length) m.extras[s].position.copy(P.hand[s]); if (m.extras.length) m.extras[s].quaternion.copy(m.limbs[s * 2 + 1].quaternion);
   }
   // legs: inside knee pushed out towards the tarmac
   for (let s = 0; s < 2; s++) {
@@ -367,9 +389,9 @@ function poseRider(m, hang, tuck, look, brake, celebrate = 0) {
     P.pole.set(sx * (0.25 + inside * 1.6), 0.15 - inside * 0.5, -1);
     ik(P.hip[s], P.foot[s], 0.43, 0.44, P.pole, P.knee);
     setLimb(m.limbs[4 + s * 2], P.hip[s], P.knee); setLimb(m.limbs[5 + s * 2], P.knee, P.foot[s]);
-    m.extras[2 + s].position.copy(P.foot[s]).add(_v1.set(0, -0.01, 0.06));
-    m.extras[4 + s].position.copy(P.knee); m.extras[4 + s].position.x += sx * 0.07; m.extras[4 + s].quaternion.copy(m.limbs[4 + s * 2].quaternion);
-    m.extras[4 + s].visible = inside > 0.25;
+    if (m.extras.length) m.extras[2 + s].position.copy(P.foot[s]).add(_v1.set(0, -0.01, 0.06));
+    if (m.extras.length) { m.extras[4 + s].position.copy(P.knee); m.extras[4 + s].position.x += sx * 0.07; m.extras[4 + s].quaternion.copy(m.limbs[4 + s * 2].quaternion);
+    m.extras[4 + s].visible = inside > 0.25; }
     m.knee[s].copy(P.knee); m.knee[s].x += sx * 0.1;
   }
 }

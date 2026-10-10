@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { puffTexture, starTexture } from './toon.js';
 
 // Pooled point-sprite particles (no per-frame allocations). One draw call per system.
 function softTexture() {
@@ -11,10 +12,10 @@ function softTexture() {
 let SOFT = null;
 const VS = `attribute float aSize; attribute vec4 aColor; uniform float uScale; varying vec4 vColor;
 void main(){ vColor = aColor; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = aSize * uScale / max(0.5, -mv.z); gl_Position = projectionMatrix * mv; }`;
-const FS = `uniform sampler2D map; varying vec4 vColor; void main(){ vec4 t = texture2D(map, gl_PointCoord); gl_FragColor = vec4(vColor.rgb, vColor.a * t.a); if (gl_FragColor.a < 0.004) discard; }`;
+const FS = `uniform sampler2D map; varying vec4 vColor; void main(){ vec4 t = texture2D(map, gl_PointCoord); gl_FragColor = vec4(vColor.rgb * t.rgb, vColor.a * t.a); if (gl_FragColor.a < 0.004) discard; }`;
 
 export class Particles {
-  constructor(max, { additive = false } = {}) {
+  constructor(max, { additive = false, map = null } = {}) {
     SOFT = SOFT || softTexture();
     this.max = Math.max(1, max); this.head = 0; this.alive = 0;
     const n = this.max;
@@ -25,7 +26,7 @@ export class Particles {
     g.setAttribute('position', new THREE.BufferAttribute(this.p, 3).setUsage(THREE.DynamicDrawUsage));
     g.setAttribute('aSize', new THREE.BufferAttribute(this.size, 1).setUsage(THREE.DynamicDrawUsage));
     g.setAttribute('aColor', new THREE.BufferAttribute(this.col, 4).setUsage(THREE.DynamicDrawUsage));
-    this.mat = new THREE.ShaderMaterial({ uniforms: { map: { value: SOFT }, uScale: { value: 600 } }, vertexShader: VS, fragmentShader: FS, transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending });
+    this.mat = new THREE.ShaderMaterial({ uniforms: { map: { value: map || SOFT }, uScale: { value: 600 } }, vertexShader: VS, fragmentShader: FS, transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending });
     this.points = new THREE.Points(g, this.mat); this.points.frustumCulled = false; this.points.renderOrder = 5;
     this.geo = g;
   }
@@ -64,7 +65,8 @@ export class FX {
     const q = quality;
     this.q = q;
     const n = [140, 700, 1500, 2600][q];
-    this.smoke = new Particles(n); this.glow = new Particles(Math.round(n * 0.5), { additive: true });
+    // v3: shape-based anime sprites (cartoon puffs, four-point star sparks)
+    this.smoke = new Particles(n, { map: puffTexture() }); this.glow = new Particles(Math.round(n * 0.5), { additive: true, map: starTexture() });
     scene.add(this.smoke.points, this.glow.points);
     this.rate = [0.25, 0.6, 1, 1.4][q];
     this.acc = new Map();
