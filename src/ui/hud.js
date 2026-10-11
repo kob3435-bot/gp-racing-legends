@@ -89,18 +89,17 @@ export class Hud {
     else { const ds = r.s - me.s, v = Math.max(15, ds > 0 ? me.v : r.v); gap = (ds > 0 ? '−' : '+') + Math.abs(ds / v).toFixed(1) + 's'; }
     el.innerHTML = `<span>RIVAL</span><b>${r.rider.name.split(' ').slice(-1)[0].toUpperCase()}</b><i>P${r.pos}</i><em class="${r.s > me.s ? 'ahead' : 'behind'}">${gap}</em>`;
   }
-  note(text, cls = '', dur = 2.4) {
+  // v7: every mid-race message is a compact, semi-transparent chip in the top band (never over the track)
+  note(text, cls = '', dur = 2.4, sub = '') {
     const b = this.$('h-banner'); if (!b) return;
-    const d = document.createElement('div'); d.className = 'note ' + cls; d.textContent = text; b.appendChild(d);
-    setTimeout(() => d.classList.add('out'), dur * 1000); setTimeout(() => d.remove(), dur * 1000 + 500);
+    dur = Math.min(dur, 1.8);
+    const d = document.createElement('div'); d.className = 'note ' + cls; d.textContent = text;
+    if (sub) { const s2 = document.createElement('small'); s2.textContent = ' ' + sub; d.appendChild(s2); }
+    b.appendChild(d);
+    setTimeout(() => d.classList.add('out'), dur * 1000); setTimeout(() => d.remove(), dur * 1000 + 400);
     while (b.children.length > 3) b.firstChild.remove();
   }
-  pop(text, cls = '', sub = '', dur = 1.6) {
-    const b = this.$ && this.$('h-pops'); if (!b) return;
-    const d = document.createElement('div'); d.className = 'pop ' + cls; d.innerHTML = text + (sub ? `<small>${sub}</small>` : ''); b.appendChild(d);
-    setTimeout(() => d.classList.add('out'), dur * 1000); setTimeout(() => d.remove(), dur * 1000 + 450);
-    while (b.children.length > 2) b.firstChild.remove();
-  }
+  pop(text, cls = '', sub = '', dur = 1.6) { this.note(text, 'pop ' + cls, dur, sub ? String(sub).replace(/<[^>]*>/g, '') : ''); }
   sector(k, cls) {
     const el = this.$ && this.$('h-sec'); if (!el) return;
     const is = el.children; if (k === 0) for (const i of is) i.className = '';

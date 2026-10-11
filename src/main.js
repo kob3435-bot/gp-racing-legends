@@ -7,11 +7,13 @@ import * as save from './save.js';
 import { audio } from './game/audio.js';
 import { commitRound } from './champ.js';
 import { Online } from './net/online.js';
+import { installOrientation } from './orient.js';
 
 class App {
   constructor() {
     this.settings = save.loadSettings();
     this.game = new Game(document.getElementById('gl'), document.getElementById('hud'), this.settings);
+    installOrientation(() => this.game);
     this.game.onSettingsChanged = () => save.saveSettings(this.settings);
     this.ui = new UI(document.getElementById('ui'), this);
     this.online = new Online(this);

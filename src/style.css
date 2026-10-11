@@ -15,7 +15,6 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); c
 #ui { position: fixed; inset: 0; z-index: 10; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 #fps { position: fixed; left: 50%; bottom: 4px; transform: translateX(-50%); z-index: 30; font: 600 11px monospace; color: #8f8; background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 4px; display: none; }
 #rotate { display: none; }
-@media (orientation: portrait) and (max-width: 700px) { #rotate { display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 40; justify-content: center; padding: 6px; font-size: 12px; background: var(--red); color: #fff; letter-spacing: 1px; } }
 #boot { position: fixed; inset: 0; z-index: 50; background: var(--carbon); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
 .boot-logo { font: italic 900 34px/1 Arial, sans-serif; letter-spacing: 2px; } .boot-logo b { color: var(--red); }
 .boot-bar { width: 220px; height: 3px; background: #222; overflow: hidden; } .boot-bar i { display: block; height: 100%; width: 40%; background: var(--red); animation: boot 1s infinite linear; }
@@ -372,3 +371,33 @@ h4 span { color: var(--txt); }
 .mainmenu .mm-item::after { content: ''; position: absolute; top: 0; bottom: 0; width: 30px; left: -60px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transform: skewX(-20deg); transition: left .35s; }
 .mainmenu .mm-item:hover::after { left: 110%; }
 .screen.setupscreen::before { content: ''; position: fixed; right: 0; top: 0; width: 38vw; height: 100vh; background: repeating-linear-gradient(115deg, rgba(255,61,127,.06) 0 14px, transparent 14px 34px); pointer-events: none; }
+/* ===== v7: compact top-band messages (lap / sector / best lap / overtakes ...) ===== */
+.banner { margin-top: 2px; gap: 3px; max-width: min(56vw, 520px); }
+.banner .note { font: italic 800 13px Arial; letter-spacing: .5px; padding: 3px 12px; background: rgba(10,10,12,.55); border-left-width: 3px; border-radius: 2px; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; opacity: .92; }
+.banner .note small { font: 700 10px Arial; color: #ddd; letter-spacing: 1px; }
+.banner .note.gold, .banner .note.photo, .banner .note.purple, .banner .note.small { font-size: 13px; }
+.banner .note.pop { border-left-color: var(--cyan); } .banner .note.pop.green { border-left-color: var(--green); color: #b6ffcd; } .banner .note.pop.red { border-left-color: #ff3b3b; color: #ffc4c4; } .banner .note.pop.purple { border-left-color: var(--purple); color: #e2b8ff; } .banner .note.pop.gold { border-left-color: var(--gold); color: var(--gold); }
+.hud.mobile .banner .note { font-size: 11px; padding: 2px 8px; }
+.hud.mobile .banner { max-width: 46vw; }
+.pops { display: none; }
+/* overtake cut-in during racing = small corner panel, not across the track (finish cut-in stays full) */
+.cutin.mini { inset: auto; left: 6px; top: 33%; width: min(21vw, 290px); height: 54px; pointer-events: none; } /* beside the HUD, left of the play area */
+.cutin.mini .ci-panel { left: 0; right: 0; top: 0; height: 100%; padding-left: 8px; gap: 10px; transform: none; animation: ciMini 1.15s ease forwards; background: rgba(18,12,36,.8); border-width: 2px; }
+.cutin.mini .ci-art svg { width: 44px; transform: none; }
+.cutin.mini .ci-panel { padding-left: 5px; gap: 6px; } .cutin.mini .ci-txt { min-width: 0; overflow: hidden; } .cutin.mini .ci-txt span, .cutin.mini .ci-txt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud.mobile ~ .cutin.mini, .cutin.mini.m { height: 44px; } .cutin.mini.m .ci-art svg { width: 34px; } .cutin.mini.m .ci-txt b { font-size: 14px; } .cutin.mini.m .ci-txt span { font-size: 10px; } .cutin.mini.m .ci-txt small { display: none; }
+.cutin.mini .ci-txt { transform: none; } .cutin.mini .ci-txt b { font-size: 20px; text-shadow: 2px 2px 0 var(--pink); -webkit-text-stroke: 1px #1a1426; } .cutin.mini .ci-txt span { font-size: 13px; } .cutin.mini .ci-txt small { font-size: 10px; }
+@keyframes ciMini { 0% { transform: translateX(110%); } 12% { transform: translateX(0); } 85% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(110%); opacity: 0; } }
+/* ===== v7: rotate-your-device overlay (touch devices in portrait) ===== */
+#rotate { display: none; }
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate { display: flex; position: fixed; inset: 0; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; color: #fff; touch-action: none;
+    background: radial-gradient(circle at 50% 40%, rgba(255,61,127,.35), transparent 60%), repeating-conic-gradient(from 0deg at 50% 40%, rgba(255,255,255,.07) 0 4deg, transparent 4deg 12deg), #120c24; }
+  #rotate .ph { width: 70px; height: 120px; border: 6px solid #fff; border-radius: 14px; box-shadow: 6px 6px 0 #ff3d7f; animation: rotPh 1.8s ease-in-out infinite; }
+  #rotate b { font: italic 900 30px "Arial Black", Arial; color: #ffd23f; -webkit-text-stroke: 1.5px #1a1426; text-shadow: 4px 4px 0 #ff3d7f; letter-spacing: 1px; }
+  #rotate small { font: 700 14px Arial; letter-spacing: 2px; color: #9fe8ff; max-width: 80vw; }
+  @keyframes rotPh { 0%, 25% { transform: rotate(0); } 55%, 100% { transform: rotate(-90deg); } }
+}
+.hud.mobile .banner { gap: 2px; margin-top: 0; } .hud.mobile .banner .note { font-size: 10px; padding: 1px 8px; line-height: 15px; }
+.hud.mobile .banner .note:nth-last-child(n+3) { display: none; } /* phones: at most 2 chips */
+.cutin.mini.m .ci-panel { top: 0; height: 100%; }

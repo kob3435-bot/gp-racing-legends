@@ -95,7 +95,7 @@ export class Link {
   tick() {
     if (!this.open) { if (this.role === 'guest' && this.peer && this.peer.open && !this.closed && this.everOpen && (this._rc = (this._rc || 0) + 1) % 3 === 0) this.connect(); return; }
     this.send({ t: 'ping', a: now() });
-    if (now() - this.lastRx > 6000) { try { this.ctl && this.ctl.close(); } catch { /* */ } this.lost(); }
+    if (now() - this.lastRx > 12000) { try { this.ctl && this.ctl.close(); } catch { /* */ } this.lost(); }
   }
   rx(m) {
     this.lastRx = now(); this.stats.rx++;
@@ -106,7 +106,7 @@ export class Link {
       const t = now(), rtt = t - m.a; this.samples.push({ rtt, off: m.b - (m.a + rtt / 2) });
       if (this.samples.length > 12) this.samples.shift();
       const best = this.samples.reduce((a, b) => (b.rtt < a.rtt ? b : a));
-      this.rtt = this.samples.slice(-4).reduce((a, b) => a + b.rtt, 0) / Math.min(4, this.samples.length); this.offset = best.off;
+      const rec = this.samples.slice(-5).map(x => x.rtt).sort((a, b) => a - b); this.rtt = rec[rec.length >> 1]; this.offset = best.off; // median: robust to a peer's loading stall
       this.emit('ping', this.rtt); return;
     }
     this.emit('msg', m);
@@ -151,7 +151,7 @@ export class RelayLink extends Link {
     ws.onclose = () => { this.st = null; this.lost(); if (!this.closed) setTimeout(() => this.dial(), 2000); };
     ws.onerror = () => { if (!this.everOpen) this.fail('network'); };
   }
-  tick() { if (!this.open) return; this.send({ t: 'ping', a: now() }); if (now() - this.lastRx > 6000) this.lost(); }
+  tick() { if (!this.open) return; this.send({ t: 'ping', a: now() }); if (now() - this.lastRx > 12000) this.lost(); }
   close() { this.closed = true; clearInterval(this.pingTimer); try { this.ws && this.ws.close(); } catch { /* */ } this.open = false; }
 }
 export function createLink(role, code) { return new URLSearchParams(location.search).get('relay') ? new RelayLink(role, code) : new Link(role, code); }

@@ -313,7 +313,7 @@ export class Game {
     this.cutin = (e, title, sub) => {
       const on = this.net ? this.settings.cutinsOnline === true : this.settings.cutins !== false;
       if (!on || this.cfg.spectator || this.time - this.lastCutin < 3) return;
-      this.lastCutin = this.time; const el = showCutin(this.hudRoot, e.rider, title, sub); if (this.mobile) el.classList.add('m');
+      this.lastCutin = this.time; const el = showCutin(this.hudRoot, e.rider, title, sub); if (this.mobile) el.classList.add('m'); if (!e.finished) el.classList.add('mini'); // mid-race: corner panel only
     };
     if (this.net) this.timeScale = 1; // online races always run in real time on both devices
     if (this.net) { const sk = document.getElementById('intro-skip'); if (sk) { sk.disabled = true; sk.textContent = 'WAITING FOR RIVAL…'; } cfg.net.loaded(); }
