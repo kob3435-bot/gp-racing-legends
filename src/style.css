@@ -338,3 +338,37 @@ h4 span { color: var(--txt); }
 .custom-laps[hidden], .rival[hidden] { display: none !important; }
 .online .opts .custom-laps { grid-column: 1 / -1; }
 .rival { z-index: 3; top: 136px; }
+/* =================== v6 ANIME FX =================== */
+#fxo .focus, #fxo .impact { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+#fxo .focus .slf, #fxo .impact .slf { width: 100%; height: 100%; }
+#fxo .rays { position: absolute; left: 0; top: 0; width: 70vmin; height: 70vmin; opacity: 0; pointer-events: none; will-change: transform, opacity; }
+#fxo .rays canvas { width: 100%; height: 100%; }
+@keyframes raysSpin { from { rotate: 0deg; } to { rotate: 360deg; } }
+#fxo .ghosts { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+#fxo .ghosts i { position: absolute; left: 0; top: 0; border-radius: 50%; will-change: transform; }
+#fxo .ghosts i:nth-child(1) { width: 7vmin; height: 7vmin; background: radial-gradient(circle, rgba(255,170,90,.0) 40%, rgba(255,170,90,.45) 62%, transparent 70%); }
+#fxo .ghosts i:nth-child(2) { width: 3vmin; height: 3vmin; background: radial-gradient(circle, rgba(120,230,255,.55), transparent 70%); }
+#fxo .ghosts i:nth-child(3) { width: 12vmin; height: 12vmin; background: radial-gradient(circle, transparent 55%, rgba(255,120,200,.35) 64%, transparent 72%); }
+#fxo .ghosts i:nth-child(4) { width: 5vmin; height: 5vmin; background: radial-gradient(circle, rgba(255,240,170,.5), transparent 70%); }
+.cutin { position: absolute; inset: 0; z-index: 30; pointer-events: auto; animation: ciOut 1.15s steps(1, end) forwards; }
+.cutin .ci-panel { position: absolute; left: -2%; right: -2%; top: 30%; height: 30%; display: flex; align-items: center; gap: 22px; padding-left: 12%;
+  background: linear-gradient(100deg, rgba(18,12,36,.94) 60%, rgba(255,61,127,.9) 60.5%, rgba(255,61,127,.9) 63%, transparent 63.5%);
+  border-top: 4px solid var(--sun); border-bottom: 4px solid var(--sun); transform: skewY(-6deg); animation: ciIn 1.15s cubic-bezier(.2,.9,.2,1) forwards; will-change: transform, opacity; }
+.cutin .ci-art svg { width: min(22vh, 170px); height: auto; transform: skewY(6deg) rotate(-4deg); filter: drop-shadow(5px 5px 0 #1a1426); }
+.cutin .ci-txt { display: flex; flex-direction: column; transform: skewY(6deg); }
+.cutin .ci-txt b { font: italic 900 clamp(26px, 7vh, 58px) "Arial Black", Arial; color: var(--sun); -webkit-text-stroke: 2px #1a1426; paint-order: stroke fill; text-shadow: 5px 5px 0 var(--pink); letter-spacing: 2px; }
+.cutin .ci-txt span { font: italic 900 clamp(16px, 3.6vh, 28px) Arial; color: #fff; } .cutin .ci-txt small { font: 800 13px Arial; color: var(--cyan); letter-spacing: 2px; }
+@keyframes ciIn { 0% { transform: skewY(-6deg) translateX(-110%); } 14% { transform: skewY(-6deg) translateX(0); } 80% { transform: skewY(-6deg) translateX(2%); opacity: 1; } 100% { transform: skewY(-6deg) translateX(120%); opacity: 0; } }
+@keyframes ciOut { 0% { opacity: 1; } 100% { opacity: 1; } }
+.hud.mobile ~ .cutin .ci-panel, .cutin.m .ci-panel { top: 24%; height: 36%; }
+/* anime rider cards */
+.rcard .portrait { position: absolute; right: 6px; bottom: 6px; width: 46px; height: 46px; filter: drop-shadow(2px 2px 0 #1a1426); }
+.rcard { position: relative; }
+.icard .portrait { width: 64px; height: 64px; float: left; margin-right: 10px; filter: drop-shadow(3px 3px 0 #1a1426); }
+/* v6 HUD / menu flourishes: halftone corners, slash accents */
+.hud-tl::before { content: ''; position: absolute; left: -10px; top: -10px; width: 120px; height: 90px; background: radial-gradient(circle, rgba(255,61,127,.35) 1.2px, transparent 1.6px) 0 0 / 7px 7px; -webkit-mask: linear-gradient(135deg, #000 20%, transparent 70%); mask: linear-gradient(135deg, #000 20%, transparent 70%); pointer-events: none; z-index: -1; }
+.hud-tl { position: relative; }
+.mainmenu .mm-item { position: relative; overflow: hidden; }
+.mainmenu .mm-item::after { content: ''; position: absolute; top: 0; bottom: 0; width: 30px; left: -60px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transform: skewX(-20deg); transition: left .35s; }
+.mainmenu .mm-item:hover::after { left: 110%; }
+.screen.setupscreen::before { content: ''; position: fixed; right: 0; top: 0; width: 38vw; height: 100vh; background: repeating-linear-gradient(115deg, rgba(255,61,127,.06) 0 14px, transparent 14px 34px); pointer-events: none; }

@@ -12,7 +12,7 @@ import { Input } from './input.js';
 import { audio } from './audio.js';
 import { Hud, fmtTime } from '../ui/hud.js';
 import { buildEnvironment } from './env.js';
-import { toonMat, toonify, addOutlines, blobTexture, setOutlineResolution } from './toon.js';
+import { toonMat, toonify, addOutlines, blobTexture, setOutlineResolution, setRimColor } from './toon.js';
 import { Post, DynRes } from './post.js';
 import { FX, Confetti } from './fx.js';
 import { themeOf } from './themes.js';
@@ -62,6 +62,10 @@ function bikeBlob() {
   const m = new THREE.Mesh(_blobGeo, _blobMat); m.position.set(0, 0.03, 0.1); m.renderOrder = 1; m.userData.blob = true; return m;
 }
 
+// v6 time-of-day per circuit (dry races): golden hour / sunset key-art lighting
+const TOD = { siam: 'golden', tuscan: 'golden', levante: 'golden', albion: 'golden', valle: 'golden', southern: 'sunset', kanto: 'sunset', lonestar: 'sunset', polder: 'golden', selangor: 'sunset' };
+import { showCutin } from '../ui/cutin.js';
+import { portraitSVG } from '../ui/portrait.js';
 const netNow = () => performance.timeOrigin + performance.now();
 
 export class Game {
@@ -180,7 +184,7 @@ export class Game {
     this.camera.fov = 40; this.camera.updateProjectionMatrix();
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(narrow ? 0 : -1.15, 0.62, 0);
-    if (this.post.enabled) this.post.setLook({ lines: 0, flash: 0 });
+    if (this.post.enabled) { this.post.setLook({ lines: 0, flash: 0 }); this.post.focus(0); this.post.sun(0, 0, 0); }
     this.render(dt);
   }
 
@@ -220,7 +224,8 @@ export class Game {
     const scene = new THREE.Scene();
     let ysum = 0; for (let i = 0; i < geo.N; i += 8) ysum += geo.y[i]; const yavg = ysum / Math.ceil(geo.N / 8);
     this.camera.far = Math.max(5000, p.draw + 800); this.camera.updateProjectionMatrix();
-    const env = buildEnvironment(this.renderer, scene, { theme, weather, night, preset: p, seed: track.id.length * 31 + geo.N, yBase: yavg });
+    const env = buildEnvironment(this.renderer, scene, { theme, weather, night, preset: p, seed: track.id.length * 31 + geo.N, yBase: yavg , tod: TOD[track.id] || 'day' });
+    setRimColor(env.rim || '#fff4e0');
     ld.set(0.12, 'Lighting the sky'); await nextFrame(); if (!alive()) { env.dispose(); return; }
     const it = trackSceneStages(geo, { quality: p.q, weather, night, theme });
     let r;
@@ -263,10 +268,29 @@ export class Game {
     this.post.setScene(scene, this.camera);
     ld.set(0.9, 'Warming up tyres'); await nextFrame(); if (!alive()) return;
     // pre-compile shaders so the first race frames don't hitch
+    // three's compile() only visits VISIBLE objects: LOD bikes, hidden ink outlines and idle FX would otherwise compile
+    // their programs mid-race (multi-100 ms hitch). Force everything visible + un-culled for the warm-up, then restore.
+    const hidden = [];
+    scene.traverse(o => { if (!o.visible) { hidden.push(o); o.visible = true; } });
     try {
-      if (this.renderer.extensions.has('KHR_parallel_shader_compile')) await Promise.race([this.renderer.compileAsync(scene, this.camera), sleep(2500)]);
+      if (this.renderer.extensions.has('KHR_parallel_shader_compile')) await Promise.race([this.renderer.compileAsync(scene, this.camera), sleep(4000)]);
       else this.renderer.compile(scene, this.camera);
+      this.warmPodiumShaders(scene);
+      // upload every texture now (compile() doesn't): first-visible texture uploads were a big stall at the lights
+      const seen = new Set();
+      scene.traverse(o => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) for (const k of ['map', 'alphaMap', 'normalMap', 'roughnessMap', 'emissiveMap', 'gradientMap']) { const t = m[k]; if (t && t.isTexture && !seen.has(t)) { seen.add(t); this.renderer.initTexture(t); } } });
     } catch { /* optional */ }
+    // one off-screen warm-up draw with culling disabled: uploads every geometry buffer / VAO / texture and links
+    // every program while the loading screen is up (these first-draw costs were the 1-4 s stall at the lights)
+    try {
+      const unculled = []; scene.traverse(o => { if (o.frustumCulled) { unculled.push(o); o.frustumCulled = false; } });
+      const rt = new THREE.WebGLRenderTarget(64, 36); const prev = this.renderer.getRenderTarget();
+      this.renderer.setRenderTarget(rt); this.renderer.render(scene, this.camera); this.renderer.setRenderTarget(prev);
+      this.renderer.readRenderTargetPixels(rt, 0, 0, 1, 1, new Uint8Array(4)); rt.dispose(); // readback = wait for the GPU to finish it now
+      for (const o of unculled) o.frustumCulled = true;
+    } catch { /* optional */ }
+    for (const o of hidden) o.visible = false;
+    if (!alive()) return;
     if (!alive()) return;
     this.hud.build({ race, geo, mobile: this.mobile, spectator: !!cfg.spectator, manual: this.settings.control === 'MANUAL', settings: this.settings, onPause: () => this.pause(), onCamera: () => this.cycleCamera(), input: this.input });
     this.input.tiltOn = !!this.settings.tilt;
@@ -284,14 +308,33 @@ export class Game {
     this.showIntroCard();
     window.__gp = { game: this, race };
     this.net = cfg.net ? cfg.net.attach(this, race, cfg) : null;
+    // v6 cut-in close-ups: on by default offline, off by default online (setting can enable)
+    this.lastCutin = -9;
+    this.cutin = (e, title, sub) => {
+      const on = this.net ? this.settings.cutinsOnline === true : this.settings.cutins !== false;
+      if (!on || this.cfg.spectator || this.time - this.lastCutin < 3) return;
+      this.lastCutin = this.time; const el = showCutin(this.hudRoot, e.rider, title, sub); if (this.mobile) el.classList.add('m');
+    };
     if (this.net) this.timeScale = 1; // online races always run in real time on both devices
     if (this.net) { const sk = document.getElementById('intro-skip'); if (sk) { sk.disabled = true; sk.textContent = 'WAITING FOR RIVAL…'; } cfg.net.loaded(); }
+  }
+
+  // podium / confetti materials are created at the finish; compile their programs now so the finish never hitches
+  warmPodiumShaders(scene) {
+    const g = new THREE.Group(), box = new THREE.BoxGeometry(1, 1, 1);
+    const tex = new THREE.CanvasTexture(document.createElement('canvas'));
+    for (const m of [new THREE.MeshStandardMaterial({ color: '#fff', roughness: 0.4, metalness: 0.1 }), new THREE.MeshStandardMaterial({ map: tex }), new THREE.MeshBasicMaterial({ map: tex }), new THREE.MeshBasicMaterial({ color: '#fff', side: THREE.DoubleSide })]) g.add(new THREE.Mesh(box, m));
+    toonify(g); addOutlines(g, { width: 2.4, minSize: 0.1 });
+    g.position.copy(this.camera.position); scene.add(g);
+    let cf = null; try { cf = new Confetti(scene, 8); } catch { /* */ }
+    try { this.renderer.compile(scene, this.camera); } catch { /* */ }
+    scene.remove(g); if (cf) cf.dispose(); tex.dispose(); box.dispose();
   }
 
   showIntroCard() {
     const r = this.race, t = this.track, w = WEATHER[r.weather];
     const pole = r.order[0], me = r.player;
-    const card = (e, label) => `<div class="icard"><div class="ic-l">${label}</div><div class="ic-n"><span class="num" style="background:${e.rider.helmet[0]};color:${e.rider.helmet[1]}">${e.rider.number}</span>${displayName(e.rider)}</div><div class="ic-t">${riderTeamName(e.rider)} · OVR ${e.rider.ovr}</div></div>`;
+    const card = (e, label) => `<div class="icard">${portraitSVG(e.rider, 64)}<div class="ic-l">${label}</div><div class="ic-n"><span class="num" style="background:${e.rider.helmet[0]};color:${e.rider.helmet[1]}">${e.rider.number}</span>${displayName(e.rider)}</div><div class="ic-t">${riderTeamName(e.rider)} · OVR ${e.rider.ovr}</div></div>`;
     const div = document.createElement('div'); div.className = 'intro'; div.id = 'intro';
     div.innerHTML = `<div class="intro-top"><div class="it-round">${this.cfg.title || 'QUICK RACE'}</div><h1>${t.name}</h1><div class="it-meta">${t.country} · ${(r.geo.L / 1000).toFixed(2)} km · ${r.laps} LAP${r.laps > 1 ? 'S' : ''} · ${w.icon} ${w.label} · ${t.character.join(' / ').toUpperCase()}</div></div>
       <div class="intro-cards">${card(pole, 'POLE POSITION · ' + fmtTime(r.qualiTimes[0].time))}${me && me !== pole ? card(me, 'YOU START P' + me.gridPos) : ''}</div>
@@ -505,7 +548,8 @@ export class Game {
           const o = ev.other, nm = o ? shortName(o.rider) : '';
           if (ev.to < ev.from) {
             const clean = race.t - this.lastContactT > 2.5, close = o && Math.abs(race.player.d - o.d) < 1.35;
-            this.flash = Math.max(this.flash, 0.32);
+            this.flash = Math.max(this.flash, 0.32); this.focusFx = 1; this.post.impact();
+            this.cutin && this.cutin(race.player, 'OVERTAKE!', `P${ev.to}${o ? ' · ON ' + nm : ''}`);
             hud.pop(`OVERTAKE · P${ev.to}`, 'green', o ? `${close && clean ? 'CLOSE PASS' : clean ? 'CLEAN PASS' : 'PASSED'} ON ${nm}` : '', 1.8);
             if (this.crowdNear > 0.3) audio.cheer(0.8);
           } else hud.note(`P${ev.to}  ▼${ev.to - ev.from}${nm ? ' · ' + nm : ''}`, 'red', 1.6);
@@ -523,6 +567,7 @@ export class Game {
             hud.note(`PHOTO FINISH! ${shortName(prev.rider)} BY ${((ev.e.finishTime - prev.finishTime) * 1000).toFixed(0)} ms`, 'photo', 3.5); this.flash = 1; audio.cheer(1.5);
           }
           if (this.finishers.length === 1) audio.cheer(1.4);
+          if (ev.e.isPlayer) { const pos = this.finishers.length; this.post.impact(); this.focusFx = 1; this.lastCutin = -9; this.cutin(ev.e, pos === 1 ? 'WINNER!' : pos <= 3 ? 'PODIUM!' : 'FINISH', `P${pos} · ${this.track.name}`); }
           break;
         }
         case 'crash':
@@ -801,6 +846,20 @@ export class Game {
       pa.needsUpdate = true;
     }
     if (this.post.enabled) this.post.setLook(this.lookParams(blur, sp));
+    // v6 manga focus lines: overtakes / impacts (decaying) + slipstream boost
+    this.focusFx = Math.max(0, (this.focusFx || 0) - dt * 1.4);
+    const pl = this.race.player, boost = pl && mode !== 'tv' && pl.v > 55 ? Math.max(0, (pl.draft - 0.55) * 1.6) : 0;
+    this.post.focus(Math.min(0.9, Math.max(this.focusFx, boost * 0.6)));
+    // v6 god rays + lens flare (dry daytime, MEDIUM+)
+    const env = this.env;
+    if (env && !env.wet && !env.night && this.preset.q >= 1 && this.weather !== 'CLOUDY') {
+      const sv = this._sunV || (this._sunV = new THREE.Vector3()), fw = this._fwd || (this._fwd = new THREE.Vector3());
+      cam.getWorldDirection(fw); const facing = fw.dot(env.sunDir);
+      sv.copy(env.sunDir).multiplyScalar(1500).add(cam.position).project(cam);
+      const edge = Math.max(Math.abs(sv.x), Math.abs(sv.y));
+      const vis = facing > 0.2 && sv.z < 1 ? Math.max(0, Math.min(1, (1.25 - edge) / 0.35)) * (env.tod !== 'day' ? 1 : 0.7) : 0;
+      this.post.sun((sv.x + 1) / 2, (1 - sv.y) / 2, vis);
+    } else this.post.sun(0, 0, 0);
   }
   lookParams(blur, sp = 0) {
     const o = this._lp || (this._lp = { tint: new THREE.Vector3() });

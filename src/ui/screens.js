@@ -7,6 +7,7 @@ import { TEAM_BY_ID, CURRENT_TEAMS } from '../data/teams.js';
 import { trackOutline, trackStats } from '../game/trackgeom.js';
 import { WEATHER, TIRES, DIFFICULTY, POINTS, pickWeather, compatibility } from '../game/perf.js';
 import { getGeo } from '../game/game.js';
+import { portraitSVG } from './portrait.js';
 import { fmtTime } from './hud.js';
 import * as save from '../save.js';
 import { audio } from '../game/audio.js';
@@ -21,7 +22,7 @@ export const CONTROL_DESC = {
 };
 export function controlPicker(value) { return `${seg('control', CONTROL_MODES, value, CONTROL_LABEL)}<p class="fine" id="ctlDesc">${CONTROL_DESC[value] || ''}</p>`; }
 export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const FLAG = { ESP: '🇪🇸', ITA: '🇮🇹', FRA: '🇫🇷', JPN: '🇯🇵', AUS: '🇦🇺', USA: '🇺🇸', GBR: '🇬🇧', THA: '🇹🇭', BRA: '🇧🇷', ARG: '🇦🇷', POR: '🇵🇹', RSA: '🇿🇦', FIN: '🇫🇮', SWE: '🇸🇪', GER: '🇩🇪', NED: '🇳🇱', AUT: '🇦🇹', MAS: '🇲🇾', QAT: '🇶🇦' };
+const FLAG = { ESP: '🇪🇸', ITA: '🇮🇹', FRA: '🇫🇷', JPN: '🇯🇵', AUS: '🇦🇺', USA: '🇺🇸', GBR: '🇬🇧', THA: '🇹🇭', BRA: '🇧🇷', ARG: '🇦🇷', POR: '🇵🇹', RSA: '🇿🇦', FIN: '🇫🇮', TUR: '🇹🇷', SWE: '🇸🇪', GER: '🇩🇪', NED: '🇳🇱', AUT: '🇦🇹', MAS: '🇲🇾', QAT: '🇶🇦' };
 export const flag = (c) => FLAG[c] || '';
 
 export function trackSvg(def, size = 120, stroke = 5) {
@@ -40,7 +41,7 @@ export function riderCard(r, sel = false, extra = '') {
     <div class="rc-band"><span class="rc-num">${r.number}</span><span class="rc-ovr"><b>${r.ovr}</b><small>OVR</small></span></div>
     <div class="rc-name">${esc(r.name)}</div>
     <div class="rc-sub">${r.version ? `<span class="tag legend">${esc(r.version)}</span>` : r.kind === 'rookie' ? '<span class="tag rookie">ROOKIE</span>' : ''} ${flag(r.nationality)} ${r.nationality}</div>
-    <div class="rc-team">${esc(riderTeamName(r))}</div>${extra}
+    <div class="rc-team">${esc(riderTeamName(r))}</div>${portraitSVG(r, 46)}${extra}
   </button>`;
 }
 
@@ -381,6 +382,8 @@ export class UI {
           <label>GEARS (MANUAL MODE)</label>${seg('gear', ['AUTO', 'MANUAL'], s.gear)}
           <label>RACING LINE</label>${seg('line', ['OFF', 'BRAKING', 'FULL'], s.line, { BRAKING: 'BRAKING ONLY' })}
           <label>DEFAULT CAMERA</label>${seg('camera', ['chase', 'far', 'helmet', 'tv'], s.camera, { chase: 'CHASE', far: 'FAR CHASE', helmet: 'HELMET', tv: 'TV' })}
+          <label>CUT-IN CLOSE-UPS (OVERTAKE / FINISH)</label>${seg('cutins', ['ON', 'OFF'], s.cutins !== false ? 'ON' : 'OFF')}
+          <label>CUT-INS IN ONLINE RACES</label>${seg('cutinsOnline', ['OFF', 'ON'], s.cutinsOnline ? 'ON' : 'OFF')}
           <label>TILT STEERING (MOBILE)</label>${seg('tilt', ['OFF', 'ON'], s.tilt ? 'ON' : 'OFF')}
         </div>
         <div class="sg"><h4>GRAPHICS</h4>
@@ -394,7 +397,7 @@ export class UI {
         </div>
       </div>`, 'setupscreen');
     bindSegs(el, s, (k, v) => {
-      if (['tilt', 'autoGfx', 'showFps', 'dynRes'].includes(k)) s[k] = v === 'ON';
+      if (['tilt', 'autoGfx', 'showFps', 'dynRes', 'cutins', 'cutinsOnline'].includes(k)) s[k] = v === 'ON';
       if (k === 'control') el.querySelector('#ctlDesc').textContent = CONTROL_DESC[v];
       if (k === 'graphics') this.app.game.applyGraphics(v);
       if (k === 'tilt' && s.tilt && typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().catch(() => { });

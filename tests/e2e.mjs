@@ -6,7 +6,7 @@ const BASE = process.argv[2] || process.env.BASE_URL || 'http://localhost:4173/g
 const OUT = new URL('../screenshots/', import.meta.url).pathname; mkdirSync(OUT, { recursive: true });
 const CHROME = process.env.CHROME || '/usr/bin/google-chrome';
 // blocklist of real-world rider/manufacturer/circuit names that must never appear (base64 so the names are not stored in the repo as plain text)
-const REAL_NAMES_B64 = 'cm9zc2l8bWFycXVlenxtW2HDoV1ycXVlenxzdG9uZXJ8bG9yZW56b3xwZWRyb3NhfGhheWRlbnxiaWFnZ2l8c2ltb25jZWxsaXxkb3Zpemlvc298cXVhcnRhcmFyb3xiYWduYWlhfGFjb3N0YXxkdWNhdGl8aG9uZGF8eWFtYWhhfHN1enVraXxrdG18YXByaWxpYXxtb3RvZ3B8bXVnZWxsb3xzZXBhbmd8YnVyaXJhbXxsb3NhaWx8amVyZXp8YXNzZW58cGhpbGxpcCBpc2xhbmR8bW90ZWdp';
+const REAL_NAMES_B64 = 'XGIoPzp2YWxlbnRpbm8gcm9zc2l8bWFyYyBtW2HDoV1ycXVlenxbYcOhXWxleCBtW2HDoV1ycXVlenxjYXNleSBzdG9uZXJ8am9yZ2UgbG9yZW56b3xkYW5pIHBlZHJvc2F8ZGFuaWVsIHBlZHJvc2F8bmlja3kgaGF5ZGVufG1heCBiaWFnZ2l8bWFzc2ltaWxpYW5vIGJpYWdnaXxtYXJjbyBzaW1vbmNlbGxpfGFuZHJlYSBkb3Zpemlvc298ZmFiaW8gcXVhcnRhcmFyb3xmcmFuY2VzY28gYmFnbmFpYXxwZWNjbyBiYWduYWlhfHBlZHJvIGFjb3N0YXxqb3JnZSBtYXJ0W2nDrV1ufG1hcmNvIGJlenplY2NoaXxhaSBvZ3VyYXxyYVt1w7pdbCBmZXJuW2HDoV1uZGV6fHNvbWtpYXQgY2hhbnRyYXxqb2hhbm4gemFyY298am9hbiBtaXJ8bHVjYSBtYXJpbml8W2HDoV1sZXggcmluc3xqYWNrIG1pbGxlcnxtaWd1ZWwgb2xpdmVpcmF8YnJhZCBiaW5kZXJ8ZW5lYSBiYXN0aWFuaW5pfG1hdmVyaWNrIHZpW27DsV1hbGVzfGZhYmlvIGRpIGdpYW5uYW50b25pb3xmcmFuY28gbW9yYmlkZWxsaXxmZXJtW2nDrV1uIGFsZGVndWVyfHRvcHJhayByYXpnYXRsW2nEsV1vW2fEn11sdXxhcltvw7NdbiBjYW5ldHxkaW9nbyBtb3JlaXJhfGpha2UgZGl4b258bWFudWVsIGdvbnpbYcOhXWxlenxzZXRlIGdpYmVybmF1fGNvbGluIGVkd2FyZHN8bG9yaXMgY2FwaXJvc3NpfG1hcmNvIG1lbGFuZHJpfGJlbiBzcGllc3xjYWwgY3J1dGNobG93fHNoaW55YSBuYWthbm98bWFrb3RvIHRhbWFkYXxhbGV4IGJhcnJvcylcYnxkdWNhdGl8aG9uZGF8eWFtYWhhfHN1enVraXxrdG18YXByaWxpYXxtb3RvZ3B8bXVnZWxsb3xzZXBhbmd8YnVyaXJhbXxsb3NhaWx8amVyZXp8YXNzZW58cGhpbGxpcCBpc2xhbmR8bW90ZWdp'; // exact real full names (parody spellings allowed) + real brands/circuits
 const results = []; const ok = (name, cond, info = '') => { results.push({ name, pass: !!cond, info }); console.log(`${cond ? 'PASS' : 'FAIL'}  ${name} ${info}`); };
 const browser = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
 
@@ -39,6 +39,15 @@ const state = (page) => page.evaluate(() => { const r = window.__gp && window.__
   await page.screenshot({ path: OUT + '02-rider-database.png' });
   const realNames = await page.evaluate((b64) => new RegExp(new TextDecoder().decode(Uint8Array.from(atob(b64), c => c.charCodeAt(0))), 'i').test(document.body.innerText + JSON.stringify(window.__gp || {})), REAL_NAMES_B64);
   ok('no real rider/manufacturer/circuit names in UI', !realNames);
+  { // data-level: every rider name must differ from the exact real full name (near-miss parody spellings are fine)
+    const { readFileSync } = await import('fs');
+    const rx = new RegExp(Buffer.from(REAL_NAMES_B64, 'base64').toString(), 'iu');
+    const all = JSON.parse(readFileSync(new URL('../src/data/riders.json', import.meta.url)));
+    const bad = all.filter(r => rx.test(r.name)).map(r => r.name);
+    ok('rider database: no exact real full names (parody spellings only)', bad.length === 0 && all.length >= 60, bad.join(', ') || `${all.length} riders checked`);
+    // the parody list must still be recognisable: sanity check the matcher catches the real spelling
+    ok('banned-name matcher catches real spellings but allows parodies', rx.test(Buffer.from('VmFsZW50aW5vIFJvc3Np', 'base64').toString()) && !rx.test('Valentino Rossa') && !rx.test('Joan Mirr'));
+  }
   await page.click('.panel.detail .x'); await page.click('[data-back]');
   // settings & stats screens open
   await page.click('[data-go=settingsScreen]'); ok('settings screen opens', await page.waitForSelector('.settings')); await page.click('[data-back]');

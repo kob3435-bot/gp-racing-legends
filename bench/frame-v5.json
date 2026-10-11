@@ -1,0 +1,138 @@
+{
+ "LOW menu": {
+  "n": 292,
+  "p50": 16.7,
+  "p95": 16.8,
+  "p99": 33.4,
+  "max": 50,
+  "hitches": 0,
+  "longTasks": 0
+ },
+ "LOW quick: start+race": {
+  "n": 294,
+  "p50": 50,
+  "p95": 83.3,
+  "p99": 133.3,
+  "max": 216.7,
+  "hitches": 6,
+  "longTasks": 1
+ },
+ "LOW quick: racing": {
+  "n": 167,
+  "p50": 50,
+  "p95": 66.7,
+  "p99": 100,
+  "max": 100.1,
+  "hitches": 1,
+  "longTasks": 0
+ },
+ "LOW finish->podium": {
+  "n": 117,
+  "p50": 50,
+  "p95": 116.7,
+  "p99": 150,
+  "max": 150.1,
+  "hitches": 8,
+  "longTasks": 0
+ },
+ "LOW spectator": {
+  "n": 132,
+  "p50": 66.6,
+  "p95": 83.4,
+  "p99": 133.4,
+  "max": 183.3,
+  "hitches": 2,
+  "longTasks": 0
+ },
+ "MEDIUM menu": {
+  "n": 139,
+  "p50": 33.3,
+  "p95": 66.7,
+  "p99": 66.8,
+  "max": 83.3,
+  "hitches": 8,
+  "longTasks": 0
+ },
+ "MEDIUM quick: start+race": {
+  "n": 110,
+  "p50": 133.2,
+  "p95": 183.4,
+  "p99": 249.9,
+  "max": 350,
+  "hitches": 1,
+  "longTasks": 1
+ },
+ "MEDIUM quick: racing": {
+  "n": 66,
+  "p50": 116.7,
+  "p95": 166.7,
+  "p99": 333.4,
+  "max": 333.4,
+  "hitches": 1,
+  "longTasks": 0
+ },
+ "MEDIUM finish->podium": {
+  "n": 54,
+  "p50": 133.3,
+  "p95": 250,
+  "p99": 366.7,
+  "max": 366.7,
+  "hitches": 2,
+  "longTasks": 0
+ },
+ "MEDIUM spectator": {
+  "n": 61,
+  "p50": 133.3,
+  "p95": 250,
+  "p99": 250,
+  "max": 250,
+  "hitches": 0,
+  "longTasks": 0
+ },
+ "online normal: host start+race": {
+  "n": 124,
+  "p50": 99.9,
+  "p95": 100.1,
+  "p99": 999.9,
+  "max": 1233.2,
+  "hitches": 4,
+  "longTasks": 1
+ },
+ "online normal: guest start+race": {
+  "n": 123,
+  "p50": 99.9,
+  "p95": 116.6,
+  "p99": 1000,
+  "max": 1233.3,
+  "hitches": 3,
+  "longTasks": 1
+ },
+ "online normal: guest buffer": {
+  "delay": 130,
+  "extrap": 1.1,
+  "rtt": 2
+ },
+ "online degraded: host start+race": {
+  "n": 163,
+  "p50": 83.3,
+  "p95": 100,
+  "p99": 116.7,
+  "max": 233.3,
+  "hitches": 1,
+  "longTasks": 0
+ },
+ "online degraded: guest start+race": {
+  "n": 163,
+  "p50": 83.3,
+  "p95": 100.1,
+  "p99": 116.7,
+  "max": 216.7,
+  "hitches": 1,
+  "longTasks": 0
+ },
+ "online degraded: guest buffer": {
+  "delay": 221,
+  "extrap": 1.5,
+  "rtt": 353
+ }
+}

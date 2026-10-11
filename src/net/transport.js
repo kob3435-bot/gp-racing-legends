@@ -1,4 +1,5 @@
 import { Peer } from 'peerjs';
+import { isBinary, decodeState } from './codec.js';
 // WebRTC P2P link over PeerJS DataChannels.
 //  - signaling: PeerJS free public cloud broker (0.peerjs.com) by default; ?peerhost=&peerport=&peerpath= override (CI/self-host)
 //  - ICE: public STUN (Google, Cloudflare) + the free public PeerJS TURN relay as best-effort fallback for strict NATs
@@ -72,7 +73,7 @@ export class Link {
     if (!this.peer || this.peer.destroyed || this.closed) return;
     const hostId = PREFIX + this.code;
     const ctl = this.peer.connect(hostId, { label: 'ctl', reliable: true, serialization: 'json' });
-    const st = this.peer.connect(hostId, { label: 'st', reliable: false, serialization: 'json' });
+    const st = this.peer.connect(hostId, { label: 'st', reliable: false, serialization: 'raw' }); // unordered + unreliable, raw binary frames
     this.bind(ctl); this.bind(st);
     clearTimeout(this.openTimer);
     if (!this.everOpen) this.openTimer = setTimeout(() => { if (!this.open) this.fail('timeout'); }, 20000);
@@ -98,6 +99,8 @@ export class Link {
   }
   rx(m) {
     this.lastRx = now(); this.stats.rx++;
+    if (isBinary(m)) { this.emit('msg', decodeState(m)); return; }
+    if (m instanceof Blob) { m.arrayBuffer().then(b => this.rx(b)); return; }
     if (m.t === 'ping') return this.send({ t: 'pong', a: m.a, b: now() });
     if (m.t === 'pong') {
       const t = now(), rtt = t - m.a; this.samples.push({ rtt, off: m.b - (m.a + rtt / 2) });
@@ -134,11 +137,12 @@ export class RelayLink extends Link {
   }
   dial() {
     if (this.closed) return;
-    const ws = this.ws = new WebSocket(this.url);
+    const ws = this.ws = new WebSocket(this.url); ws.binaryType = 'arraybuffer';
     ws.onopen = () => { ws.send(JSON.stringify({ join: this.code, role: this.role })); this.emit('ready'); };
     ws.onmessage = (ev) => {
+      if (typeof ev.data !== 'string') { this.rx(ev.data); return; }
       const m = JSON.parse(ev.data);
-      if (m.sys === 'peer-open') { const c = { open: true, send: (x) => ws.readyState === 1 && ws.send(JSON.stringify(x)) }; this.ctl = this.st = c; this.open = true; this.everOpen = true; this.lastRx = now(); this.emit('open'); return; }
+      if (m.sys === 'peer-open') { const c = { open: true, send: (x) => ws.readyState === 1 && ws.send(isBinary(x) ? x : JSON.stringify(x)) }; this.ctl = this.st = c; this.open = true; this.everOpen = true; this.lastRx = now(); this.emit('open'); return; }
       if (m.sys === 'peer-close') { this.st = null; this.lost(); return; }
       if (m.sys === 'no-room') { this.emit('unavailable'); if (!this.everOpen) this.fail('peer-unavailable'); return; }
       if (m.sys === 'taken') { this.fail('unavailable-id'); return; }

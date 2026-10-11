@@ -60,6 +60,8 @@ export function asphaltTexture(wet) {
     x.fillStyle = grd; x.fillRect(0, 0, w, h);
     for (let i = 0; i < 14; i++) { x.strokeStyle = `rgba(10,10,10,${0.05 + r() * 0.08})`; x.lineWidth = 2 + r() * 3; x.beginPath(); const x0 = w * (0.3 + r() * 0.4); x.moveTo(x0, 0); x.bezierCurveTo(x0 + (r() - 0.5) * 60, h * 0.3, x0 + (r() - 0.5) * 60, h * 0.7, x0, h); x.stroke(); }
     // painted white edge lines (slightly worn)
+    // v6 painted-background feel: long soft brush strokes in cool/warm tints along the track
+    for (let i = 0; i < 70; i++) { x.strokeStyle = r() < 0.5 ? `rgba(120,140,190,${0.04 + r() * 0.05})` : `rgba(255,230,200,${0.03 + r() * 0.04})`; x.lineWidth = 6 + r() * 18; x.lineCap = 'round'; const xx = r() * w, yy = r() * h; x.beginPath(); x.moveTo(xx, yy); x.lineTo(xx + (r() - 0.5) * 30, yy + 60 + r() * 160); x.stroke(); }
     x.fillStyle = '#ecebe6'; x.fillRect(6, 0, 11, h); x.fillRect(w - 17, 0, 11, h);
     for (let i = 0; i < 1400; i++) { x.fillStyle = 'rgba(60,60,60,0.35)'; const yy = r() * h; x.fillRect(6 + r() * 11, yy, 1.5, 1.5); x.fillRect(w - 17 + r() * 11, r() * h, 1.5, 1.5); }
   }));
@@ -80,7 +82,8 @@ function asphaltMaps() {
 }
 function kerbTexture() {
   return cached('kerb', () => canvasTex(64, 256, (x, w, h) => {
-    for (let k = 0; k < 2; k++) { x.fillStyle = '#d61f1f'; x.fillRect(0, k * h / 2, w, h / 4); x.fillStyle = '#f4f4f2'; x.fillRect(0, k * h / 2 + h / 4, w, h / 4); }
+    for (let k = 0; k < 2; k++) { x.fillStyle = '#ff2338'; x.fillRect(0, k * h / 2, w, h / 4); x.fillStyle = '#fbfbf6'; x.fillRect(0, k * h / 2 + h / 4, w, h / 4); }
+    x.fillStyle = '#1a1426'; for (let k = 0; k < 4; k++) x.fillRect(0, k * h / 4 - 3, w, 6); // bold inked block edges
     const r = mulberry(9); for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(0,0,0,${r() * 0.12})`; x.fillRect(r() * w, r() * h, 2, 2); }
     x.fillStyle = 'rgba(0,0,0,0.25)'; x.fillRect(0, 0, 4, h);
   }));
@@ -118,6 +121,8 @@ function grassTexture(theme) {
     const r = mulberry(3);
     for (let i = 0; i < 9000; i++) { const k = 0.75 + r() * 0.35; x.fillStyle = `rgba(${210 * k | 0},${230 * k | 0},${200 * k | 0},0.55)`; x.fillRect(r() * w, r() * h, 1.5, 2.5); }
     if (!theme.sand) { x.fillStyle = 'rgba(255,255,255,0.08)'; x.fillRect(0, 0, w / 2, h); } // mowing stripes
+    // v6 hand-painted hatching: short diagonal brush ticks in darker/lighter tones
+    for (let i = 0; i < 420; i++) { const lx = r() * w, ly = r() * h, l = 5 + r() * 9; x.strokeStyle = r() < 0.6 ? 'rgba(40,70,40,0.22)' : 'rgba(255,255,230,0.25)'; x.lineWidth = 1.6; x.beginPath(); x.moveTo(lx, ly); x.lineTo(lx + l * 0.5, ly - l); x.stroke(); }
     void a; void b;
   }));
 }
@@ -532,7 +537,7 @@ export function* trackSceneStages(geo, opts) {
   // ---- v3 anime pass: toon materials, merge static meshes per material (draw calls), ink outlines on key props ----
   toonify(group);
   staticMerge(group, new Set([ocean].filter(Boolean)));
-  if (q >= 1) addOutlines(group, { width: q >= 2 ? 1.8 : 1.5, minSize: 0.5, filter: (o) => o.userData.ink });
+  if (q >= 1) addOutlines(group, { width: q >= 2 ? 2.4 : 2.0, minSize: 0.5, filter: (o) => o.userData.ink });
   return {
     group, lights, slots, stands, yBase: yavg, bounds: { mnx, mxx, mnz, mxz }, wall: WALL, kerb: KERB, runoff: RUNOFF, isCorner, absK,
     update(t) { timeU.value = t; if (ocean && ocean.material.normalMap) ocean.material.normalMap.offset.set(t * 0.004, t * 0.002); },

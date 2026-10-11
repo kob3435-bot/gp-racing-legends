@@ -47,7 +47,8 @@ export class Online {
   leave() { if (this.link) { try { this.send({ t: 'bye' }); } catch { /* */ } this.link.close(); } this.link = null; this.role = null; this.net = null; }
 
   onMsg(m) {
-    if (this.net && (m.t === 'H' || m.t === 'S' || m.t === 'G' || m.t === 'final')) return this.net.onMsg(m);
+    if (m.t === 'S' || m.t === 'G') { if (this.net) this.net.onMsg(m); return; }
+    if (this.net && m.t === 'final') return this.net.onMsg(m);
     const H = this.role === 'host';
     switch (m.t) {
       case 'hello': if (!H) return;

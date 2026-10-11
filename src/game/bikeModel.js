@@ -144,7 +144,7 @@ function mergeByMaterial(parts, shadow = true) {
     if (!groups.has(p.mat)) groups.set(p.mat, []); groups.get(p.mat).push(clean(p.geo));
   }
   const out = [];
-  if (baked.length) { const mesh = new THREE.Mesh(mergeGeometries(baked, false), toonMat({ vertexColors: true, rim: 0.55 })); mesh.castShadow = shadow; mesh.userData.ink = true; out.push(mesh); }
+  if (baked.length) { const mesh = new THREE.Mesh(mergeGeometries(baked, false), toonMat({ vertexColors: true, rim: 0.85 })); mesh.castShadow = shadow; mesh.userData.ink = true; out.push(mesh); }
   for (const [m, gs] of groups) { const mesh = new THREE.Mesh(mergeGeometries(gs, false), m); mesh.castShadow = shadow; mesh.userData.ink = true; out.push(mesh); }
   return out;
 }
@@ -300,11 +300,11 @@ export function createBike({ livery, helmet, number, sponsor, detail = 1, tyre =
   }
 
   // ---------------- anime look: toon ramps, rim light on bike+rider, ink outlines ----------------
-  toonify(hi, { rim: 0.55 }); toonify(lo, { rim: 0.4 });
+  toonify(hi, { rim: 0.85 }); toonify(lo, { rim: 0.6 });
   // ink only on the big silhouettes: baked bodywork, livery, wheels, torso, helmet, limbs
   limbs.forEach(l => { l.userData.ink = true; }); torso.traverse(o => { if (o.isMesh) o.userData.ink = true; }); head.children[0].userData.ink = true;
-  addOutlines(hi, { width: D >= 2 ? 2.2 : 1.9, minSize: 0.05, filter: o => o.userData.ink });
-  addOutlines(lo, { width: 1.6 });
+  addOutlines(hi, { width: D >= 2 ? 2.9 : 2.5, minSize: 0.05, filter: o => o.userData.ink });
+  addOutlines(lo, { width: 2.2 });
   hi.traverse(o => { if (o.isMesh) o.receiveShadow = false; });
   const bike = {
     root, lean, wheelie, body, hi, lo, front, rear, head, torso, limbs, extras, exhaust, detail: D,

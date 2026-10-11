@@ -73,13 +73,15 @@ function mountainRing(theme, haze, seed, radius) {
   return mesh;
 }
 
-export function buildEnvironment(renderer, scene, { theme, weather, night, preset, seed = 1, yBase = 0 }) {
+export function buildEnvironment(renderer, scene, { theme, weather, night, preset, seed = 1, yBase = 0, tod = 'day' }) {
   const wet = weather === 'LIGHT_RAIN' || weather === 'HEAVY_RAIN';
   const heavy = weather === 'HEAVY_RAIN';
   const cloudy = weather === 'CLOUDY';
   const backdrop = new THREE.Group(); backdrop.name = 'backdrop';
   const R = 4000;
-  const elev = THREE.MathUtils.degToRad(night ? 55 : theme.sky.elev), azim = THREE.MathUtils.degToRad(theme.sky.azim);
+  const dry = !(weather === 'LIGHT_RAIN' || weather === 'HEAVY_RAIN' || weather === 'CLOUDY');
+  if (!dry || night) tod = 'day';
+  const elev = THREE.MathUtils.degToRad(night ? 55 : tod === 'golden' ? 13 : tod === 'sunset' ? 6 : theme.sky.elev), azim = THREE.MathUtils.degToRad(theme.sky.azim);
   const sunDir = new THREE.Vector3().setFromSphericalCoords(1, Math.PI / 2 - elev, azim);
   // anime palette: saturated blue zenith -> pale cyan horizon (themes tint the horizon)
   const haze = new THREE.Color(theme.haze);
@@ -88,6 +90,8 @@ export function buildEnvironment(renderer, scene, { theme, weather, night, prese
   else if (heavy) { top = '#4c5876'; hor = '#9aa3b8'; bot = '#545a66'; sunCol = '#000000'; }
   else if (wet) { top = '#5f7499'; hor = '#b6bfd2'; bot = '#5d6470'; sunCol = '#202020'; }
   else if (cloudy) { top = '#4f86d6'; hor = '#c9daf0'; bot = '#7b8a80'; sunCol = '#a09080'; }
+  else if (tod === 'golden') { top = '#3566d6'; hor = '#ffc98a'; bot = '#8a8a62'; sunCol = '#fff0c8'; sunSize = 0.9990; }
+  else if (tod === 'sunset') { top = '#2a2a78'; hor = '#ff8f5e'; bot = '#6a4e5a'; sunCol = '#ffe0a8'; sunSize = 0.9986; }
   else { top = '#2f7fe8'; hor = new THREE.Color('#bfe6ff').lerp(haze, 0.35).getStyle(); bot = '#7ea07a'; }
   const horizon = new THREE.Color(hor);
   const skyMat = new THREE.ShaderMaterial({
@@ -101,8 +105,8 @@ export function buildEnvironment(renderer, scene, { theme, weather, night, prese
   // cumulus billboards, merged into ONE mesh (quads face the dome centre = the camera)
   if (!night) {
     const r = mulberry(seed * 13 + 5);
-    const count = heavy ? 26 : wet ? 22 : cloudy ? 22 : preset.q >= 1 ? 13 : 9;
-    const tint = heavy ? ['#b6bccb', '#8c93a6', 'rgba(70,72,96,0.6)'] : wet ? ['#e2e6f0', '#aab2c6', 'rgba(90,96,130,0.5)'] : ['#ffffff', '#c8d4f2', 'rgba(120,130,190,0.45)'];
+    const count = heavy ? 26 : wet ? 22 : cloudy ? 22 : tod !== 'day' ? (preset.q >= 1 ? 17 : 12) : preset.q >= 1 ? 13 : 9;
+    const tint = tod === 'golden' ? ['#fff4e2', '#ffbf8c', 'rgba(170,90,120,0.5)'] : tod === 'sunset' ? ['#ffe2c8', '#ff9a7a', 'rgba(110,60,130,0.6)'] : heavy ? ['#b6bccb', '#8c93a6', 'rgba(70,72,96,0.6)'] : wet ? ['#e2e6f0', '#aab2c6', 'rgba(90,96,130,0.5)'] : ['#ffffff', '#c8d4f2', 'rgba(120,130,190,0.45)'];
     const variants = 4, texs = [];
     // atlas of 4 cloud shapes stacked vertically
     const atlas = document.createElement('canvas'); atlas.width = 256; atlas.height = 128 * variants; const ax = atlas.getContext('2d');
@@ -115,7 +119,7 @@ export function buildEnvironment(renderer, scene, { theme, weather, night, prese
       dir.setFromSphericalCoords(1, Math.PI / 2 - el, az);
       const dist = R * (0.62 + r() * 0.12); cpos.copy(dir).multiplyScalar(dist);
       right.crossVectors(up, dir).normalize(); upv.crossVectors(dir, right).normalize();
-      const w = dist * (0.16 + r() * 0.16) * (cloudy || wet ? 1.4 : 1), h = w * 0.5;
+      const w = dist * (0.16 + r() * 0.16) * (cloudy || wet ? 1.4 : tod !== 'day' ? 1.25 : 1), h = w * (tod !== 'day' ? 0.62 : 0.5); // dramatic towering cumulus at golden hour
       const v = Math.floor(r() * variants), b = pos.length / 3;
       for (const [sx, sy] of [[-1, 0], [1, 0], [1, 1], [-1, 1]]) {
         pos.push(cpos.x + right.x * sx * w / 2 + upv.x * sy * h, cpos.y + right.y * sx * w / 2 + upv.y * sy * h - h * 0.12, cpos.z + right.z * sx * w / 2 + upv.z * sy * h);
@@ -152,7 +156,7 @@ export function buildEnvironment(renderer, scene, { theme, weather, night, prese
   scene.fog = new THREE.Fog(horizon.clone(), heavy ? 30 : 120, fogFar);
 
   // lights: one key light + hemisphere fill (toon ramps do the rest). No env maps.
-  const sunColor = night ? new THREE.Color('#e4e8ff') : new THREE.Color('#fff3df');
+  const sunColor = night ? new THREE.Color('#e4e8ff') : tod === 'golden' ? new THREE.Color('#ffd49a') : tod === 'sunset' ? new THREE.Color('#ffae7a') : new THREE.Color('#fff3df');
   const sunI = night ? 1.5 : heavy ? 1.1 : wet ? 1.4 : cloudy ? 1.9 : 2.6;
   const sun = new THREE.DirectionalLight(sunColor, sunI);
   sun.position.copy(sunDir).multiplyScalar(200);
@@ -169,7 +173,7 @@ export function buildEnvironment(renderer, scene, { theme, weather, night, prese
   }
   const tmpTarget = new THREE.Vector3();
   return {
-    backdrop, sun, hemi, horizon, sunDir, exposure: 1, envRT: null, wet, night,
+    backdrop, sun, hemi, horizon, sunDir, tod, rim: night ? '#9fb4ff' : tod === 'golden' ? '#ffb46a' : tod === 'sunset' ? '#ff7aa8' : wet ? '#cfe0ff' : '#7fe8ff', exposure: 1, envRT: null, wet, night,
     update(camera, focus) {
       backdrop.position.set(camera.position.x, yBase, camera.position.z);
       backdrop.scale.setScalar(Math.min(1, camera.far * 0.92 / 4000));

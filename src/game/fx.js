@@ -85,8 +85,9 @@ export class FX {
   sparks(p, vx, vz) {
     for (let k = 0; k < 3; k++) this.glow.emit(p.x, p.y + 0.03, p.z, vx * 0.8 + (Math.random() - 0.5) * 4, 0.6 + Math.random() * 2.2, vz * 0.8 + (Math.random() - 0.5) * 4, 0.25 + Math.random() * 0.25, 0.09, 0.03, 3.2, 1.6, 0.5, 1, 0.8, 9.8);
   }
-  flame(p, vx, vz) {
-    for (let k = 0; k < 4; k++) this.glow.emit(p.x, p.y, p.z, vx * 0.9 + (Math.random() - 0.5) * 0.6, 0.2 + Math.random() * 0.3, vz * 0.9 + (Math.random() - 0.5) * 0.6, 0.08 + Math.random() * 0.07, 0.22, 0.06, k < 2 ? 3.5 : 1.0, k < 2 ? 1.3 : 1.2, k < 2 ? 0.3 : 3.0, 0.9, 3, 0);
+  flame(p, vx, vz) { // v6 cartoony backfire: chunky yellow/orange pops + an inked-looking grey puff
+    for (let k = 0; k < 5; k++) this.glow.emit(p.x, p.y, p.z, vx * 0.9 + (Math.random() - 0.5) * 0.8, 0.2 + Math.random() * 0.4, vz * 0.9 + (Math.random() - 0.5) * 0.8, 0.1 + Math.random() * 0.08, k < 2 ? 0.42 : 0.3, 0.1, k < 2 ? 3.6 : 3.2, k < 2 ? 2.4 : 1.1, k < 2 ? 0.6 : 0.15, 1, 3, 0);
+    this.smoke.emit(p.x, p.y + 0.05, p.z, vx * 0.6, 0.6, vz * 0.6, 0.45, 0.35, 1.4, 0.82, 0.8, 0.86, 0.55, 2.5, 0.6);
   }
   burst(p, color = [0.6, 0.5, 0.4], count = 20) { for (let k = 0; k < count * this.rate; k++) this.smoke.emit(p.x, p.y + 0.3, p.z, (Math.random() - 0.5) * 6, Math.random() * 3, (Math.random() - 0.5) * 6, 1.5 + Math.random(), 1, 5, color[0], color[1], color[2], 0.5, 1.5, 0.5); }
   update(dt, scale) { this.smoke.update(dt, scale); this.glow.update(dt, scale); }

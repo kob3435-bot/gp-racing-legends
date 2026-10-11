@@ -1,4 +1,5 @@
 import { now } from './transport.js';
+import { encodeState } from './codec.js';
 // Per-race network sync.
 //  - own bike: simulated locally every physics step with zero input delay (prediction); state sent at 30 Hz
 //  - host: authoritative AI + start lights + finish order; host bike 30 Hz, AI snapshot 20 Hz (compact arrays)
@@ -11,7 +12,7 @@ function pack(e) {
     (e.crashT > 0 ? 1 : 0) | (e.finished ? 2 : 0) | (e.offTrack ? 4 : 0) | (e.projected ? 8 : 0),
     e.finished ? r3(e.finishTime) : 0, e.lap, isFinite(e.bestLap) ? r3(e.bestLap) : 0, r2(e.throttle || 0), r2(e.brake || 0)];
 }
-const HOST_HZ = 30, AI_HZ = 20, GUEST_HZ = 30;
+const HOST_HZ = 30, GUEST_HZ = 30; // host: one combined packet (own bike + all AI) at 30 Hz -> smaller interpolation buffer
 
 export class NetRace {
   constructor(session, game, race, cfg) {
@@ -34,7 +35,7 @@ export class NetRace {
   setLights(localAt, hold) { this.lights = { at: localAt, hold }; }
   // ---------- receive ----------
   onMsg(m) {
-    if (m.t === 'H' || m.t === 'S' || m.t === 'G') this.ingest(m.r, m.e);
+    if (m.t === 'S' || m.t === 'G') this.ingest(m.r, m.e);
     else if (m.t === 'final') this.finalRx = m;
   }
   ingest(t, entries) {
@@ -55,9 +56,9 @@ export class NetRace {
       if (smp.best > 0) e.netBest = smp.best;
     }
     const sorted = this.lags.slice().sort((x, y) => x - y);
-    const p90 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.9))];
+    const p90 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))]; // p95 one-way lag
     const gap = this.gaps.length ? this.gaps.reduce((x, y) => x + y, 0) / this.gaps.length : 1 / 30;
-    this.target = Math.max(0.06, Math.min(0.6, p90 + gap * 1.3 + 0.01));
+    this.target = Math.max(0.04, Math.min(0.6, p90 + gap + 0.005)); // as small as safe: covers 95% of packets + one send interval
     if (!this.delayInit && this.lags.length >= 6) { this.delay = this.target; this.delayInit = true; }
   }
   // ---------- remote bike for one physics step ----------
@@ -97,9 +98,12 @@ export class NetRace {
     const rate = 0.06 * dt; this.delay += Math.max(-rate, Math.min(rate, this.target - this.delay)); // <=6% time warp, never a jump
     if (L && L.open && !this.offline) {
       if (this.role === 'host') {
-        if (t - this.txH >= 1000 / HOST_HZ && race.player) { this.txH = t; L.sendFast({ t: 'H', r: r3(race.t), e: [pack(race.player)] }); }
-        if (t - this.txS >= 1000 / AI_HZ) { this.txS = t; L.sendFast({ t: 'S', r: r3(race.t), e: race.entrants.filter(e => !e.isPlayer && !e.remote).map(pack) }); }
-      } else if (race.player && t - this.txH >= 1000 / GUEST_HZ) { this.txH = t; L.sendFast({ t: 'G', r: r3(race.t), e: [pack(race.player)] }); }
+        if (t - this.txH >= 1000 / HOST_HZ) {
+          this.txH = t; const E = race.entrants, out = this._out || (this._out = []); out.length = 0;
+          for (let k = 0; k < E.length; k++) if (!E[k].remote) out.push(pack(E[k]));
+          L.sendFast(encodeState('S', race.t, out));
+        }
+      } else if (race.player && t - this.txH >= 1000 / GUEST_HZ) { this.txH = t; L.sendFast(encodeState('G', race.t, [pack(race.player)])); }
     }
     this.rivalT -= dt;
     if (this.rivalT <= 0 && this.rival && race.player) { this.rivalT = 0.25; this.game.hud.rival && this.game.hud.rival(this.rival, race.player, race); }

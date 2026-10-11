@@ -49,8 +49,10 @@ export class Hud {
       <div class="lowerthird" id="h-lower"></div>
       <div class="pops" id="h-pops"></div>
     </div>`;
-    const $ = (id) => this.root.querySelector('#' + id);
-    this.$ = $;
+    // element cache + write-on-change: no per-frame querySelector, no redundant DOM writes (no layout thrash)
+    const cache = new Map();
+    const $ = (id) => { let el = cache.get(id); if (el === undefined || (el && !el.isConnected)) { el = this.root.querySelector('#' + id); cache.set(id, el); } return el; };
+    this.$ = $; this._v = Object.create(null); this.clockT = 0; this.mapT2 = 0;
     $('h-pause').onclick = onPause; $('h-cam').onclick = onCamera;
     if (race.player && mobile && input) {
       input.bindTouch($('t-left'), 'left'); input.bindTouch($('t-right'), 'right');
@@ -110,35 +112,44 @@ export class Hud {
     el.innerHTML = `<span class="num" style="background:${e.rider.helmet[0]};color:${e.rider.helmet[1]}">${e.rider.number}</span><div><b>${e.rider.name}</b><small>${riderTeamName(e.rider)}${extra}</small></div>`;
     el.classList.add('show');
   }
+  // text/html/class setters that touch the DOM only when the value actually changes
+  txt(id, v) { if (this._v[id] === v) return; this._v[id] = v; const el = this.$(id); if (el) el.textContent = v; }
+  html(id, v) { if (this._v[id] === v) return; this._v[id] = v; const el = this.$(id); if (el) el.innerHTML = v; }
   update(dt, focus, cam) {
     const r = this.race, $ = this.$;
     const p = r.player || focus;
     if (!p) return;
-    $('h-pos').textContent = 'P' + p.pos;
-    $('h-lap').textContent = Math.max(1, Math.min(r.laps, p.lap || 1));
+    this.txt('h-pos', 'P' + p.pos);
+    this.txt('h-lap', String(Math.max(1, Math.min(r.laps, p.lap || 1))));
     const raceT = r.goTime != null ? r.t - r.goTime : 0;
-    $('h-cur').textContent = r.goTime != null && !p.finished ? fmtTime(r.t - (p.lap > 0 ? p.lapStart : r.goTime)) : (p.finished ? 'FINISH' : '0:00.000');
-    $('h-last').textContent = fmtTime(p.lapTimes[p.lapTimes.length - 1]);
-    $('h-best').textContent = fmtTime(p.bestLap);
+    this.clockT -= dt;
+    if (this.clockT <= 0) { // the running lap clock is the only per-frame-changing string: 15 Hz is visually identical
+      this.clockT = 1 / 15;
+      this.txt('h-cur', r.goTime != null && !p.finished ? fmtTime(r.t - (p.lap > 0 ? p.lapStart : r.goTime)) : (p.finished ? 'FINISH' : '0:00.000'));
+      this.txt('h-last', fmtTime(p.lapTimes[p.lapTimes.length - 1]));
+      this.txt('h-best', fmtTime(p.bestLap));
+    }
     if (r.player) {
       const kmh = Math.round(p.v * 3.6);
-      $('h-spd').textContent = kmh;
-      $('h-gear').textContent = p.v < 0.5 && !p.started ? 'N' : p.gear;
-      const rf = Math.max(0, Math.min(1, (p.rpm - 3500) / 14000));
-      const rpmEl = $('h-rpm'); rpmEl.style.width = (rf * 100).toFixed(1) + '%'; rpmEl.className = rf > 0.93 ? 'redline' : rf > 0.78 ? 'high' : '';
-      const w = $('h-wear'); if (w) w.textContent = Math.round((1 - p.wear) * 100) + '%';
-      const dr = $('h-draft'); if (dr) { const on = p.draft > 0.08 && p.v > 30; if (on !== this.draftOn) { dr.classList.toggle('on', on); this.draftOn = on; } if (on) $('h-draftbar').style.width = Math.round(Math.min(1, p.draft) * 100) + '%'; }
-      const as = $('h-assist');
-      if (as) as.innerHTML = p.brake > 0.05 ? `<i class="b" style="opacity:${0.4 + p.brake * 0.6}">BRAKE</i>` : p.throttle > 0.6 ? '<i class="g">THROTTLE</i>' : '<i class="y">LIFT</i>';
-      if (p.offTrack) as.innerHTML = '<i class="b">OFF TRACK</i>';
+      this.txt('h-spd', String(kmh));
+      this.txt('h-gear', p.v < 0.5 && !p.started ? 'N' : String(p.gear));
+      const rf = Math.max(0, Math.min(1, (p.rpm - 3500) / 14000)), rq = Math.round(rf * 200);
+      if (rq !== this._rq) { this._rq = rq; const rpmEl = $('h-rpm'); if (rpmEl) { rpmEl.style.width = (rq / 2) + '%'; const c = rf > 0.93 ? 'redline' : rf > 0.78 ? 'high' : ''; if (rpmEl.className !== c) rpmEl.className = c; } }
+      if ($('h-wear')) this.txt('h-wear', Math.round((1 - p.wear) * 100) + '%');
+      const dr = $('h-draft'); if (dr) { const on = p.draft > 0.08 && p.v > 30; if (on !== this.draftOn) { dr.classList.toggle('on', on); this.draftOn = on; } if (on) { const w = Math.round(Math.min(1, p.draft) * 20) * 5; if (w !== this._dw) { this._dw = w; $('h-draftbar').style.width = w + '%'; } } }
+      if ($('h-assist')) this.html('h-assist', p.offTrack ? '<i class="b">OFF TRACK</i>' : p.brake > 0.05 ? `<i class="b" style="opacity:${(0.4 + Math.round(p.brake * 5) / 5 * 0.6).toFixed(2)}">BRAKE</i>` : p.throttle > 0.6 ? '<i class="g">THROTTLE</i>' : '<i class="y">LIFT</i>');
     }
-    // gaps
+    // gaps (10 Hz)
     const idx = r.order.indexOf(p);
-    const A = r.order[idx - 1], B = r.order[idx + 1];
-    if (r.goTime != null && raceT > 3 && !p.finished) {
-      $('h-gapA').innerHTML = A ? `<em>${shortName(A.rider)}</em> ${fmtGap(-r.gap(A, p))}` : '<em>LEADER</em>';
-      $('h-gapB').innerHTML = B && !B.finished ? `<em>${shortName(B.rider)}</em> ${fmtGap(r.gap(p, B))}` : '';
-    } else { $('h-gapA').textContent = ''; $('h-gapB').textContent = ''; }
+    this.gapT = (this.gapT || 0) - dt;
+    if (this.gapT <= 0) {
+      this.gapT = 0.1;
+      const A = r.order[idx - 1], B = r.order[idx + 1];
+      if (r.goTime != null && raceT > 3 && !p.finished) {
+        this.html('h-gapA', A ? `<em>${shortName(A.rider)}</em> ${fmtGap(-r.gap(A, p))}` : '<em>LEADER</em>');
+        this.html('h-gapB', B && !B.finished ? `<em>${shortName(B.rider)}</em> ${fmtGap(r.gap(p, B))}` : '');
+      } else { this.txt('h-gapA', ''); this.txt('h-gapB', ''); }
+    }
     // tower (throttled)
     this.towerT -= dt;
     if (this.towerT <= 0 && !this.mobile) {
@@ -155,9 +166,10 @@ export class Hud {
         rows.push(`<div class="tr ${e === p ? 'me' : ''}"><span class="p">${k + 1}</span><span class="c" style="background:${e.rider.helmet[0]}"></span><span class="n">${shortName(e.rider)}</span><span class="g">${g}</span></div>`);
         lastK = k;
       }
-      $('h-tower').innerHTML = rows.join('');
+      this.html('h-tower', rows.join(''));
     }
-    // minimap
+    // minimap (30 Hz is plenty for dots)
+    this.mapT2 -= dt; if (this.mapT2 > 0) return; this.mapT2 = 1 / 30;
     const x = this.mapCtx; x.clearRect(0, 0, 220, 220); x.drawImage(this.mapBase, 0, 0);
     for (const e of r.entrants) {
       const i = ((Math.floor(e.s / this.geo.ds) % this.geo.N) + this.geo.N) % this.geo.N;
@@ -167,7 +179,7 @@ export class Hud {
     }
     if (this.spectator) {
       const f = $('h-focus');
-      if (f) f.innerHTML = `<div class="sp-name"><span class="num" style="background:${p.rider.helmet[0]};color:${p.rider.helmet[1]}">${p.rider.number}</span> ${p.rider.name}</div><div class="sp-row">P${p.pos} · ${Math.round(p.v * 3.6)} km/h · ${cam.toUpperCase()} CAM</div>`;
+      if (f) this.html('h-focus', `<div class="sp-name"><span class="num" style="background:${p.rider.helmet[0]};color:${p.rider.helmet[1]}">${p.rider.number}</span> ${p.rider.name}</div><div class="sp-row">P${p.pos} · ${Math.round(p.v * 3.6)} km/h · ${cam.toUpperCase()} CAM</div>`);
     }
   }
 }

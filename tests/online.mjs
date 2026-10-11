@@ -11,6 +11,7 @@ const BASE = args.find(a => a.startsWith('http')) || process.env.BASE_URL || 'ht
 const CHROME = process.env.CHROME || '/usr/bin/google-chrome';
 const OUT = new URL('../screenshots/', import.meta.url).pathname;
 const LAG = args.includes('--lag'), SHOTS = args.includes('--shots');
+const PFX = args.includes('--v6') ? 'v6-online-' : 'v4-';
 let LOCAL = args.includes('--local');
 const results = []; const ok = (name, cond, info = '') => { results.push({ name, pass: !!cond }); console.log(`${cond ? 'PASS' : 'FAIL'}  ${name} ${info}`); };
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -100,14 +101,14 @@ await hp.click('#ready'); await gp.click('#ready');
 await hp.waitForFunction(() => !document.querySelector('#startS').disabled, null, { timeout: 10000 });
 ok('host can start once both are ready', true);
 await Promise.all([hp, gp].map(p => p.evaluate(() => { const sc = document.querySelector('#ui .screen'); if (sc) sc.scrollTop = 0; window.scrollTo(0, 0); })));
-await hp.screenshot({ path: OUT + 'v4-online-lobby-host.png' }); await gp.screenshot({ path: OUT + 'v4-online-lobby-guest.png' });
+await hp.screenshot({ path: OUT + PFX + 'online-lobby-host.png' }); await gp.screenshot({ path: OUT + PFX + 'online-lobby-guest.png' });
 await hp.click('#startS');
 await Promise.all([hp, gp].map(p => p.waitForSelector('.cal .calr', { timeout: 15000 })));
 const seasonOf = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('gprl.online.v1') || 'null'));
 let hs = await seasonOf(hp), gs = await seasonOf(gp);
 ok('season saved on both devices, same calendar & 22-rider field', hs && gs && JSON.stringify(hs.season.calendar) === JSON.stringify(gs.season.calendar) && hs.season.field.length === 22 && gs.season.field.join() === hs.season.field.join(), `${hs?.season.calendar.join(',')} · ${hs?.season.field.length} riders`);
 ok('roles saved (host/guest) with the room code', hs.role === 'host' && gs.role === 'guest' && gs.code === code);
-await hp.screenshot({ path: OUT + 'v4-online-hub.png' });
+await hp.screenshot({ path: OUT + PFX + 'online-hub.png' });
 
 // ---------------- in-race measurements ----------------
 const samplerSrc = () => {
@@ -159,7 +160,7 @@ async function raceRound(r, { disconnect = false } = {}) {
   const info = `jitter: guest bike on host ${jRemHost.pct.toFixed(2)}% · host bike on guest ${jRemGuest.pct.toFixed(2)}% · host AI on guest ${jAiGuest.pct.toFixed(2)}% · local AI ref ${jRef.pct.toFixed(2)}% · buffer host ${(nm[0].delay * 1000).toFixed(0)} ms / guest ${(nm[1].delay * 1000).toFixed(0)} ms · extrap ${(100 * nm[1].extrapSteps / Math.max(1, nm[1].steps)).toFixed(1)}% steps, snaps ${nm[0].snaps + nm[1].snaps}`;
   ok(`R${r + 1}: remote motion smooth (jitter close to local sim)`, Math.max(jRemHost.pct, jRemGuest.pct, jAiGuest.pct) < Math.max(6, jRef.pct * 2.5) && nm[0].snaps + nm[1].snaps === 0, info);
   measures.push({ round: r + 1, dGo, lat, jRemHost: jRemHost.pct, jRemGuest: jRemGuest.pct, jAiGuest: jAiGuest.pct, jRef: jRef.pct, bufHost: nm[0].delay, bufGuest: nm[1].delay, fpsHost: hsS[idx[0].ai].length / 5, fpsGuest: gsS[idx[1].ai].length / 5 });
-  if (SHOTS || r === 0) { await hp.screenshot({ path: OUT + `v4-race-host-view.png` }); await gp.screenshot({ path: OUT + `v4-race-guest-view.png` }); }
+  if (SHOTS || r === 0) { await hp.screenshot({ path: OUT + PFX + `race-host-view.png` }); await gp.screenshot({ path: OUT + PFX + `race-guest-view.png` }); }
   const rivalHud = await gp.evaluate(() => { const el = document.getElementById('h-rival'); return el && !el.hidden ? el.textContent : ''; });
   ok(`R${r + 1}: rival HUD shows the other human's position and gap`, /RIVAL.*P\d+.*s/.test(rivalHud), rivalHud);
   if (disconnect) {
@@ -182,14 +183,14 @@ async function raceRound(r, { disconnect = false } = {}) {
   } else await Promise.all([hp, gp].map(p => p.evaluate(() => { window.__gp.game.timeScale = 6; })));
   const resultsOf = async (p) => { await p.waitForSelector('#podium-skip, .restable', { timeout: 300000 }); if (await p.$('#podium-skip')) await p.click('#podium-skip').catch(() => {}); await p.waitForSelector('.restable', { timeout: 60000 }); return p.$$eval('.restable .rr:not(.head)', rows => rows.map(x => x.children[1].textContent + '|' + x.lastElementChild.textContent)); };
   if (disconnect) {
-    const hr = await resultsOf(hp); await hp.screenshot({ path: OUT + 'v4-results-host.png' });
+    const hr = await resultsOf(hp); await hp.screenshot({ path: OUT + PFX + 'results-host.png' });
     ok(`R${r + 1}: host classified all 22`, hr.length === 22);
   } else {
     const [hr, gr] = await Promise.all([resultsOf(hp), resultsOf(gp)]);
     ok(`R${r + 1}: finish order and points identical on both devices`, hr.join() === gr.join() && hr.length === 22, hr.slice(0, 3).join(' / '));
     const hl = await gp.$$eval('.restable .rr.me, .restable .rr.rival', x => x.length);
     ok(`R${r + 1}: results highlight both humans`, hl === 2);
-    if (r === 0) { await hp.screenshot({ path: OUT + 'v4-results-host.png' }); }
+    if (r === 0) { await hp.screenshot({ path: OUT + PFX + 'results-host.png' }); }
   }
   await sleep(1500);
   hs = await seasonOf(hp); gs = await seasonOf(gp);
@@ -200,7 +201,7 @@ const measures = [];
 let guestSave = null;
 await raceRound(0);
 await gp.waitForSelector('.cal .calr, #next', { timeout: 30000 }); if (await gp.$('#next')) await gp.click('#next');
-await gp.waitForSelector('.cal .calr'); await gp.screenshot({ path: OUT + 'v4-standings-guest.png' });
+await gp.waitForSelector('.cal .calr'); await gp.screenshot({ path: OUT + PFX + 'standings-guest.png' });
 guestSave = await seasonOf(gp);
 await raceRound(1, { disconnect: true });
 // season complete: champion screens on both
@@ -209,7 +210,7 @@ const ch = await Promise.all([hp, gp].map(p => p.textContent('.center-col h2')))
 ok('season complete: same champion on both devices', ch[0] === ch[1], ch[0]);
 const hlc = await gp.$$eval('.stand .sr.me, .stand .sr.rival', x => x.length);
 ok('champion standings highlight both humans (riders + teams)', hlc >= 3, hlc + ' highlighted rows');
-await hp.screenshot({ path: OUT + 'v4-champion-host.png' });
+await hp.screenshot({ path: OUT + PFX + 'champion-host.png' });
 // persistence after reload
 await hp.reload(); await hp.waitForSelector('[data-go=online]'); await hp.click('[data-go=online]');
 const resumeTxt = await hp.textContent('section.col p');
@@ -222,7 +223,7 @@ await M.page.goto(BASE + '?nosw' + transQ + peerQ); await M.page.waitForSelector
 await M.page.waitForSelector('#room-code'); await M.page.waitForFunction(() => /waiting for your friend/i.test(document.getElementById('net-err').textContent), null, { timeout: 30000 });
 const mb = await M.page.evaluate(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); return { code: r('#room-code'), copy: r('#copy'), ready: r('#ready'), w: innerWidth }; });
 ok('mobile 844x390: lobby renders, code + copy fit the screen', mb.code.right <= mb.w && mb.copy.right <= mb.w && mb.code.height > 20, JSON.stringify({ code: Math.round(mb.code.right), copy: Math.round(mb.copy.right) }));
-await M.page.screenshot({ path: OUT + 'v4-mobile-lobby.png' });
+await M.page.screenshot({ path: OUT + PFX + 'mobile-lobby.png' });
 
 const errs = errors.filter(e => !/favicon|ERR_INTERNET_DISCONNECTED|Could not connect to peer|Lost connection to server/i.test(e));
 ok('no console errors', errs.length === 0, errs.slice(0, 5).join(' | '));

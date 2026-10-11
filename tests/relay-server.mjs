@@ -4,7 +4,8 @@ import { WebSocketServer } from 'ws';
 export function startRelay(port = 9012) {
   const rooms = new Map(); const wss = new WebSocketServer({ port });
   wss.on('connection', (ws) => {
-    ws.on('message', (buf) => {
+    ws.on('message', (buf, isBinary) => {
+      if (isBinary && ws.room) { const r = rooms.get(ws.room); const o = r && (ws.role === 'host' ? r.guest : r.host); if (o && o.readyState === 1) o.send(buf, { binary: true }); return; }
       const txt = buf.toString();
       if (!ws.room) {
         const { join, role } = JSON.parse(txt); let r = rooms.get(join);

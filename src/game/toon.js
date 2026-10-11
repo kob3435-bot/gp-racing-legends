@@ -7,7 +7,8 @@ import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 const ramps = {};
 export function ramp(steps = 3) {
   if (ramps[steps]) return ramps[steps];
-  const vals = steps === 2 ? [110, 255] : steps === 4 ? [70, 140, 205, 255] : [96, 186, 255];
+  // v6: hard 2-tone (shadow / lit) with a thin highlight band on the default ramp = sharper anime key-art shading
+  const vals = steps === 2 ? [104, 255] : steps === 4 ? [70, 140, 205, 255] : [88, 232, 232, 255];
   const data = new Uint8Array(vals.length * 4);
   vals.forEach((v, i) => data.set([v, v, v, 255], i * 4));
   const t = new THREE.DataTexture(data, vals.length, 1, THREE.RGBAFormat);
@@ -26,7 +27,7 @@ function addRim(m, strength) {
     sh.uniforms.uRim = { value: strength };
     sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 uRimCol; uniform float uRim;')
       .replace('#include <opaque_fragment>', `{ float rf = 1.0 - saturate(dot(normal, normalize(vViewPosition)));
-        outgoingLight += uRimCol * uRim * smoothstep(0.62, 0.72, rf) * diffuseColor.rgb; }
+        outgoingLight += uRimCol * uRim * smoothstep(0.63, 0.66, rf) * (0.35 + diffuseColor.rgb); }
       #include <opaque_fragment>`);
   };
   m.customProgramCacheKey = () => 'rim' + strength;
@@ -79,7 +80,7 @@ void main() {
   vec4 clip = projectionMatrix * mvPosition;
   vec3 vn = normalize(normalMatrix * n);
   vec2 dir = vn.xy; float l = length(dir); dir = l > 1e-4 ? dir / l : vec2(0.0);
-  float w = uWidth * clamp(9.0 / max(clip.w, 0.1), 0.25, 1.0);
+  float w = uWidth * clamp(16.0 / max(clip.w, 0.1), 0.6, 1.0); // v6: near-constant ink width with distance
   clip.xy += dir * w * clip.w * 2.0 / uRes;
   gl_Position = clip;
   #include <fog_vertex>

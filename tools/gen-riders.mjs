@@ -132,3 +132,5 @@ const riders = R.map(build);
 writeFileSync(new URL('../src/data/riders.json', import.meta.url), JSON.stringify(riders, null, 1));
 for (const r of riders) console.log(String(computeOVR(r.attributes)).padStart(3), r.kind.padEnd(8), r.name + (r.version ? ' - ' + r.version : ''));
 console.log('total', riders.length, 'legends', riders.filter(r => r.kind === 'legend').length);
+// v6: names/numbers/teams are then overridden by the parody rename pass
+await import('./rename-v6.mjs');
