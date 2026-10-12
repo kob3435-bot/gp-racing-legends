@@ -421,7 +421,7 @@ export class UI {
     el.querySelector('#retry').onclick = () => { audio.click(); onRetry(); };
     if (onNext) el.querySelector('#next').onclick = () => { audio.click(); onNext(); };
   }
-  toast(msg) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = msg; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }
+  toast(msg) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = msg; (document.getElementById('root') || document.body).appendChild(d); setTimeout(() => d.remove(), 2600); }
 }
 
 // field of 22: player + current grid (a legend/rookie replaces the lowest-rated regular)

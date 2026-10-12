@@ -65,6 +65,7 @@ function bikeBlob() {
 // v6 time-of-day per circuit (dry races): golden hour / sunset key-art lighting
 const TOD = { siam: 'golden', tuscan: 'golden', levante: 'golden', albion: 'golden', valle: 'golden', southern: 'sunset', kanto: 'sunset', lonestar: 'sunset', polder: 'golden', selangor: 'sunset' };
 import { showCutin } from '../ui/cutin.js';
+import { viewSize } from '../orient.js';
 import { portraitSVG } from '../ui/portrait.js';
 const netNow = () => performance.timeOrigin + performance.now();
 
@@ -94,8 +95,8 @@ export class Game {
     this.__anim = (m, lean, v = 30) => animateBike(m, { lean, v, dt: 0.05, near: true }); // debug/screenshot hook
     this.buildShowroom();
     this.applyGraphics(settings.graphics);
-    window.addEventListener('resize', () => this.resize());
-    this.resize();
+    window.addEventListener('resize', () => this.resize()); window.addEventListener('gp-resize', () => this.resize());
+    this.resize(); window.__gpGame = this; // test hook (menu-time); window.__gp is set per race
     this.loop = this.loop.bind(this);
     requestAnimationFrame(this.loop);
   }
@@ -118,7 +119,7 @@ export class Game {
     if (this.fx && this.scene) { /* particle budgets are rebuilt with the next race */ }
   }
   resize() {
-    const w = window.innerWidth, h = window.innerHeight;
+    const { w, h } = viewSize();
     this.renderer.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
     setOutlineResolution(w, h);
     this.post.resize();
@@ -177,7 +178,7 @@ export class Game {
       const lean = Math.sin(sh.t * 0.9) * 0.42;
       animateBike(sh.bike, { lean, accel: 0, v: 4, dt, near: true });
     }
-    const narrow = window.innerWidth < window.innerHeight * 1.2;
+    const narrow = viewSize().w < viewSize().h * 1.2;
     const drift = Math.sin(sh.t * 0.17) * 0.35;
     const dist = narrow ? 5.3 : 4.7;
     this.camera.position.set(Math.sin(drift) * dist, 1.25 + Math.sin(sh.t * 0.23) * 0.12, Math.cos(drift) * dist);
@@ -196,7 +197,7 @@ export class Game {
     div.innerHTML = `<div class="ld-track">${outlineSvg(track)}</div><div class="ld-round">${cfg.title || 'QUICK RACE'}</div><h1>${track.name}</h1>
       <div class="ld-meta">${track.country} · ${(track.length / 1000).toFixed(2)} km · ${cfg.laps} LAP${cfg.laps > 1 ? 'S' : ''} · ${w.icon} ${w.label}${track.night ? ' · NIGHT RACE' : ''}</div>
       <div class="ld-bar"><i></i></div><div class="ld-label">Loading</div><div class="ld-tip">TIP · ${TIPS[(Math.random() * TIPS.length) | 0]}</div>`;
-    document.body.appendChild(div);
+    (document.getElementById('root') || document.body).appendChild(div);
     const bar = div.querySelector('.ld-bar i'), lab = div.querySelector('.ld-label');
     return {
       set: (p, label) => { bar.style.width = Math.round(p * 100) + '%'; if (label) lab.textContent = label; },

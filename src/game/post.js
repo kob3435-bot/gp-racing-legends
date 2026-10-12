@@ -48,6 +48,7 @@ function drawRays(s) {
   return c;
 }
 
+import { viewSize } from '../orient.js';
 export class Post {
   constructor(renderer) {
     this.renderer = renderer; this.enabled = true; this.scene = null; this.camera = null; this.preset = null;
@@ -86,7 +87,7 @@ export class Post {
     const k = vis > 0.02 ? `${Math.round(x * 400)},${Math.round(y * 400)},${Math.round(vis * 20)}` : '0';
     if (k === this._sun) return; this._sun = k;
     if (vis <= 0.02) { this.rays.style.opacity = 0; this.ghosts.style.opacity = 0; return; }
-    const W = innerWidth, H = innerHeight, sx = x * W, sy = y * H;
+    const { w: W, h: H } = viewSize(), sx = x * W, sy = y * H;
     this.rays.style.opacity = (0.55 * vis).toFixed(2); this.rays.style.transform = `translate(${sx}px,${sy}px) translate(-50%,-50%)`;
     this.ghosts.style.opacity = (0.8 * vis).toFixed(2);
     const g = this.ghosts.children, dx = W / 2 - sx, dy = H / 2 - sy;
