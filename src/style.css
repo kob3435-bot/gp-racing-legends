@@ -402,3 +402,6 @@ html.rot #hud, html.rot #ui { left: env(safe-area-inset-top, 0px); right: env(sa
 html.rot.rot-ccw #hud, html.rot.rot-ccw #ui { left: env(safe-area-inset-bottom, 0px); right: env(safe-area-inset-top, 0px); }
 html.rot #root { touch-action: none; } /* rotated: panning is done in game axes by orient.js */
 html.rot input, html.rot textarea, html.rot select { touch-action: manipulation; }
+/* v9: other landscape (camera on the right) -> counter-rotate so the picture always faces the camera-left hold */
+html.flip #root { transform-origin: 50% 50%; transform: rotate(180deg); touch-action: none; }
+html.flip input, html.flip textarea { touch-action: manipulation; }

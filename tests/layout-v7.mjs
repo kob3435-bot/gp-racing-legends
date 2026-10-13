@@ -18,7 +18,7 @@ const errs = [];
   const geo = await p.evaluate(() => { const r = document.getElementById('root').getBoundingClientRect(); const g = window.__gpGame.renderer.getSize(new window.__gpGame.camera.position.constructor()); return { rot: document.documentElement.classList.contains('rot'), rw: Math.round(r.width), rh: Math.round(r.height), gl: [g.x, g.y], aspect: +window.__gpGame.camera.aspect.toFixed(2), overlay: !!document.getElementById('rotate') }; });
   ok('portrait phone: game rotated to landscape (root covers screen, renderer 844x390, no blocking overlay)', geo.rot && geo.rw === 390 && geo.rh === 844 && geo.gl[0] === 844 && geo.gl[1] === 390 && geo.aspect > 2 && !geo.overlay, JSON.stringify(geo));
   await p.screenshot({ path: OUT + 'v8-portrait-menu.png' });
-  const man = await (await p.request.get(BASE + 'manifest.webmanifest')).json(); ok('manifest orientation = landscape', man.orientation === 'landscape');
+  const man = await (await p.request.get(BASE + 'manifest.webmanifest')).json(); ok('manifest orientation = landscape-primary', man.orientation === 'landscape-primary');
   // settings tap (segmented control)
   await tapSel('[data-go=settingsScreen]'); await p.waitForSelector('[data-seg=control]');
   await tapSel('[data-seg=control] [data-v=FULL]');
@@ -76,6 +76,46 @@ const errs = [];
   const P = await p.evaluate(() => ({ rot: document.documentElement.classList.contains('rot'), gl: window.__gpGame.renderer.getSize(new window.__gpGame.camera.position.constructor()), paused: !!window.__gp.game.paused, mark: window.__mark }));
   ok('…and back to portrait: re-rotated live, renderer 844x390, still not paused', P.rot && P.gl.x === 844 && P.gl.y === 390 && !P.paused && P.mark === 1, JSON.stringify(P));
   const tL2 = await hold('#t-left'); ok('after rotating back, touch LEFT still steers left', tL2.hit && Math.sign(tL2.st) === Math.sign(kL), JSON.stringify(tL2));
+  await ctx.close();
+}
+// 1b) real landscape on a phone: ONE fixed physical side (front camera on the LEFT = landscape-primary).
+//     In landscape-secondary the page is counter-rotated 180deg; steering/tilt stay consistent; no toggling on jitter.
+{
+  const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  await ctx.addInitScript(init);
+  await ctx.addInitScript(() => { let T = 'landscape-primary';
+    Object.defineProperty(screen, 'orientation', { configurable: true, get: () => ({ type: T, angle: T === 'landscape-secondary' ? 270 : 90, addEventListener() {}, removeEventListener() {}, lock: async () => {} }) });
+    Object.defineProperty(window, 'orientation', { configurable: true, get: () => (T === 'landscape-secondary' ? -90 : 90) });
+    window.__setOri = (t) => { T = t; dispatchEvent(new Event('orientationchange')); }; });
+  const p = await ctx.newPage(); p.on('pageerror', e => errs.push(e.message)); await p.goto(BASE + '?nosw'); await p.waitForSelector('[data-go=quick]');
+  const cdp = await ctx.newCDPSession(p);
+  const touch = async (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 1 }] });
+  const centre = (sel) => p.evaluate((sel) => { const b = document.querySelector(sel).getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2 }; }, sel);
+  const tapSel = async (sel) => { await p.evaluate((sel) => document.querySelector(sel).scrollIntoView({ block: 'center' }), sel); await p.waitForTimeout(100); const c = await centre(sel); await touch('touchStart', c.x, c.y); await touch('touchEnd'); await p.waitForTimeout(150); };
+  const state = () => p.evaluate(() => ({ cls: document.documentElement.className, tf: getComputedStyle(document.getElementById('root')).transform, gl: window.__gpGame.renderer.getSize(new window.__gpGame.camera.position.constructor()) }));
+  await tapSel('[data-go=quick]'); await p.waitForSelector('#go'); await tapSel('#go');
+  await p.waitForSelector('#intro-skip', { timeout: 90000 }); await tapSel('#intro-skip');
+  await p.evaluate(() => { window.__gp.game.timeScale = 6; }); await p.waitForFunction(() => window.__gp.race.phase === 'race', null, { timeout: 120000 });
+  await p.evaluate(() => { window.__gp.game.timeScale = 1; }); await p.waitForTimeout(800);
+  const hold = async (sel) => { const c = await centre(sel); const hit = await p.evaluate(([x, y, sel]) => document.querySelector(sel).contains(document.elementFromPoint(x, y)), [c.x, c.y, sel]); await touch('touchStart', c.x, c.y); await p.waitForTimeout(600); const st = await p.evaluate(() => window.__gp.race.player.steer); await touch('touchEnd'); await p.waitForTimeout(400); return { hit, st, x: Math.round(c.x) }; };
+  const tilt = () => p.evaluate(() => { const inp = window.__gp.game.input; inp.tiltOn = true; const e = new Event('deviceorientation'); Object.assign(e, { alpha: 0, beta: 15, gamma: 60 }); dispatchEvent(e); const v = inp.tilt; inp.tiltOn = false; inp.tilt = 0; return v; });
+  const A = await state(); const aL = await hold('#t-left'), aR = await hold('#t-right'); const aT = await tilt();
+  ok('landscape-primary (camera left): shown as-is, no rotation', !/\b(rot|flip)\b/.test(A.cls) && A.tf === 'none' && A.gl.x === 844, JSON.stringify(A));
+  ok('landscape-primary: touch LEFT steers left, RIGHT steers right', aL.hit && aR.hit && aL.st < 0 && aR.st > 0, JSON.stringify({ aL, aR }));
+  await p.evaluate(() => window.__setOri('landscape-secondary')); await p.waitForTimeout(600);
+  const B = await state(); const bL = await hold('#t-left'), bR = await hold('#t-right'); const bT = await tilt();
+  ok('landscape-secondary (camera right): page counter-rotated 180deg so the picture keeps the camera-left orientation', /\bflip\b/.test(B.cls) && /^matrix\(-1, ?[0-9.e-]+, ?[0-9.e-]+, ?-1/.test(B.tf) && B.gl.x === 844, JSON.stringify(B));
+  ok('landscape-secondary: LEFT/RIGHT still hit and steer correctly (LEFT button now physically on the other side)', bL.hit && bR.hit && bL.st < 0 && bR.st > 0 && bL.x > bR.x, JSON.stringify({ bL, bR }));
+  ok('tilt steering axis consistent across both landscapes (same picture-relative sign)', Math.sign(aT) === Math.sign(bT) && aT !== 0, JSON.stringify({ aT, bT }));
+  // jitter: rapid alternation (sensor noise) settling back on secondary must not toggle the layout at all
+  await p.evaluate(() => { window.__log = []; new MutationObserver(() => window.__log.push(document.documentElement.className)).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] }); });
+  for (let k = 0; k < 12; k++) { await p.evaluate((k) => window.__setOri(k % 2 ? 'landscape-secondary' : 'landscape-primary'), k); await p.waitForTimeout(40); }
+  for (const h of [380, 390, 372, 390]) { await p.setViewportSize({ width: 844, height: h }); await p.waitForTimeout(60); }
+  await p.waitForTimeout(700);
+  const J = await p.evaluate(() => ({ log: window.__log, cls: document.documentElement.className }));
+  ok('orientation/resize jitter never toggles the layout (debounced)', J.log.length === 0 && /\bflip\b/.test(J.cls), JSON.stringify(J));
+  await p.evaluate(() => window.__setOri('landscape-primary')); await p.waitForTimeout(600);
+  const C = await state(); ok('back to landscape-primary: un-flipped live, race not paused', !/\bflip\b/.test(C.cls) && C.tf === 'none' && await p.evaluate(() => !window.__gp.game.paused && window.__gp.race.phase === 'race'), JSON.stringify(C));
   await ctx.close();
 }
 // 2) desktop: never shows overlay (even in a tall window)
