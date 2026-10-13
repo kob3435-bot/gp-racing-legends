@@ -56,6 +56,17 @@ const errs = [];
     const a = fire(15, 5), b = fire(-15, 5), c = fire(0, 30); inp.tiltOn = was; inp.tilt = 0; return { a, b, c }; });
   ok('portrait-rotated: tilt steering uses the landscape "wheel" axis (beta), not gamma', tilt.a > 0.3 && tilt.b < -0.3 && Math.abs(tilt.c) < 0.05, JSON.stringify(tilt));
   await p.screenshot({ path: OUT + 'v8-portrait-race.png' });
+  // v8.1 regression: sensors must never pick/flip the rotation; resize jitter must not toggle it
+  await p.evaluate(() => { window.__rotLog = []; const html = document.documentElement; new MutationObserver(() => window.__rotLog.push(html.className + '|' + getComputedStyle(document.getElementById('root')).transform)).observe(html, { attributes: true, attributeFilter: ['class'] }); window.__tf0 = getComputedStyle(document.getElementById('root')).transform; });
+  await p.evaluate(async () => { for (let k = 0; k < 200; k++) { const g = k % 2 ? 85 : -85; const e = new Event('deviceorientation'); Object.assign(e, { alpha: 0, beta: k % 3 ? 10 : -10, gamma: g }); window.dispatchEvent(e);
+    const m = new Event('devicemotion'); Object.assign(m, { accelerationIncludingGravity: { x: k % 2 ? 9.8 : -9.8, y: 0, z: 0 } }); window.dispatchEvent(m); if (k % 20 === 0) await new Promise(r => setTimeout(r, 30)); } });
+  await p.waitForTimeout(600);
+  const sens = await p.evaluate(() => ({ log: window.__rotLog.length, rot: document.documentElement.className, same: getComputedStyle(document.getElementById('root')).transform === window.__tf0 }));
+  ok('200 alternating-gravity deviceorientation/devicemotion events never change the rotation', sens.log === 0 && sens.same && /\brot\b/.test(sens.rot) && !/rot-ccw/.test(sens.rot), JSON.stringify(sens));
+  for (const h of [800, 844, 760, 844, 812, 790, 844]) { await p.setViewportSize({ width: 390, height: h }); await p.waitForTimeout(90); }
+  await p.waitForTimeout(600);
+  const jit = await p.evaluate(() => ({ log: window.__rotLog, rot: document.documentElement.classList.contains('rot'), same: getComputedStyle(document.getElementById('root')).transform === window.__tf0 }));
+  ok('iOS address-bar style height jitter never toggles the rotation', jit.log.length === 0 && jit.rot && jit.same, JSON.stringify(jit));
   // rotate to real landscape mid-race and back: no reload, no pause, renderer follows
   const before = await p.evaluate(() => { window.__mark = 1; return window.__gp.race.t; });
   await p.setViewportSize({ width: 844, height: 390 }); await p.waitForTimeout(700);

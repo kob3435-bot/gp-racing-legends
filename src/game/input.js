@@ -18,7 +18,7 @@ export class Input {
       if (!this.tiltOn || e.gamma == null) return;
       // CSS-rotated landscape (device reports portrait but is held sideways): steer with the same "wheel" axis
       // as real landscape (beta), signed by which way the picture is rotated
-      const o = orient.rot ? orient.rot : (window.orientation != null ? +window.orientation : (screen.orientation && screen.orientation.angle === 270 ? -90 : 90));
+      const o = orient.rot ? 90 /* fixed cw rotation */ : (window.orientation != null ? +window.orientation : (screen.orientation && screen.orientation.angle === 270 ? -90 : 90));
       const landscape = !!orient.rot || Math.abs(o) === 90 || innerWidth > innerHeight;
       const raw = landscape ? (e.beta || 0) * (o === -90 || o === 270 ? -1 : 1) : (e.gamma || 0);
       this.tilt = Math.max(-1, Math.min(1, raw / 25));

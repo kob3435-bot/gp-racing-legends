@@ -4,15 +4,20 @@
 //    90deg with CSS and sized to the visual viewport (handles the iOS address bar + safe areas). DOM hit-testing,
 //    native scrolling and inputs work through the transform; JS reads the game size via viewSize().
 //  - if the device turns to real landscape, the rotation is removed live (no reload, no pause).
-//  - which way to rotate follows gravity (deviceorientation gamma) so the picture is upright however it's held.
+//  - FIXED direction: 90deg clockwise (phone bottom/home side on the right, like standard landscape games).
+//    No sensors are used to pick it (v8's gravity choice flipped sides on real phones).
+//  - layout only changes on real resize/orientation events, debounced 300 ms; the portrait/landscape decision has
+//    hysteresis so iOS address-bar height jitter can never toggle it.
 const st = { rot: 0, w: innerWidth, h: innerHeight, coarse: false };
 export const orient = st;
 export function viewSize() { return st; }
 function vv() { const v = window.visualViewport; return v ? { w: Math.round(v.width), h: Math.round(v.height) } : { w: innerWidth, h: innerHeight }; }
-let dir = 90;
+const dir = 90;
 function apply() {
   const { w, h } = vv(), html = document.documentElement;
-  const rot = st.coarse && h > w ? dir : 0;
+  // hysteresis: switch only when the aspect clearly crosses (address-bar jitter is a few % of the height)
+  const portrait = st.rot ? !(w > h * 1.05) : h > w * 1.05;
+  const rot = st.coarse && portrait ? dir : 0;
   const nw = rot ? h : w, nh = rot ? w : h;
   const changed = rot !== st.rot || nw !== st.w || nh !== st.h;
   st.rot = rot; st.w = nw; st.h = nh;
@@ -25,11 +30,10 @@ function apply() {
 export function installOrientation() {
   st.coarse = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0 && /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
   apply();
-  addEventListener('resize', apply); if (window.visualViewport) { visualViewport.addEventListener('resize', apply); visualViewport.addEventListener('scroll', apply); }
-  addEventListener('orientationchange', () => setTimeout(apply, 60));
+  let tm = 0; const later = () => { clearTimeout(tm); tm = setTimeout(apply, 300); };
+  addEventListener('resize', later); if (window.visualViewport) visualViewport.addEventListener('resize', later);
+  addEventListener('orientationchange', later);
   if (!st.coarse) return st;
-  // upright whichever way the phone is held sideways (hysteresis so it doesn't flip-flop)
-  addEventListener('deviceorientation', (e) => { if (e.gamma == null) return; const nd = e.gamma < -40 ? -90 : e.gamma > 40 ? 90 : dir; if (nd !== dir) { dir = nd; apply(); } });
   const tryLock = async () => {
     try { const d = document.documentElement; if (!document.fullscreenElement && d.requestFullscreen) await d.requestFullscreen({ navigationUI: 'hide' }); } catch { /* not allowed (iOS) */ }
     try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch { /* unsupported -> CSS rotation keeps landscape */ }
