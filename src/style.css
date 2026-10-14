@@ -392,16 +392,35 @@ h4 span { color: var(--txt); }
 .hud.mobile .banner .note:nth-last-child(n+3) { display: none; } /* phones: at most 2 chips */
 .cutin.mini.m .ci-panel { top: 0; height: 100%; }
 
-/* ===== v8: CSS-rotated landscape for portrait touch devices ===== */
-#root { position: fixed; left: 0; top: 0; width: var(--rw, 100vw); height: var(--rh, 100vh); overflow: hidden; }
-html.rot, html.rot body { overflow: hidden; height: var(--ph); }
-html.rot #root { transform-origin: 0 0; transform: translateX(var(--pw)) rotate(90deg); }
-html.rot.rot-ccw #root { transform: translateY(var(--ph)) rotate(-90deg); }
-/* safe areas: in rotated mode the notch (portrait top inset) sits on the game's left/right edge */
-html.rot #hud, html.rot #ui { left: env(safe-area-inset-top, 0px); right: env(safe-area-inset-bottom, 0px); }
-html.rot.rot-ccw #hud, html.rot.rot-ccw #ui { left: env(safe-area-inset-bottom, 0px); right: env(safe-area-inset-top, 0px); }
-html.rot #root { touch-action: none; } /* rotated: panning is done in game axes by orient.js */
-html.rot input, html.rot textarea, html.rot select { touch-action: manipulation; }
-/* v9: other landscape (camera on the right) -> counter-rotate so the picture always faces the camera-left hold */
-html.flip #root { transform-origin: 50% 50%; transform: rotate(180deg); touch-action: none; }
-html.flip input, html.flip textarea { touch-action: manipulation; }
+
+#root { position: fixed; inset: 0; overflow: hidden; }
+/* =================== v10 PORTRAIT LAYOUT (touch devices held upright) =================== */
+html.portrait .hud.mobile .hud-tl { top: max(8px, env(safe-area-inset-top)); left: 8px; }
+html.portrait .hud.mobile .hud-pos .big { font-size: 30px; }
+html.portrait .hud.mobile .tower { display: block; margin-top: 6px; font-size: 10px; width: 132px; }
+html.portrait .hud.mobile .tower .tr { padding: 1px 4px; line-height: 14px; }
+html.portrait .hud.mobile .tower .tr:nth-child(n+6) { display: none; }
+html.portrait .hud.mobile .hud-tr { top: max(8px, env(safe-area-inset-top)); right: 8px; }
+html.portrait .hud.mobile .timing { margin-top: 6px; min-width: 118px; font-size: 10px; }
+html.portrait .hud.mobile .hud-tc { top: calc(max(8px, env(safe-area-inset-top)) + 120px); width: 94vw; }
+html.portrait .hud.mobile .banner { max-width: 90vw; }
+html.portrait .hud.mobile .hud-bl { display: block; left: auto; bottom: auto; right: 8px; top: calc(max(8px, env(safe-area-inset-top)) + 150px); width: 84px; height: 84px; opacity: .85; }
+html.portrait .hud.mobile .hud-bl canvas { width: 84px; height: 84px; }
+html.portrait .hud.mobile .hud-br { right: auto; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom)); text-align: center; z-index: 2; }
+html.portrait .hud.mobile .rpm { width: 120px; margin: 0 auto; }
+html.portrait .hud.mobile .rival { top: auto; bottom: calc(46% + 8px); left: 50%; transform: translateX(-50%); }
+/* large LEFT / RIGHT zones = the whole bottom half, split down the middle */
+html.portrait .touch .tbtn.left, html.portrait .touch .tbtn.right { bottom: 0; height: 46%; width: 50%; max-width: none; border-radius: 0; background: rgba(255,255,255,.05); border: 0; border-top: 2px solid rgba(255,255,255,.18); }
+html.portrait .touch .tbtn.left { left: 0; border-right: 1px solid rgba(255,255,255,.14); } html.portrait .touch .tbtn.right { right: 0; }
+html.portrait .touch .tbtn.left span, html.portrait .touch .tbtn.right span { font-size: 40px; opacity: .55; }
+html.portrait .touch .tbtn.active { background: rgba(225,6,0,.22); }
+html.portrait .touch .brake, html.portrait .touch .gas { bottom: calc(46% + 10px); width: 26vw; height: 64px; }
+html.portrait .touch .brake { left: 10px; } html.portrait .touch .gas { right: 10px; }
+html.portrait .cutin.mini { top: auto; bottom: calc(46% + 70px); width: 62vw; left: 6px; }
+html.portrait .cutin .ci-panel { top: 22%; height: 22%; padding-left: 6%; }
+html.portrait .hud.mobile .hud-tl { max-width: 54vw; } html.portrait .hud.mobile .hud-tl > * { max-width: 100%; }
+/* portrait stacking: left = position/lap/leaderboard, right = buttons/timing/minimap, centre chips below both */
+html.portrait .hud.mobile .timing { margin-top: 46px; }
+html.portrait .hud.mobile .hud-bl { top: calc(max(8px, env(safe-area-inset-top)) + 112px); width: 84px !important; height: 84px !important; }
+html.portrait .hud.mobile .hud-bl canvas { width: 84px !important; height: 84px !important; }
+html.portrait .hud.mobile .hud-tc { top: calc(max(8px, env(safe-area-inset-top)) + 204px); }

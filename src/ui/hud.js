@@ -151,7 +151,7 @@ export class Hud {
     }
     // tower (throttled)
     this.towerT -= dt;
-    if (this.towerT <= 0 && !this.mobile) {
+    if (this.towerT <= 0 && (!this.mobile || document.documentElement.classList.contains('portrait'))) { // portrait phones get a compact leaderboard
       this.towerT = 0.5;
       const rows = [];
       const n = r.order.length; const show = new Set();

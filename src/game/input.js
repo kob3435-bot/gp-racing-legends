@@ -1,4 +1,4 @@
-import { orient } from '../orient.js';
+import { screenAngle } from '../orient.js';
 // Keyboard, touch buttons, gamepad and optional tilt steering.
 export class Input {
   constructor() {
@@ -16,12 +16,8 @@ export class Input {
     window.addEventListener('blur', () => this.keys.clear());
     window.addEventListener('deviceorientation', (e) => {
       if (!this.tiltOn || e.gamma == null) return;
-      // CSS-rotated landscape (device reports portrait but is held sideways): steer with the same "wheel" axis
-      // as real landscape (beta), signed by which way the picture is rotated
-      const o = orient.rot ? 90 /* fixed cw rotation */ : (window.orientation != null ? +window.orientation : (screen.orientation && (screen.orientation.angle === 270 || screen.orientation.type === 'landscape-secondary') ? -90 : 90));
-      const landscape = !!orient.rot || Math.abs(o) === 90 || innerWidth > innerHeight;
-      // fixed axis: content always faces the camera-left hold (flipped 180 in the other landscape => sign restored)
-      const raw = landscape ? (e.beta || 0) * (o === -90 || o === 270 ? -1 : 1) * (orient.flip ? -1 : 1) : (e.gamma || 0);
+      // any orientation: steer around the screen's own vertical axis (works for portrait, both landscapes, upside-down)
+      const ang = screenAngle(), raw = ang === 90 ? (e.beta || 0) : ang === 270 ? -(e.beta || 0) : ang === 180 ? -(e.gamma || 0) : (e.gamma || 0);
       this.tilt = Math.max(-1, Math.min(1, raw / 25));
     });
   }
